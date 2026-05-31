@@ -1,0 +1,15 @@
+/* style.css */
+/* Efecto de realce para las tarjetas de destinos y ofertas */
+.tarjeta-animada {
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.tarjeta-animada:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Ocultar elementos para la lógica de pestañas del buscador (HTML puro) */
+.oculto {
+    display: none;
+}
