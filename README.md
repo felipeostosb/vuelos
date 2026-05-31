@@ -1,3 +1,2 @@
 # vuelos
-proyecto de vuelos en PHP
-esta es una prueba de despliegue continuo
+Proyecto de sistema de reservas automaticas con gemini
