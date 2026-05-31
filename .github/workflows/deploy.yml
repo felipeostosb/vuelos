@@ -18,4 +18,4 @@ jobs:
         port: 22
         script: |
           cd /var/www/html
-          sudo git pull origin main
+          sudo git reset --hard HEAD && sudo git pull origin main
