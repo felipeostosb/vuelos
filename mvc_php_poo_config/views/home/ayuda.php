@@ -1,0 +1,122 @@
+<main class="bg-gray-50 pb-20">
+    
+    <section class="bg-[#0090FF] text-white py-20">
+        <div class="max-w-[1280px] mx-auto px-8 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Ayuda y soporte</h1>
+            <p class="text-lg md:text-xl text-white/90">Estamos aquí para ayudarte</p>
+        </div>
+    </section>
+
+    <div class="max-w-[1280px] mx-auto px-8 mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        
+        <section class="lg:col-span-2 space-y-4">
+            <h2 class="text-2xl font-bold text-[#0A192F] mb-6">Preguntas frecuentes</h2>
+            
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button type="button" onclick="toggleAccordion('faq-1')" class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50/50 transition-colors">
+                    <span class="font-bold text-[#0A192F] text-base">¿Cómo funciona la búsqueda con IA?</span>
+                    <i id="icon-faq-1" class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                </button>
+                <div id="faq-1" class="hidden px-6 pb-6 text-gray-600 text-sm leading-relaxed">
+                    Nuestra inteligencia artificial analiza miles de combinaciones de rutas, horarios y tarifas en tiempo real para ofrecerte las opciones más optimizadas, económicas y personalizadas según tus preferencias de viaje.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button type="button" onclick="toggleAccordion('faq-2')" class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50/50 transition-colors">
+                    <span class="font-bold text-[#0A192F] text-base">¿Puedo cancelar mi reserva?</span>
+                    <i id="icon-faq-2" class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                </button>
+                <div id="faq-2" class="hidden px-6 pb-6 text-gray-600 text-sm leading-relaxed">
+                    Sí, las cancelaciones se pueden gestionar directamente desde el panel de gestión. Los reembolsos o penalizaciones aplicables dependerán estrictamente de las condiciones y regulaciones de la tarifa que compraste.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button type="button" onclick="toggleAccordion('faq-3')" class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50/50 transition-colors">
+                    <span class="font-bold text-[#0A192F] text-base">¿Cómo hago el check-in?</span>
+                    <i id="icon-faq-3" class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                </button>
+                <div id="faq-3" class="hidden px-6 pb-6 text-gray-600 text-sm leading-relaxed">
+                    Puedes realizar tu Check-in digital de manera rápida accediendo a la pestaña dedicada en nuestro menú superior, introduciendo tu código de reserva y el apellido registrado 48 horas antes de tu vuelo.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button type="button" onclick="toggleAccordion('faq-4')" class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50/50 transition-colors">
+                    <span class="font-bold text-[#0A192F] text-base">¿Qué formas de pago aceptan?</span>
+                    <i id="icon-faq-4" class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                </button>
+                <div id="faq-4" class="hidden px-6 pb-6 text-gray-600 text-sm leading-relaxed">
+                    Aceptamos todas las principales tarjetas de crédito y débito (Visa, Mastercard, American Express), así como pagos digitales locales seguros y transferencias bancarias según tu país de residencia.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button type="button" onclick="toggleAccordion('faq-5')" class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50/50 transition-colors">
+                    <span class="font-bold text-[#0A192F] text-base">¿Hay cargos por equipaje?</span>
+                    <i id="icon-faq-5" class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                </button>
+                <div id="faq-5" class="hidden px-6 pb-6 text-gray-600 text-sm leading-relaxed">
+                    Cada tarifa incluye una franquicia de equipaje distinta (por ejemplo, bolso de mano o bodega). Puedes verificar el costo detallado por pieza adicional en nuestra tabla de políticas dentro de la sección Check-in.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button type="button" onclick="toggleAccordion('faq-6')" class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50/50 transition-colors">
+                    <span class="font-bold text-[#0A192F] text-base">¿Cómo contacto al soporte?</span>
+                    <i id="icon-faq-6" class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                </button>
+                <div id="faq-6" class="hidden px-6 pb-6 text-gray-600 text-sm leading-relaxed">
+                    Si necesitas atención inmediata, puedes usar el botón de chat rápido vía WhatsApp a la derecha, o rellenar el formulario de asistencia técnica para que un asesor especializado responda a tu correo electrónico.
+                </div>
+            </div>
+        </section>
+
+        <aside class="space-y-6">
+            
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 text-center flex flex-col items-center tarjeta-animada">
+                <h3 class="text-xl font-bold text-[#0A192F] mb-1">WhatsApp</h3>
+                <p class="text-xs text-gray-400 mb-6">Respuesta en 10 min</p>
+                <a href="https://wa.me/5112345678" target="_blank" class="w-full bg-[#15A850] hover:bg-[#118F43] text-white py-3 rounded-xl font-semibold transition-colors text-center block">
+                    Chatear ahora
+                </a>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 tarjeta-animada">
+                <h3 class="text-xl font-bold text-[#0A192F] text-center mb-6">Asistencia</h3>
+                <form action="index.php" method="POST" class="space-y-4">
+                    <input type="hidden" name="action" value="procesar_soporte">
+                    <div>
+                        <input type="text" name="nombre" placeholder="Nombre" required class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[#0070F3] focus:ring-1 focus:ring-[#0070F3] transition-colors">
+                    </div>
+                    <div>
+                        <input type="email" name="email" placeholder="Email" required class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[#0070F3] focus:ring-1 focus:ring-[#0070F3] transition-colors">
+                    </div>
+                    <div>
+                        <textarea name="mensaje" placeholder="Mensaje" rows="4" required class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[#0070F3] focus:ring-1 focus:ring-[#0070F3] transition-colors resize-none"></textarea>
+                    </div>
+                    <button type="submit" class="w-full bg-[#0070F3] hover:bg-[#0051CC] text-white py-3 rounded-xl font-semibold transition-colors text-center">
+                        Enviar
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+    </div>
+</main>
+
+<script>
+function toggleAccordion(id) {
+    const content = document.getElementById(id);
+    const icon = document.getElementById('icon-' + id);
+    
+    if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        icon.classList.add('rotate-180');
+    } else {
+        content.classList.add('hidden');
+        icon.classList.remove('rotate-180');
+    }
+}
+</script>
