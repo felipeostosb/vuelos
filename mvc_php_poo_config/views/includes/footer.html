@@ -23,8 +23,7 @@
 
         <div>
             <h4 class="text-white font-bold text-base mb-4">Ayuda y soporte</h4>
-            <a href="https://wa.me/5112345678" target="_blank"
-                class="inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20BA5A] text-white w-full py-3 rounded-xl font-bold mb-4 transition-all shadow-md text-center">
+            <a href="https://wa.me/5112345678" target="_blank" class="inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20BA5A] text-white w-full py-3 rounded-xl font-bold mb-4 transition-all shadow-md text-center">
                 <i class="fa-brands fa-whatsapp text-lg"></i> WhatsApp
             </a>
             <ul class="space-y-2.5">
@@ -40,87 +39,7 @@
         &copy; 2026 VuelaIA. Todos los derechos reservados.
     </div>
 </footer>
-<div id="loginModal"
-    class="fixed inset-0 bg-black/60 z-[100] hidden flex items-center justify-center backdrop-blur-sm transition-opacity">
 
-    <div class="bg-white rounded-[24px] shadow-2xl w-full max-w-[450px] p-8 relative mx-4 animate-fade-in-up">
-
-        <button onclick="cerrarLogin()"
-            class="absolute top-6 right-6 text-gray-400 hover:text-gray-700 transition-colors">
-            <i class="fa-solid fa-xmark text-xl"></i>
-        </button>
-
-        <div class="text-center mb-8">
-            <div class="flex items-center justify-center gap-2 mb-6">
-                <i class="fa-solid fa-paper-plane text-[#0070F3] text-2xl rotate-[15deg]"></i>
-                <span class="text-2xl font-bold text-[#0A192F] tracking-tight">Vuela<span
-                        class="text-[#0070F3]">IA</span></span>
-            </div>
-            <h2 class="text-2xl font-bold text-[#0A192F] mb-2">Bienvenido</h2>
-            <p class="text-gray-500 text-sm">Inicia sesión para gestionar tus vuelos</p>
-        </div>
-
-        <form action="#" method="POST" class="space-y-5">
-
-            <div>
-                <label class="block text-sm font-bold text-[#0A192F] mb-2 text-center">Email</label>
-                <input type="email" placeholder="tu@email.com"
-                    class="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-center text-sm focus:outline-none focus:border-[#0070F3] focus:ring-1 focus:ring-[#0070F3] transition-all">
-            </div>
-
-            <div>
-                <label class="block text-sm font-bold text-[#0A192F] mb-2 text-center">Contraseña</label>
-                <input type="password" placeholder="••••••••"
-                    class="w-full border border-gray-200 rounded-xl px-4 py-3.5 text-center tracking-widest text-sm focus:outline-none focus:border-[#0070F3] focus:ring-1 focus:ring-[#0070F3] transition-all">
-            </div>
-
-            <div class="text-center pt-2">
-                <a href="#" class="text-[#0070F3] text-sm font-bold hover:underline">¿Olvidaste tu contraseña?</a>
-            </div>
-
-            <button type="submit"
-                class="w-full bg-[#0070F3] hover:bg-[#0051CC] text-white py-3.5 rounded-xl font-bold text-base transition-colors shadow-sm mt-2">
-                Iniciar sesión
-            </button>
-        </form>
-
-        <div class="flex items-center gap-4 my-6">
-            <div class="h-px bg-gray-200 flex-1"></div>
-            <span class="text-xs text-gray-400">o continúa con</span>
-            <div class="h-px bg-gray-200 flex-1"></div>
-        </div>
-
-        <button
-            class="w-full bg-white border border-gray-300 text-gray-700 py-3.5 rounded-xl font-bold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 text-sm">
-            <i class="fa-brands fa-google text-lg"></i> Continuar con Google
-        </button>
-
-        <div class="text-center mt-8">
-            <p class="text-sm text-gray-500">¿No tienes cuenta? <a href="#"
-                    class="text-[#0070F3] font-bold hover:underline">Regístrate gratis</a></p>
-        </div>
-
-    </div>
-</div>
-
-<script>
-    const modal = document.getElementById('loginModal');
-
-    function abrirLogin() {
-        modal.classList.remove('hidden');
-    }
-
-    function cerrarLogin() {
-        modal.classList.add('hidden');
-    }
-
-    // Cierra el modal si haces clic fuera de la caja blanca
-    modal.addEventListener('click', function (e) {
-        if (e.target === modal) {
-            cerrarLogin();
-        }
-    });
-</script>
 </body>
 
 </html>
