@@ -29,7 +29,7 @@ class UserController
     }
 
     // =======================================================
-    // VISTAS DEL PROYECTO VUELA IA
+    // VISTAS PRINCIPALES DEL PROYECTO VUELA IA
     // =======================================================
     
     public function showHome(): void
@@ -47,6 +47,12 @@ class UserController
         $this->renderView('ofertas');
     }
 
+    // 👇 NUEVA RUTA AGREGADA PARA LA PÁGINA DE RESERVAS 👇
+    public function showReserva(): void
+    {
+        $this->renderView('reserva');
+    }
+
     public function showCheckin(): void
     {
         $this->renderView('checkin');
@@ -55,5 +61,36 @@ class UserController
     public function showAyuda(): void
     {
         $this->renderView('ayuda');
+    }
+    
+    // =======================================================
+    // MÉTODOS DE PROCESAMIENTO Y ACCIONES SECUNDARIAS
+    // =======================================================
+
+    // Función que procesará el formulario de búsqueda de la IA
+    public function buscar(): void
+    {
+        // Por ahora cargamos una vista temporal, luego aquí conectarás la IA
+        $this->renderView('resultados_busqueda'); 
+    }
+
+    // Función que procesará el envío de mensajes de ayuda/soporte
+    public function procesarSoporte(): void
+    {
+        // Lógica futura: Recibir el POST y guardar en BD o enviar email
+        // Por ahora redirigimos o mostramos mensaje de éxito
+        $this->renderView('ayuda_exito');
+    }
+
+    // Funciones base que tenías preparadas en tu index.php
+    public function mostrarFormulario(): void
+    {
+        $this->renderView('formulario_registro');
+    }
+
+    public function insertar(): void
+    {
+        // Lógica para procesar la inserción de datos a la BD
+        // header('Location: index.php?action=home');
     }
 }

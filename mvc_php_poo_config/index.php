@@ -16,8 +16,9 @@ match ($action) {
     'home'             => $controller->showHome(),
     'destinos'         => $controller->showDestinos(),
     'ofertas'          => $controller->showOfertas(),
+    'reserva'          => $controller->showReserva(),
     'checkin'          => $controller->showCheckin(),
-    'ayuda'            => $controller->showAyuda(),
+    'ayuda'            => $controller->showAyuda(), 
     
     // Nuevas rutas conectadas desde las vistas HTML
     'buscar'           => $controller->buscar(),
