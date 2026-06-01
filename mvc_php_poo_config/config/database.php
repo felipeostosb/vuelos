@@ -1,5 +1,5 @@
 <?php
-
+/*
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
 define('DB_PASS', '');
@@ -15,4 +15,5 @@ function getConnection(): mysqli
 
     $conn->set_charset('utf8');
     return $conn;
-}
+}*/
+?>

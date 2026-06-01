@@ -12,8 +12,8 @@
         <section class="lg:col-span-2 space-y-4">
             <h2 class="text-2xl font-bold text-[#0A192F] mb-6">Preguntas frecuentes</h2>
             
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group">
-                <button onclick="toggleAccordion('faq-1')" class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50/50 transition-colors">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <button type="button" onclick="toggleAccordion('faq-1')" class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50/50 transition-colors">
                     <span class="font-bold text-[#0A192F] text-base">¿Cómo funciona la búsqueda con IA?</span>
                     <i id="icon-faq-1" class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300"></i>
                 </button>
@@ -23,7 +23,7 @@
             </div>
 
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <button onclick="toggleAccordion('faq-2')" class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50/50 transition-colors">
+                <button type="button" onclick="toggleAccordion('faq-2')" class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50/50 transition-colors">
                     <span class="font-bold text-[#0A192F] text-base">¿Puedo cancelar mi reserva?</span>
                     <i id="icon-faq-2" class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300"></i>
                 </button>
@@ -33,7 +33,7 @@
             </div>
 
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <button onclick="toggleAccordion('faq-3')" class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50/50 transition-colors">
+                <button type="button" onclick="toggleAccordion('faq-3')" class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50/50 transition-colors">
                     <span class="font-bold text-[#0A192F] text-base">¿Cómo hago el check-in?</span>
                     <i id="icon-faq-3" class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300"></i>
                 </button>
@@ -43,7 +43,7 @@
             </div>
 
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <button onclick="toggleAccordion('faq-4')" class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50/50 transition-colors">
+                <button type="button" onclick="toggleAccordion('faq-4')" class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50/50 transition-colors">
                     <span class="font-bold text-[#0A192F] text-base">¿Qué formas de pago aceptan?</span>
                     <i id="icon-faq-4" class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300"></i>
                 </button>
@@ -53,7 +53,7 @@
             </div>
 
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <button onclick="toggleAccordion('faq-5')" class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50/50 transition-colors">
+                <button type="button" onclick="toggleAccordion('faq-5')" class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50/50 transition-colors">
                     <span class="font-bold text-[#0A192F] text-base">¿Hay cargos por equipaje?</span>
                     <i id="icon-faq-5" class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300"></i>
                 </button>
@@ -63,7 +63,7 @@
             </div>
 
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <button onclick="toggleAccordion('faq-6')" class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50/50 transition-colors">
+                <button type="button" onclick="toggleAccordion('faq-6')" class="w-full p-6 text-left flex justify-between items-center hover:bg-gray-50/50 transition-colors">
                     <span class="font-bold text-[#0A192F] text-base">¿Cómo contacto al soporte?</span>
                     <i id="icon-faq-6" class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300"></i>
                 </button>
@@ -75,7 +75,7 @@
 
         <aside class="space-y-6">
             
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 text-center flex flex-col items-center">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 text-center flex flex-col items-center tarjeta-animada">
                 <h3 class="text-xl font-bold text-[#0A192F] mb-1">WhatsApp</h3>
                 <p class="text-xs text-gray-400 mb-6">Respuesta en 10 min</p>
                 <a href="https://wa.me/5112345678" target="_blank" class="w-full bg-[#15A850] hover:bg-[#118F43] text-white py-3 rounded-xl font-semibold transition-colors text-center block">
@@ -83,17 +83,18 @@
                 </a>
             </div>
 
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 tarjeta-animada">
                 <h3 class="text-xl font-bold text-[#0A192F] text-center mb-6">Asistencia</h3>
-                <form action="#" method="POST" class="space-y-4">
+                <form action="index.php" method="POST" class="space-y-4">
+                    <input type="hidden" name="action" value="procesar_soporte">
                     <div>
-                        <input type="text" name="nombre" placeholder="Nombre" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[#0070F3] focus:ring-1 focus:ring-[#0070F3] transition-colors">
+                        <input type="text" name="nombre" placeholder="Nombre" required class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[#0070F3] focus:ring-1 focus:ring-[#0070F3] transition-colors">
                     </div>
                     <div>
-                        <input type="email" name="email" placeholder="Email" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[#0070F3] focus:ring-1 focus:ring-[#0070F3] transition-colors">
+                        <input type="email" name="email" placeholder="Email" required class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[#0070F3] focus:ring-1 focus:ring-[#0070F3] transition-colors">
                     </div>
                     <div>
-                        <textarea name="mensaje" placeholder="Mensaje" rows="4" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[#0070F3] focus:ring-1 focus:ring-[#0070F3] transition-colors resize-none"></textarea>
+                        <textarea name="mensaje" placeholder="Mensaje" rows="4" required class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-[#0070F3] focus:ring-1 focus:ring-[#0070F3] transition-colors resize-none"></textarea>
                     </div>
                     <button type="submit" class="w-full bg-[#0070F3] hover:bg-[#0051CC] text-white py-3 rounded-xl font-semibold transition-colors text-center">
                         Enviar
