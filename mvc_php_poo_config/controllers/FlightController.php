@@ -89,14 +89,23 @@ class FlightController extends BaseController
     }
 
     /**
-     * 👗 TAREA 4: La Inteligencia Artificial (buscar)
+     * 👗 TAREA 4: La Inteligencia Artificial Mágica (buscar)
      * ------------------------------------------------------------------------------------------
-     * ¿Para qué sirve?: Es la pantalla mágica donde Gemini lee tu texto libre.
+     * ¿Para qué sirve?: Cuando la clienta escribe texto libre (ej: "Viaje a París mañana"),
+     * esta función toma ese texto, lo lee sin mostrar pantallas de carga feas, y la manda 
+     * directamente al probador (la vista de reserva) con las opciones listas.
      */
     public function buscar(): void
     {
-        // En el futuro, aquí conectaremos con el cerebro de Google Gemini.
-        // Por ahora, solo armamos la pantalla visual de "resultados_busqueda".
-        $this->renderView('flights', 'resultados_busqueda'); 
+        $textoLibre = $_GET['query'] ?? '';
+        
+        // Aquí conectaremos con Gemini. Por ahora, "simulamos" que la IA fue súper rápida
+        // y detectó que la clienta quería ir a París.
+        $destinoDetectado = 'París'; 
+        
+        // ¡Magia! La redirigimos directamente a la pantalla de resultados finales (reserva),
+        // sin que ella vea pasos intermedios.
+        header('Location: index.php?action=reserva&destino=' . urlencode($destinoDetectado) . '&origen=Lima');
+        exit;
     }
 }

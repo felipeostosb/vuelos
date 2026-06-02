@@ -3,11 +3,17 @@
     <section class="bg-[#0A192F] border-t border-gray-800 text-white py-4">
         <div class="max-w-[1280px] mx-auto px-8 flex justify-between items-center text-sm">
             <div class="flex items-center gap-2">
-                <span class="font-bold">Lima → Madrid</span>
+                <?php 
+                    $origen = isset($_GET['origen']) ? htmlspecialchars($_GET['origen']) : 'Lima';
+                    $destino = isset($_GET['destino']) ? htmlspecialchars($_GET['destino']) : 'Madrid';
+                    $fecha = isset($_GET['fecha']) ? htmlspecialchars($_GET['fecha']) : '25 Jul 2026';
+                    $pasajeros = isset($_GET['pasajeros']) ? htmlspecialchars($_GET['pasajeros']) : '1';
+                ?>
+                <span class="font-bold"><?php echo $origen; ?> → <?php echo $destino; ?></span>
                 <span class="text-gray-400">·</span>
-                <span class="text-gray-300">25 Jul 2026</span>
+                <span class="text-gray-300"><?php echo $fecha; ?></span>
                 <span class="text-gray-400">·</span>
-                <span class="text-gray-300">1 · Económica</span>
+                <span class="text-gray-300"><?php echo $pasajeros; ?> · Económica</span>
             </div>
             <a href="?action=home" class="text-[#0070F3] hover:text-blue-400 flex items-center gap-2 transition-colors font-medium">
                 <i class="fa-solid fa-pen"></i> Editar búsqueda

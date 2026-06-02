@@ -13,19 +13,21 @@
 
         <div class="absolute -bottom-16 w-full max-w-4xl px-4 z-20">
             <div class="bg-white rounded-2xl shadow-2xl p-6">
+                <!-- Pestañas -->
                 <div class="flex gap-6 border-b border-gray-200 mb-6 pb-2">
-                    <button type="button" class="text-[#0070F3] font-bold border-b-2 border-[#0070F3] pb-2 flex items-center gap-2">
+                    <button type="button" onclick="cambiarTab('ia')" id="tab-ia" class="text-[#0070F3] font-bold border-b-2 border-[#0070F3] pb-2 flex items-center gap-2 transition-colors">
                         <i class="fa-solid fa-wand-magic-sparkles"></i> Búsqueda Inteligente
                     </button>
-                    <button type="button" class="text-gray-400 font-medium pb-2 flex items-center gap-2 hover:text-gray-600 transition">
+                    <button type="button" onclick="cambiarTab('clasica')" id="tab-clasica" class="text-gray-400 font-medium pb-2 flex items-center gap-2 hover:text-gray-600 transition-colors">
                         <i class="fa-solid fa-magnifying-glass"></i> Búsqueda Clásica
                     </button>
                 </div>
                 
-                <form method="GET" action="index.php" class="flex flex-col md:flex-row gap-4">
+                <!-- Formulario IA -->
+                <form id="form-ia" method="GET" action="index.php" class="flex flex-col md:flex-row gap-4">
                     <input type="hidden" name="action" value="buscar">
                     <div class="relative flex-1">
-                        <input type="text" name="query" placeholder="Ej: Deseo viajar a París desde Lima, con mi esposa el 25 de julio" class="w-full pl-6 pr-12 py-4 rounded-xl border border-gray-300 focus:outline-none focus:border-[#0070F3] focus:ring-1 focus:ring-[#0070F3] transition-all">
+                        <input type="text" name="query" required placeholder="Ej: Deseo viajar a París desde Lima, con mi esposa el 25 de julio" class="w-full pl-6 pr-12 py-4 rounded-xl border border-gray-300 focus:outline-none focus:border-[#0070F3] focus:ring-1 focus:ring-[#0070F3] transition-all">
                         <button type="button" class="absolute right-4 top-1/2 -translate-y-1/2 text-[#0070F3] hover:text-[#0051CC]">
                             <i class="fa-solid fa-microphone text-xl"></i>
                         </button>
@@ -34,7 +36,70 @@
                         Buscar
                     </button>
                 </form>
-                <p class="text-center text-xs text-gray-400 mt-4"><i class="fa-regular fa-lightbulb text-yellow-500"></i> Tip: dile a la IA tu destino, fechas y número de personas</p>
+
+                <!-- Formulario Clásico -->
+                <form id="form-clasica" method="GET" action="index.php" class="hidden flex-col md:flex-row gap-4">
+                    <input type="hidden" name="action" value="reserva">
+                    
+                    <div class="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"><i class="fa-solid fa-plane-departure"></i></span>
+                            <input type="text" name="origen" required placeholder="Origen (Ej. Lima)" class="w-full pl-10 pr-4 py-4 rounded-xl border border-gray-300 focus:outline-none focus:border-[#0070F3] focus:ring-1 focus:ring-[#0070F3] transition-all">
+                        </div>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"><i class="fa-solid fa-plane-arrival"></i></span>
+                            <input type="text" name="destino" required placeholder="Destino (Ej. París)" class="w-full pl-10 pr-4 py-4 rounded-xl border border-gray-300 focus:outline-none focus:border-[#0070F3] focus:ring-1 focus:ring-[#0070F3] transition-all">
+                        </div>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"><i class="fa-solid fa-calendar"></i></span>
+                            <input type="text" name="fecha" required placeholder="Fecha (Ej. 25 Jul)" class="w-full pl-10 pr-4 py-4 rounded-xl border border-gray-300 focus:outline-none focus:border-[#0070F3] focus:ring-1 focus:ring-[#0070F3] transition-all">
+                        </div>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"><i class="fa-solid fa-users"></i></span>
+                            <input type="number" name="pasajeros" min="1" value="1" required class="w-full pl-10 pr-4 py-4 rounded-xl border border-gray-300 focus:outline-none focus:border-[#0070F3] focus:ring-1 focus:ring-[#0070F3] transition-all">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="bg-[#0070F3] hover:bg-[#0051CC] text-white px-10 py-4 rounded-xl font-bold text-lg transition-all shadow-md">
+                        Buscar
+                    </button>
+                </form>
+
+                <p id="tip-text" class="text-center text-xs text-gray-400 mt-4"><i class="fa-regular fa-lightbulb text-yellow-500"></i> Tip: dile a la IA tu destino, fechas y número de personas</p>
+
+                <script>
+                    function cambiarTab(tab) {
+                        const formIa = document.getElementById('form-ia');
+                        const formClasica = document.getElementById('form-clasica');
+                        const tabIa = document.getElementById('tab-ia');
+                        const tabClasica = document.getElementById('tab-clasica');
+                        const tipText = document.getElementById('tip-text');
+
+                        if (tab === 'ia') {
+                            formIa.style.display = 'flex';
+                            formClasica.style.display = 'none';
+                            
+                            tabIa.classList.add('text-[#0070F3]', 'border-b-2', 'border-[#0070F3]', 'font-bold');
+                            tabIa.classList.remove('text-gray-400', 'font-medium');
+                            
+                            tabClasica.classList.remove('text-[#0070F3]', 'border-b-2', 'border-[#0070F3]', 'font-bold');
+                            tabClasica.classList.add('text-gray-400', 'font-medium');
+                            
+                            tipText.innerHTML = '<i class="fa-regular fa-lightbulb text-yellow-500"></i> Tip: dile a la IA tu destino, fechas y número de personas';
+                        } else {
+                            formIa.style.display = 'none';
+                            formClasica.style.display = 'flex';
+                            
+                            tabClasica.classList.add('text-[#0070F3]', 'border-b-2', 'border-[#0070F3]', 'font-bold');
+                            tabClasica.classList.remove('text-gray-400', 'font-medium');
+                            
+                            tabIa.classList.remove('text-[#0070F3]', 'border-b-2', 'border-[#0070F3]', 'font-bold');
+                            tabIa.classList.add('text-gray-400', 'font-medium');
+                            
+                            tipText.innerHTML = '<i class="fa-regular fa-lightbulb text-yellow-500"></i> Tip: Selecciona tus fechas y origen/destino manualmente';
+                        }
+                    }
+                </script>
             </div>
         </div>
     </section>
