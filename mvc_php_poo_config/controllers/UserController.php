@@ -43,4 +43,44 @@ class UserController extends BaseController
         // Después de guardar, usualmente redirigimos a otra pantalla:
         // header('Location: index.php?action=home');
     }
+
+    /**
+     * Procesa el formulario del Modal de Login.
+     */
+    public function procesarLogin(): void
+    {
+        $email = $_POST['email'] ?? '';
+        $password = $_POST['password'] ?? '';
+
+        $userModel = new UserModel();
+        $userData = $userModel->verificarLogin($email, $password);
+
+        if ($userData) {
+            // Guardamos al usuario en la sesión para que el sistema lo recuerde
+            $_SESSION['user_id'] = $userData['id'];
+            $_SESSION['user_name'] = $userData['nombre'];
+            $_SESSION['user_email'] = $userData['email'];
+            
+            // Redirigimos al home con un mensaje de éxito
+            header('Location: index.php?action=home&login=success');
+        } else {
+            // Redirigimos al home con un mensaje de error
+            header('Location: index.php?action=home&login=error');
+        }
+        exit;
+    }
+
+    /**
+     * Cierra la sesión del usuario.
+     */
+    public function procesarLogout(): void
+    {
+        // Destruimos la sesión
+        session_unset();
+        session_destroy();
+        
+        // Redirigimos al inicio
+        header('Location: index.php?action=home');
+        exit;
+    }
 }

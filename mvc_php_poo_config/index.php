@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+session_start();
 /**
  * 🌸 ============================================================================================== 🌸
  * ARCHIVO PRINCIPAL: index.php (La "Hostess" o Anfitriona VIP de nuestra web)
@@ -19,8 +21,6 @@
  * 4. Acompaña a la persona a la zona correcta (Dispatcher).
  * ==============================================================================================
  */
-
-declare(strict_types=1);
 
 // 💡 1. PRENDIENDO LAS LUCES (Manejo de errores)
 // ¿Para qué sirve? Si algo se rompe en nuestro código, PHP nos mostrará un mensaje de error exacto.
@@ -94,6 +94,10 @@ $routes = [
     'checkin'          => ['controller' => 'UserController', 'method' => 'showCheckin'],
     'formulario'       => ['controller' => 'UserController', 'method' => 'mostrarFormulario'],
     'insertar'         => ['controller' => 'UserController', 'method' => 'insertar'],
+    
+    // Autenticación de Usuario (Login / Logout)
+    'login'            => ['controller' => 'UserController', 'method' => 'procesarLogin'],
+    'logout'           => ['controller' => 'UserController', 'method' => 'procesarLogout'],
 ];
 
 /**
