@@ -86,4 +86,32 @@ class UserModel
     }
 } 
 */
+
+class UserModel
+{
+    /**
+     * SIMULACIÓN DE INICIO DE SESIÓN
+     * Como la base de datos está inactiva en esta versión de demostración,
+     * usaremos un usuario "hardcodeado" (fijo) para validar el acceso.
+     */
+    public function verificarLogin(string $email, string $password): array|false
+    {
+        // Nuestro usuario administrador de prueba
+        $emailPrueba = 'admin@vuelaia.com';
+        $passwordPrueba = '123456';
+        
+        // Verificamos si los datos ingresados coinciden con los de prueba
+        if ($email === $emailPrueba && $password === $passwordPrueba) {
+            // Si coinciden, devolvemos la información del usuario
+            return [
+                'id' => 1,
+                'nombre' => 'Admin',
+                'email' => $email
+            ];
+        }
+        
+        // Si no coinciden, devolvemos falso (error de login)
+        return false;
+    }
+}
 ?>

@@ -30,9 +30,30 @@
                 <a href="tel:+5112345678" class="hidden lg:flex items-center gap-2 text-sm text-gray-300 hover:text-white transition-colors">
                     <i class="fa-solid fa-phone text-[#0070F3]"></i> +51 1 234 5678
                 </a>
-                <button onclick="abrirLogin()" class="bg-[#0070F3] hover:bg-[#0051CC] text-white px-6 py-2.5 rounded-xl font-bold text-sm transition-all shadow-md">
-                    Iniciar sesión
-                </button>
+                
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <div class="relative group cursor-pointer">
+                        <div class="flex items-center gap-2 bg-gray-800/50 hover:bg-gray-800 border border-gray-700 px-4 py-2 rounded-xl transition-all">
+                            <div class="w-8 h-8 rounded-full bg-[#0070F3] text-white flex items-center justify-center font-bold">
+                                <?php echo substr($_SESSION['user_name'], 0, 1); ?>
+                            </div>
+                            <span class="font-medium text-sm">Hola, <?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
+                            <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
+                        </div>
+                        
+                        <!-- Menú Desplegable Oculto -->
+                        <div class="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg py-2 hidden group-hover:block border border-gray-100 z-50">
+                            <a href="?action=checkin" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#0070F3]"><i class="fa-solid fa-suitcase-rolling w-5"></i> Mis Viajes</a>
+                            <a href="?action=formulario" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#0070F3]"><i class="fa-solid fa-user w-5"></i> Mi Perfil</a>
+                            <div class="border-t border-gray-100 my-1"></div>
+                            <a href="?action=logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50"><i class="fa-solid fa-sign-out-alt w-5"></i> Cerrar sesión</a>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <button onclick="abrirLogin()" class="bg-[#0070F3] hover:bg-[#0051CC] text-white px-6 py-2.5 rounded-xl font-bold text-sm transition-all shadow-md">
+                        Iniciar sesión
+                    </button>
+                <?php endif; ?>
             </div>
 
         </div>
