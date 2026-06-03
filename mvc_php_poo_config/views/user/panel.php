@@ -34,7 +34,11 @@
             </div>
         <?php else: ?>
             <div class="space-y-6">
-                <?php foreach (array_reverse($misReservas) as $reserva): 
+                <?php 
+                // Invertimos el arreglo de forma manual usando un ciclo for (de atrás hacia adelante)
+                // para que las reservas más recientes salgan primero.
+                for ($i = count($misReservas) - 1; $i >= 0; $i--) { 
+                    $reserva = $misReservas[$i];
                     $vuelo = $reserva['vuelo'];
                     $pnr = $reserva['pnr'];
                     $isCheckedIn = ($reserva['estado'] === 'Checked-in');
@@ -109,7 +113,7 @@
                         </div>
                     </div>
                 </div>
-                <?php endforeach; ?>
+                <?php } ?>
             </div>
         <?php endif; ?>
     </div>

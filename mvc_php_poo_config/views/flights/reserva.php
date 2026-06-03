@@ -28,8 +28,13 @@
 
     <section class="bg-[#EAF4FF] border-b border-blue-100 py-3">
         <div class="max-w-[1280px] mx-auto px-8 flex items-center gap-3 text-sm text-[#0A192F]">
-            <i class="fa-solid fa-wand-magic-sparkles text-[#0070F3]"></i>
-            <p>La IA encontró <span class="font-bold text-[#0070F3]"><?php echo count($vuelos); ?> vuelos</span>. El mejor precio sale los martes.</p>
+            <?php if (isset($_GET['query']) && !empty($_GET['query'])): ?>
+                <i class="fa-solid fa-wand-magic-sparkles text-[#0070F3]"></i>
+                <p>La IA entendió tu solicitud y encontró <span class="font-bold text-[#0070F3]"><?php echo count($vuelos_encontrados); ?> vuelos</span>. El mejor precio sale los martes.</p>
+            <?php else: ?>
+                <i class="fa-solid fa-plane text-[#0070F3]"></i>
+                <p>Hemos encontrado <span class="font-bold text-[#0070F3]"><?php echo count($vuelos_encontrados); ?> vuelos</span> para tu ruta.</p>
+            <?php endif; ?>
         </div>
     </section>
 
@@ -54,9 +59,12 @@
                             <label class="block text-xs font-medium text-gray-500 mb-1">Origen</label>
                             <select name="origen" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:outline-none focus:border-[#0070F3] bg-white">
                                 <option value="">Todos</option>
-                                <?php foreach($opciones as $op): ?>
+                                <?php 
+                                    for ($i = 0; $i < count($opciones); $i++) {
+                                        $op = $opciones[$i];
+                                ?>
                                     <option value="<?php echo $op; ?>" <?php echo (stripos($origenSel, $op) !== false) ? 'selected' : ''; ?>><?php echo $op; ?></option>
-                                <?php endforeach; ?>
+                                <?php } ?>
                             </select>
                         </div>
                         
@@ -64,9 +72,12 @@
                             <label class="block text-xs font-medium text-gray-500 mb-1">Destino</label>
                             <select name="destino" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:outline-none focus:border-[#0070F3] bg-white">
                                 <option value="">Todos</option>
-                                <?php foreach($opciones as $op): ?>
+                                <?php 
+                                    for ($i = 0; $i < count($opciones); $i++) {
+                                        $op = $opciones[$i];
+                                ?>
                                     <option value="<?php echo $op; ?>" <?php echo (stripos($destinoSel, $op) !== false) ? 'selected' : ''; ?>><?php echo $op; ?></option>
-                                <?php endforeach; ?>
+                                <?php } ?>
                             </select>
                         </div>
                         
@@ -114,12 +125,15 @@
                         $available_airlines = ['Copa Airlines', 'Avianca', 'LATAM Airlines', 'Iberia'];
                     ?>
                     <div class="space-y-3">
-                        <?php foreach($available_airlines as $airline): ?>
+                        <?php 
+                            for ($i = 0; $i < count($available_airlines); $i++) {
+                                $airline = $available_airlines[$i];
+                        ?>
                         <label class="flex items-center gap-3 cursor-pointer group">
                             <input type="checkbox" name="airlines[]" value="<?php echo $airline; ?>" <?php echo in_array($airline, $airlines) ? 'checked' : ''; ?> class="w-5 h-5 accent-[#0070F3] border-gray-300 rounded cursor-pointer">
                             <span class="text-sm text-gray-700 group-hover:text-[#0070F3] transition-colors"><?php echo $airline; ?></span>
                         </label>
-                        <?php endforeach; ?>
+                        <?php } ?>
                     </div>
                 </div>
 
@@ -137,8 +151,11 @@
             </div>
 
             <div id="lista-vuelos" class="space-y-6">
-                <?php if (count($vuelos) > 0): ?>
-                    <?php foreach ($vuelos as $vuelo): ?>
+                <?php if (count($vuelos_encontrados) > 0): ?>
+                    <?php 
+                        for ($i = 0; $i < count($vuelos_encontrados); $i++) {
+                            $vuelo = $vuelos_encontrados[$i];
+                    ?>
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col md:flex-row items-center justify-between gap-6 hover:shadow-md transition-shadow relative overflow-hidden">
                         
                         <?php if ($vuelo['best_price']): ?>
@@ -208,7 +225,7 @@
                             </form>
                         </div>
                     </div>
-                    <?php endforeach; ?>
+                    <?php } ?>
                 <?php else: ?>
                     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-16 text-center mt-6">
                         <div class="relative w-24 h-24 mx-auto mb-6">

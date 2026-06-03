@@ -1,142 +1,258 @@
 <?php
-declare(strict_types=1);
 session_start();
+
 /**
- * 🌸 ============================================================================================== 🌸
- * ARCHIVO PRINCIPAL: index.php (La "Hostess" o Anfitriona VIP de nuestra web)
- * 🌸 ============================================================================================== 🌸
+ * 👨‍🍳 ============================================================================================== 👨‍🍳
+ * EL MOSTRADOR PRINCIPAL: index.php
+ * 👨‍🍳 ============================================================================================== 👨‍🍳
  * 
- * 💖 CONCEPTO GENERAL (Para entenderlo súper fácil):
- * Imagina que nuestra página web es una boutique de moda o un club VIP súper exclusivo.
- * Cuando una persona hace clic en un link (por ejemplo, "Ver Destinos"), es como si acabara de 
- * entrar por la puerta principal. 
+ * 💖 BIENVENIDO A LA ENTRADA DE TU RESTAURANTE:
+ * Imagina que este archivo es el mostrador de entrada o el "Host" de tu restaurante.
+ * ABSOLUTAMENTE TODOS los clientes (las páginas que alguien quiere ver) pasan por aquí primero.
  * 
- * Este archivo (index.php) es la chica de la entrada, la "Hostess". NUNCA dejamos que los clientes
- * pasen solos a la bodega o a las oficinas. Siempre, siempre, pasan por ella primero.
+ * 1. Lo primero que hace el host es ir a la cocina y traer la "Pizarra del Menú" (datos.php).
+ * 2. Luego, le pregunta al cliente: "¿A qué mesa quieres ir?" (Leyendo $_GET['action']).
+ * 3. Dependiendo de lo que diga el cliente, el host (usando un condicional SWITCH)
+ *    lo acompaña a la zona correcta, mostrándole el archivo visual correspondiente.
  * 
- * 💖 ¿CÓMO FUNCIONA ESTE ARCHIVO EN NUESTRO SISTEMA?
- * 1. Prende las luces de emergencia (muestra errores si la página falla).
- * 2. Llama a la asistente mágica (Autoloader) para tener las carpetas listas.
- * 3. Revisa la lista de invitados/destinos (Router) para saber a dónde quiere ir la persona.
- * 4. Acompaña a la persona a la zona correcta (Dispatcher).
+ * Todo es directo y en orden. Sin magia, sin "clases", sin complicaciones.
  * ==============================================================================================
  */
 
-// 💡 1. PRENDIENDO LAS LUCES (Manejo de errores)
-// ¿Para qué sirve? Si algo se rompe en nuestro código, PHP nos mostrará un mensaje de error exacto.
-// Si no pusiéramos esto, la pantalla se quedaría totalmente blanca y no sabríamos qué pasó.
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
-error_reporting(E_ALL);
+// 📋 PASO 1: TRAER LA PIZARRA DEL MENÚ
+// 'require_once' le dice a PHP: "Ve y trae todo lo que está escrito en datos.php, lo necesitamos".
+require_once 'datos.php';
 
-/**
- * ----------------------------------------------------------------------------------------------
- * 👗 2. EL AUTOLOADER (La Asistente Personal)
- * ----------------------------------------------------------------------------------------------
- * ¿QUÉ ES EL COMANDO "spl_autoload_register"?: 
- * Es una función mágica de PHP que carga archivos de código automáticamente sin que tengamos que 
- * llamarlos uno por uno.
- * 
- * ¿QUÉ HACE EN EL SISTEMA?:
- * Imagina que tienes 50 empleados (archivos) trabajando. Normalmente tendrías que llamarlos uno
- * a uno (usando un comando llamado 'require'). Esta asistente (autoloader) está atenta; en cuanto
- * tú mencionas el nombre de un empleado (ej. "FlightModel"), ella va corriendo a la carpeta 
- * correcta, agarra el archivo y te lo trae. ¡Ahorra muchísimo tiempo!
- */
-spl_autoload_register(function ($class_name) {
-    // Preguntamos: ¿El nombre del archivo que buscas tiene la palabra "Controller"?
-    if (strpos($class_name, 'Controller') !== false) {
-        $file = __DIR__ . '/controllers/' . $class_name . '.php'; // Busca en la oficina de controladores
-        if (file_exists($file)) {
-            require_once $file; // Lo trae y lo integra al proyecto
-        }
-    } 
-    // Preguntamos: ¿El nombre del archivo que buscas tiene la palabra "Model"?
-    elseif (strpos($class_name, 'Model') !== false) {
-        $file = __DIR__ . '/models/' . $class_name . '.php'; // Busca en la bodega de modelos
-        if (file_exists($file)) {
-            require_once $file; // Lo trae y lo integra
-        }
-    }
-});
-
-/**
- * ----------------------------------------------------------------------------------------------
- * 🗺️ 3. EL ENRUTADOR (El Mapa de la Hostess)
- * ----------------------------------------------------------------------------------------------
- * ¿QUÉ ES EL COMANDO "$_GET['action']"?: 
- * Es la forma en que leemos la URL. Si la web dice "misitio.com/index.php?action=destinos", 
- * este comando atrapa la palabra "destinos".
- * 
- * ¿QUÉ HACE EN EL SISTEMA?:
- * Si el usuario no dice a dónde va, lo mandamos al inicio ('home').
- */
-$action = $_GET['action'] ?? $_POST['action'] ?? 'home';
-
-/*
- * Esta es nuestra LISTA VIP (Arreglo o Array). 
- * La Hostess lee a dónde quieres ir (ej. 'ofertas') y mira en la lista quién es el
- * 'Personal Shopper' (Controlador) encargado de atenderte y qué tarea (Método) hará.
- */
-$routes = [
-    // Peticiones básicas van con el HomeController (Atención al cliente general)
-    'home'             => ['controller' => 'HomeController', 'method' => 'showHome'],
-    'ayuda'            => ['controller' => 'HomeController', 'method' => 'showAyuda'],
-    'procesar_soporte' => ['controller' => 'HomeController', 'method' => 'procesarSoporte'],
-    
-    // Todo lo relacionado a buscar y reservar vuelos va con el FlightController (El experto en viajes)
-    'destinos'         => ['controller' => 'FlightController', 'method' => 'showDestinos'],
-    'ofertas'          => ['controller' => 'FlightController', 'method' => 'showOfertas'],
-    'reserva'          => ['controller' => 'FlightController', 'method' => 'showReserva'],
-    'buscar'           => ['controller' => 'FlightController', 'method' => 'buscar'],
-    'checkout'         => ['controller' => 'FlightController', 'method' => 'checkout'],
-    'confirmarReserva' => ['controller' => 'FlightController', 'method' => 'confirmarReserva'],
-    
-    // Perfiles y registros van con el UserController (El de los registros)
-    'checkin'          => ['controller' => 'UserController', 'method' => 'showCheckin'],
-    'procesarCheckin'  => ['controller' => 'UserController', 'method' => 'procesarCheckin'],
-    'formulario'       => ['controller' => 'UserController', 'method' => 'mostrarFormulario'],
-    'insertar'         => ['controller' => 'UserController', 'method' => 'insertar'],
-    'panel'            => ['controller' => 'UserController', 'method' => 'panel'],
-    
-    // Autenticación de Usuario (Login / Logout)
-    'login'            => ['controller' => 'UserController', 'method' => 'procesarLogin'],
-    'logout'           => ['controller' => 'UserController', 'method' => 'procesarLogout'],
-];
-
-/**
- * ----------------------------------------------------------------------------------------------
- * 🚕 4. EL DESPACHADOR (Llevando al cliente a su destino)
- * ----------------------------------------------------------------------------------------------
- * ¿CÓMO FUNCIONA ESTE BLOQUE?:
- * Usamos una condición "if" (que significa "SI ocurre esto...").
- * array_key_exists pregunta: "Hostess, ¿la palabra que pidió el cliente (ej. 'ofertas') 
- * existe en tu lista VIP ($routes)?"
- */
-if (array_key_exists($action, $routes)) {
-    // Leemos quién es el encargado (ej. FlightController) y qué función debe hacer (ej. showOfertas)
-    $controllerName = $routes[$action]['controller']; 
-    $methodName = $routes[$action]['method'];         
-
-    // class_exists: Verificamos si ese empleado realmente vino a trabajar hoy
-    if (class_exists($controllerName)) {
-        
-        // $controller = new ... : Es como ponerle el uniforme al empleado y ponerlo a trabajar.
-        $controller = new $controllerName();
-        
-        // method_exists: Verificamos si el empleado sí sabe hacer la tarea que le pedimos
-        if (method_exists($controller, $methodName)) {
-            // ¡Todo perfecto! Le decimos al empleado que ejecute su tarea de inmediato.
-            $controller->$methodName();
-        } else {
-            // Si el empleado no sabe hacerla, por seguridad llevamos a la persona a la pantalla de Inicio
-            (new HomeController())->showHome();
-        }
-    } else {
-        // Si el empleado no vino, lo mandamos a Inicio
-        (new HomeController())->showHome();
-    }
+// 🗣️ PASO 2: ESCUCHAR LO QUE QUIERE EL CLIENTE
+// Leemos la acción tanto si viene por la URL ($_GET) como por un formulario oculto ($_POST)
+if (isset($_GET['action'])) {
+    $peticion = $_GET['action'];
+} elseif (isset($_POST['action'])) {
+    $peticion = $_POST['action'];
 } else {
-    // Si la persona inventó un destino que no existe en nuestra lista VIP, lo mandamos a Inicio
-    (new HomeController())->showHome();
+    $peticion = 'home'; // Valor por defecto
 }
+
+// 🚦 PASO 3: EL HOST DIRIGE AL CLIENTE (EL ENRUTADOR)
+// El 'switch' es como un semáforo de múltiples vías o un guardia de seguridad.
+// Compara la variable $peticion con cada 'case' y cuando encuentra el que coincide, ejecuta ese bloque.
+switch ($peticion) {
+    // ---------------------------------------------------------
+    // ZONA PÚBLICA (El Salón Principal)
+    // ---------------------------------------------------------
+    case 'home':
+        // Si pidieron 'home', mostramos la cabecera, la página de inicio y el pie de página.
+        include 'views/layout/header.php';
+        include 'views/home/home.php';
+        include 'views/layout/footer.php';
+        break;
+
+    case 'destinos':
+        include 'views/layout/header.php';
+        include 'views/flights/destinos.php';
+        include 'views/layout/footer.php';
+        break;
+
+    case 'ofertas':
+        include 'views/layout/header.php';
+        include 'views/flights/ofertas.php';
+        include 'views/layout/footer.php';
+        break;
+
+    case 'ayuda':
+        include 'views/layout/header.php';
+        include 'views/home/ayuda.php';
+        include 'views/layout/footer.php';
+        break;
+
+    case 'checkin':
+        include 'views/layout/header.php';
+        include 'views/user/checkin.php';
+        include 'views/layout/footer.php';
+        break;
+
+    // ---------------------------------------------------------
+    // ZONA DE RESERVAS (Tomando la Orden)
+    // ---------------------------------------------------------
+    case 'buscar':
+        // 🧑‍🍳 EL MESERO TOMA TU ORDEN (Buscar Vuelo)
+        // Guardamos los datos que nos diste en el buscador (puede venir por GET o simulado por IA)
+        $origen = $_GET['origen'] ?? '';
+        $destino = $_GET['destino'] ?? '';
+        
+        // Si usaron la Búsqueda Inteligente (IA)
+        if (isset($_GET['query']) && !empty($_GET['query'])) {
+            // Simulamos que la IA extrajo el destino 'París' del texto
+            $destino = 'París'; 
+            $origen = 'Lima';
+        }
+        
+        $vuelos_encontrados = [];
+        
+        // El mesero lee toda la pizarra (todos los vuelos)
+        for ($i = 0; $i < count($menu_vuelos); $i++) {
+            $vuelo = $menu_vuelos[$i];
+            // Si el destino del vuelo es igual al que pidió el cliente...
+            // (Si no puso destino, mostramos todos)
+            if ($vuelo['arrival_airport'] == $destino || $destino == '') {
+                $vuelos_encontrados[] = $vuelo; // Lo anota en la libreta
+            }
+        }
+        
+        // Le pasamos la libreta con los resultados a la página de reservas
+        include 'views/layout/header.php';
+        include 'views/flights/reserva.php';
+        include 'views/layout/footer.php';
+        break;
+
+    case 'reserva':
+        // Aquí mostraremos los resultados de búsqueda de vuelos
+        include 'views/layout/header.php';
+        include 'views/flights/reserva.php';
+        include 'views/layout/footer.php';
+        break;
+
+    case 'checkout':
+        // 💳 EL CAJERO PREPARA LA FACTURA (Checkout)
+        // El cliente seleccionó un plato (vuelo). Buscamos cuál es.
+        $id_vuelo_seleccionado = $_POST['flight_id'] ?? 1;
+        $pasajeros = $_POST['pasajeros'] ?? 1;
+        $tipo_viaje = $_POST['tipo_viaje'] ?? 'solo_ida';
+        
+        $vuelo = null;
+        // Buscamos el vuelo en nuestro menú
+        for ($i = 0; $i < count($menu_vuelos); $i++) {
+            $v = $menu_vuelos[$i];
+            if ($v['id'] == $id_vuelo_seleccionado) {
+                $vuelo = $v;
+                break;
+            }
+        }
+        
+        include 'views/layout/header.php';
+        include 'views/flights/checkout.php';
+        include 'views/layout/footer.php';
+        break;
+
+    case 'confirmarReserva':
+        // 🎉 EL CLIENTE PAGA Y GUARDAMOS LA RESERVA
+        $id_vuelo = $_POST['flight_id'] ?? 1;
+        $nombre_pasajero = $_POST['nombre'] ?? 'Pasajero Anónimo';
+        
+        // Buscamos el vuelo para los detalles
+        $vuelo_reservado = null;
+        for ($i = 0; $i < count($menu_vuelos); $i++) {
+            $v = $menu_vuelos[$i];
+            if ($v['id'] == $id_vuelo) {
+                $vuelo_reservado = $v;
+                break;
+            }
+        }
+        
+        // Creamos un código de reserva aleatorio (PNR)
+        $pnr = substr(str_shuffle("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"), 0, 6);
+        
+        // Anotamos la reserva en nuestro libro (Sesión)
+        // Guardamos los datos exactamente como los espera el panel.
+        $_SESSION['reservas'][] = [
+            'pnr' => $pnr,
+            'vuelo' => $vuelo_reservado,
+            'pasajero_nombre' => $nombre_pasajero,
+            'estado' => 'Confirmada',
+            'fecha_reserva' => date('Y-m-d H:i:s')
+        ];
+        
+        // Si el usuario era invitado, le damos una cuenta temporal para que pueda ver su panel
+        if (!isset($_SESSION['user_id'])) {
+            $_SESSION['user_id'] = 999;
+            $_SESSION['user_name'] = $nombre_pasajero;
+        }
+        
+        // Lo mandamos a su panel de viajes con un mensaje de éxito
+        header('Location: index.php?action=panel&success=1&pnr=' . $pnr);
+        exit();
+        break;
+
+    // ---------------------------------------------------------
+    // ZONA PRIVADA (Login y Área de Clientes VIP)
+    // ---------------------------------------------------------
+    case 'login':
+        // 🏨 EL RECEPCIONISTA REVISA LA IDENTIFICACIÓN (Login)
+        // Tomamos lo que el cliente escribió en el formulario de la puerta.
+        $email_ingresado = $_POST['email'] ?? '';
+        $password_ingresada = $_POST['password'] ?? '';
+        
+        $cliente_valido = false; // Asumimos que es un impostor hasta demostrar lo contrario
+        
+        // El recepcionista lee nuestra pizarra (arreglo $clientes_vip) línea por línea
+        for ($i = 0; $i < count($clientes_vip); $i++) {
+            $cliente = $clientes_vip[$i];
+            if ($cliente['email'] == $email_ingresado && $cliente['password'] == $password_ingresada) {
+                // ¡Coincide! Le damos su pulsera VIP (Variables de Sesión)
+                $_SESSION['user_id'] = 1; // Un ID falso por ahora
+                $_SESSION['user_name'] = $cliente['nombre'];
+                $_SESSION['user_email'] = $cliente['email'];
+                $cliente_valido = true;
+                break; // Ya lo encontramos, dejamos de buscar en la pizarra
+            }
+        }
+        
+        if ($cliente_valido) {
+            header('Location: index.php?action=home&login=success');
+        } else {
+            header('Location: index.php?action=home&login=error');
+        }
+        exit();
+        break;
+
+    case 'logout':
+        // Aquí el cliente se va del restaurante. Destruimos su "sesión" (su ticket de visita).
+        session_destroy();
+        header('Location: index.php?action=home'); // Lo regresamos a la calle (inicio)
+        exit();
+        break;
+
+    case 'panel':
+        // Solo los que tienen sesión iniciada (ticket VIP) pueden ver esto
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: index.php?action=home');
+            exit();
+        }
+        // El anfitrión saca la lista de reservas del cliente
+        $misReservas = $_SESSION['reservas'] ?? [];
+        
+        include 'views/layout/header.php';
+        include 'views/user/panel.php';
+        include 'views/layout/footer.php';
+        break;
+
+    case 'procesarCheckin':
+        // 🎫 EL CLIENTE PIDE SU PASE DE ABORDAR
+        $pnr_buscado = $_POST['pnr'] ?? '';
+        
+        // Buscamos su reserva en la sesión y le cambiamos el estado
+        if (isset($_SESSION['reservas'])) {
+            for ($i = 0; $i < count($_SESSION['reservas']); $i++) {
+                $reserva = $_SESSION['reservas'][$i];
+                if ($reserva['pnr'] == $pnr_buscado) {
+                    $_SESSION['reservas'][$i]['estado'] = 'Checked-in';
+                    break;
+                }
+            }
+        }
+        
+        // Lo mandamos de vuelta a su panel
+        header('Location: index.php?action=panel');
+        exit();
+        break;
+
+    // ---------------------------------------------------------
+    // RUTA POR DEFECTO (Si piden algo que no existe)
+    // ---------------------------------------------------------
+    default:
+        // Si el cliente pide ir al baño de oro (algo que no existe), lo mandamos al inicio.
+        header('Location: index.php?action=home');
+        exit();
+        break;
+}
+?>

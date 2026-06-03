@@ -39,7 +39,7 @@
 
                 <!-- Formulario Clásico -->
                 <form id="form-clasica" method="GET" action="index.php" class="hidden flex-col gap-4">
-                    <input type="hidden" name="action" value="reserva">
+                    <input type="hidden" name="action" value="buscar">
                     
                     <!-- Toggle Tipo de Viaje -->
                     <div class="flex items-center gap-4 mb-2">
@@ -246,7 +246,7 @@
                             <p class="text-xs text-gray-400">desde</p>
                             <p class="text-2xl font-bold text-[#0070F3]">S/. 890</p>
                         </div>
-                        <a href="?action=reserva" class="bg-[#0070F3] hover:bg-[#0051CC] text-white px-6 py-2.5 rounded-lg font-semibold transition-colors text-center">Reservar</a>
+                        <a href="?action=buscar&destino=Miami" class="bg-[#0070F3] hover:bg-[#0051CC] text-white px-6 py-2.5 rounded-lg font-semibold transition-colors text-center">Reservar</a>
                     </div>
                 </div>
             </div>
@@ -266,7 +266,7 @@
                             <p class="text-xs text-gray-400">desde</p>
                             <p class="text-2xl font-bold text-[#0070F3]">S/. 2,100</p>
                         </div>
-                        <a href="?action=reserva" class="bg-[#0070F3] hover:bg-[#0051CC] text-white px-6 py-2.5 rounded-lg font-semibold transition-colors text-center">Reservar</a>
+                        <a href="?action=buscar&destino=Madrid" class="bg-[#0070F3] hover:bg-[#0051CC] text-white px-6 py-2.5 rounded-lg font-semibold transition-colors text-center">Reservar</a>
                     </div>
                 </div>
             </div>
@@ -286,7 +286,7 @@
                             <p class="text-xs text-gray-400">desde</p>
                             <p class="text-2xl font-bold text-[#0070F3]">S/. 3,450</p>
                         </div>
-                        <a href="?action=reserva" class="bg-[#0070F3] hover:bg-[#0051CC] text-white px-6 py-2.5 rounded-lg font-semibold transition-colors text-center">Reservar</a>
+                        <a href="?action=buscar&destino=París" class="bg-[#0070F3] hover:bg-[#0051CC] text-white px-6 py-2.5 rounded-lg font-semibold transition-colors text-center">Reservar</a>
                     </div>
                 </div>
             </div>
