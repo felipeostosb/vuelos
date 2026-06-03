@@ -24,10 +24,11 @@ session_start();
 require_once 'datos.php';
 
 // 🗣️ PASO 2: ESCUCHAR LO QUE QUIERE EL CLIENTE
-// Si el cliente en la URL pone "?action=destinos", $peticion guardará la palabra "destinos".
-// Si el cliente entra sin pedir nada, por defecto lo mandamos a "home" (la puerta de inicio).
+// Leemos la acción tanto si viene por la URL ($_GET) como por un formulario oculto ($_POST)
 if (isset($_GET['action'])) {
     $peticion = $_GET['action'];
+} elseif (isset($_POST['action'])) {
+    $peticion = $_POST['action'];
 } else {
     $peticion = 'home'; // Valor por defecto
 }
@@ -75,9 +76,16 @@ switch ($peticion) {
     // ---------------------------------------------------------
     case 'buscar':
         // 🧑‍🍳 EL MESERO TOMA TU ORDEN (Buscar Vuelo)
-        // Guardamos los datos que nos diste en el buscador
-        $origen = $_POST['origen'] ?? '';
-        $destino = $_POST['destino'] ?? '';
+        // Guardamos los datos que nos diste en el buscador (puede venir por GET o simulado por IA)
+        $origen = $_GET['origen'] ?? '';
+        $destino = $_GET['destino'] ?? '';
+        
+        // Si usaron la Búsqueda Inteligente (IA)
+        if (isset($_GET['query']) && !empty($_GET['query'])) {
+            // Simulamos que la IA extrajo el destino 'París' del texto
+            $destino = 'París'; 
+            $origen = 'Lima';
+        }
         
         $vuelos_encontrados = [];
         
@@ -85,7 +93,7 @@ switch ($peticion) {
         for ($i = 0; $i < count($menu_vuelos); $i++) {
             $vuelo = $menu_vuelos[$i];
             // Si el destino del vuelo es igual al que pidió el cliente...
-            // (Para simplificar, por ahora solo filtramos por destino)
+            // (Si no puso destino, mostramos todos)
             if ($vuelo['arrival_airport'] == $destino || $destino == '') {
                 $vuelos_encontrados[] = $vuelo; // Lo anota en la libreta
             }

@@ -28,8 +28,13 @@
 
     <section class="bg-[#EAF4FF] border-b border-blue-100 py-3">
         <div class="max-w-[1280px] mx-auto px-8 flex items-center gap-3 text-sm text-[#0A192F]">
-            <i class="fa-solid fa-wand-magic-sparkles text-[#0070F3]"></i>
-            <p>La IA encontró <span class="font-bold text-[#0070F3]"><?php echo count($vuelos_encontrados); ?> vuelos</span>. El mejor precio sale los martes.</p>
+            <?php if (isset($_GET['query']) && !empty($_GET['query'])): ?>
+                <i class="fa-solid fa-wand-magic-sparkles text-[#0070F3]"></i>
+                <p>La IA entendió tu solicitud y encontró <span class="font-bold text-[#0070F3]"><?php echo count($vuelos_encontrados); ?> vuelos</span>. El mejor precio sale los martes.</p>
+            <?php else: ?>
+                <i class="fa-solid fa-plane text-[#0070F3]"></i>
+                <p>Hemos encontrado <span class="font-bold text-[#0070F3]"><?php echo count($vuelos_encontrados); ?> vuelos</span> para tu ruta.</p>
+            <?php endif; ?>
         </div>
     </section>
 
