@@ -1,42 +1,42 @@
-<footer class="bg-[#0A192F] text-gray-400 text-sm pt-16 pb-8 border-t border-gray-800">
-    <div class="max-w-[1560px] mx-auto px-12 grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+<footer class="site-footer">
+    <div class="footer__container footer__grid">
 
-        <div>
-            <h4 class="text-white font-bold text-base mb-4 font-['Open_Sauce_One']">NOVAIRLINES</h4>
-            <ul class="space-y-2.5">
-                <li><a href="?action=home" class="hover:text-white transition-colors">Acerca de nosotros</a></li>
-                <li><a href="?action=home" class="hover:text-white transition-colors">Cómo funciona la IA</a></li>
-                <li><a href="#" class="hover:text-white transition-colors">Términos y condiciones</a></li>
-                <li><a href="#" class="hover:text-white transition-colors">Política de privacidad</a></li>
+        <div class="footer__brand">
+            <h4 class="footer__title font-['Open_Sauce_One']">NOVAIRLINES</h4>
+            <ul class="footer__links">
+                <li><a href="?action=home" class="footer__link">Acerca de nosotros</a></li>
+                <li><a href="?action=home" class="footer__link">Cómo funciona la IA</a></li>
+                <li><a href="#" class="footer__link">Términos y condiciones</a></li>
+                <li><a href="#" class="footer__link">Política de privacidad</a></li>
             </ul>
         </div>
 
-        <div>
-            <h4 class="text-white font-bold text-base mb-4">Gestión de viajes</h4>
-            <ul class="space-y-2.5">
-                <li><a href="?action=checkin" class="hover:text-white transition-colors">Check-in online</a></li>
-                <li><a href="#" class="hover:text-white transition-colors">Estado de vuelo</a></li>
-                <li><a href="#" class="hover:text-white transition-colors">Cambios y cancelaciones</a></li>
-                <li><a href="#" class="hover:text-white transition-colors">Equipaje</a></li>
+        <div class="footer__brand">
+            <h4 class="footer__title">Gestión de viajes</h4>
+            <ul class="footer__links">
+                <li><a href="?action=checkin" class="footer__link">Check-in online</a></li>
+                <li><a href="#" class="footer__link">Estado de vuelo</a></li>
+                <li><a href="#" class="footer__link">Cambios y cancelaciones</a></li>
+                <li><a href="#" class="footer__link">Equipaje</a></li>
             </ul>
         </div>
 
-        <div>
-            <h4 class="text-white font-bold text-base mb-4">Ayuda y soporte</h4>
-            <a href="https://wa.me/5112345678" target="_blank" class="inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20BA5A] text-white w-full py-3 rounded-xl font-bold mb-4 transition-all shadow-md text-center">
+        <div class="footer__brand">
+            <h4 class="footer__title">Ayuda y soporte</h4>
+            <a href="https://wa.me/5112345678" target="_blank" class="btn btn--large" style="background-color: #25D366; color: white; width: 100%; margin-bottom: 1rem; padding: 0.75rem;">
                 <i class="fa-brands fa-whatsapp text-lg"></i> WhatsApp
             </a>
-            <ul class="space-y-2.5">
-                <li><a href="?action=ayuda" class="hover:text-white transition-colors">Centro de ayuda</a></li>
-                <li><a href="?action=ayuda" class="hover:text-white transition-colors">Preguntas frecuentes</a></li>
-                <li><a href="?action=ayuda" class="hover:text-white transition-colors">Contacto</a></li>
+            <ul class="footer__links">
+                <li><a href="?action=ayuda" class="footer__link">Centro de ayuda</a></li>
+                <li><a href="?action=ayuda" class="footer__link">Preguntas frecuentes</a></li>
+                <li><a href="?action=ayuda" class="footer__link">Contacto</a></li>
             </ul>
         </div>
 
     </div>
 
-    <div class="max-w-[1560px] mx-auto px-12 pt-6 border-t border-gray-800 text-center text-xs text-gray-500">
-        &copy; 2026 NOVAIRLINES. Todos los derechos reservados.
+    <div class="footer__bottom footer__container">
+        <span class="footer__copyright">&copy; 2026 NOVAIRLINES. Todos los derechos reservados.</span>
     </div>
 </footer>
 
