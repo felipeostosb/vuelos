@@ -89,11 +89,15 @@ $routes = [
     'ofertas'          => ['controller' => 'FlightController', 'method' => 'showOfertas'],
     'reserva'          => ['controller' => 'FlightController', 'method' => 'showReserva'],
     'buscar'           => ['controller' => 'FlightController', 'method' => 'buscar'],
+    'checkout'         => ['controller' => 'FlightController', 'method' => 'checkout'],
+    'confirmarReserva' => ['controller' => 'FlightController', 'method' => 'confirmarReserva'],
     
     // Perfiles y registros van con el UserController (El de los registros)
     'checkin'          => ['controller' => 'UserController', 'method' => 'showCheckin'],
+    'procesarCheckin'  => ['controller' => 'UserController', 'method' => 'procesarCheckin'],
     'formulario'       => ['controller' => 'UserController', 'method' => 'mostrarFormulario'],
     'insertar'         => ['controller' => 'UserController', 'method' => 'insertar'],
+    'panel'            => ['controller' => 'UserController', 'method' => 'panel'],
     
     // Autenticación de Usuario (Login / Logout)
     'login'            => ['controller' => 'UserController', 'method' => 'procesarLogin'],

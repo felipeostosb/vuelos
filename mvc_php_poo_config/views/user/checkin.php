@@ -11,18 +11,34 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             
             <div class="tarjeta-animada bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow overflow-hidden border border-gray-100 flex flex-col">
-                <div class="h-40 overflow-hidden">
+                <div class="h-40 overflow-hidden relative">
                     <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=800&q=80" alt="Avión en vuelo" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex items-end p-4">
+                        <h3 class="text-white font-bold text-xl">Web Check-in</h3>
+                    </div>
                 </div>
                 <div class="p-8 flex-1 flex flex-col justify-between text-center">
-                    <div>
-                        <h3 class="text-xl font-bold text-[#0A192F] mb-2">Estado del vuelo</h3>
-                        <p class="text-sm text-gray-500 mb-6">Consulta en tiempo real</p>
-                        <input type="text" placeholder="Ej: LA 2451" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-center mb-6 focus:outline-none focus:border-[#0070F3] focus:ring-1 focus:ring-[#0070F3] transition-colors">
-                    </div>
-                    <button type="button" class="w-full bg-[#0070F3] hover:bg-[#0051CC] text-white py-3 rounded-xl font-medium transition-colors">
-                        Consultar
-                    </button>
+                    
+                    <?php if (isset($_GET['success'])): ?>
+                        <div class="bg-green-50 text-green-700 p-3 rounded-xl mb-4 text-sm font-bold flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-check-circle"></i> ¡Check-in exitoso para <?php echo htmlspecialchars($_GET['pnr'] ?? ''); ?>!
+                        </div>
+                    <?php elseif (isset($_GET['error'])): ?>
+                        <div class="bg-red-50 text-red-700 p-3 rounded-xl mb-4 text-sm font-bold flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-circle-xmark"></i> Reserva no encontrada
+                        </div>
+                    <?php endif; ?>
+
+                    <form action="index.php" method="POST" class="flex flex-col h-full justify-between">
+                        <input type="hidden" name="action" value="procesarCheckin">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-4">Ingresa tu código de reserva (PNR) para obtener tu tarjeta de embarque.</p>
+                            <input type="text" name="pnr" required placeholder="Ej: XY8P2Q" class="w-full border border-gray-200 rounded-xl px-4 py-3 text-center mb-6 focus:outline-none focus:border-[#0070F3] focus:ring-1 focus:ring-[#0070F3] transition-colors uppercase font-bold tracking-widest">
+                        </div>
+                        <button type="submit" class="w-full bg-[#0070F3] hover:bg-[#0051CC] text-white py-3 rounded-xl font-medium transition-colors shadow-md">
+                            <i class="fa-solid fa-qrcode mr-2"></i> Obtener Boarding Pass
+                        </button>
+                    </form>
                 </div>
             </div>
 
