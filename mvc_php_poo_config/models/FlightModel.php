@@ -31,62 +31,105 @@ class FlightModel
     {
         // "return" significa: Devuélveme todo lo que está dentro de estos corchetes gigantes [ ... ]
         return [
+            // RUTAS A MADRID (MAD)
             [
-                'id' => 1,
-                'airline' => 'Copa Airlines',
-                'flight_number' => 'CM 331',
-                'departure_time' => '22:00',
-                'departure_airport' => 'LIM', // Saliendo desde Lima
-                'arrival_time' => '13:55',
-                'arrival_next_day' => true,
-                'arrival_airport' => 'MAD', // Llegando a Madrid
-                'duration' => '15h 55m',
-                'stops' => 1,
-                'price' => 1490,
-                'best_price' => false,
+                'id' => 1, 'airline' => 'Copa Airlines', 'flight_number' => 'CM 331',
+                'departure_time' => '22:00', 'departure_airport' => 'LIM',
+                'arrival_time' => '13:55', 'arrival_next_day' => true, 'arrival_airport' => 'MAD',
+                'duration' => '15h 55m', 'stops' => 1, 'price' => 1490, 'best_price' => false,
             ],
             [
-                'id' => 2,
-                'airline' => 'Avianca',
-                'flight_number' => 'AV 204',
-                'departure_time' => '10:30',
-                'departure_airport' => 'LIM',
-                'arrival_time' => '01:15',
-                'arrival_next_day' => true,
-                'arrival_airport' => 'MAD',
-                'duration' => '14h 45m',
-                'stops' => 1,
-                'price' => 1620,
-                'best_price' => false,
+                'id' => 2, 'airline' => 'Iberia', 'flight_number' => 'IB 6650',
+                'departure_time' => '19:40', 'departure_airport' => 'LIM',
+                'arrival_time' => '14:25', 'arrival_next_day' => true, 'arrival_airport' => 'MAD',
+                'duration' => '11h 45m', 'stops' => 0, 'price' => 2200, 'best_price' => false,
             ],
             [
-                'id' => 3,
-                'airline' => 'LATAM Airlines',
-                'flight_number' => 'LA 2451',
-                'departure_time' => '08:15',
-                'departure_airport' => 'LIM',
-                'arrival_time' => '22:40',
-                'arrival_next_day' => false,
-                'arrival_airport' => 'MAD',
-                'duration' => '14h 25m',
-                'stops' => 0,
-                'price' => 1850,
-                'best_price' => true, // Etiqueta que hace que se pinte "Mejor precio" en azul
+                'id' => 3, 'airline' => 'LATAM Airlines', 'flight_number' => 'LA 2451',
+                'departure_time' => '08:15', 'departure_airport' => 'LIM',
+                'arrival_time' => '22:40', 'arrival_next_day' => false, 'arrival_airport' => 'MAD',
+                'duration' => '14h 25m', 'stops' => 0, 'price' => 1850, 'best_price' => true,
             ],
             [
-                'id' => 4,
-                'airline' => 'Iberia',
-                'flight_number' => 'IB 6650',
-                'departure_time' => '19:40',
-                'departure_airport' => 'LIM',
-                'arrival_time' => '14:25',
-                'arrival_next_day' => true,
-                'arrival_airport' => 'MAD',
-                'duration' => '11h 45m',
-                'stops' => 0,
-                'price' => 3200,
-                'best_price' => false,
-            ]
+                'id' => 4, 'airline' => 'Avianca', 'flight_number' => 'AV 210',
+                'departure_time' => '12:00', 'departure_airport' => 'BOG',
+                'arrival_time' => '06:15', 'arrival_next_day' => true, 'arrival_airport' => 'MAD',
+                'duration' => '10h 15m', 'stops' => 0, 'price' => 1200, 'best_price' => true,
+            ],
+
+            // RUTAS A PARÍS (CDG)
+            [
+                'id' => 5, 'airline' => 'Air France', 'flight_number' => 'AF 480',
+                'departure_time' => '18:15', 'departure_airport' => 'LIM',
+                'arrival_time' => '13:40', 'arrival_next_day' => true, 'arrival_airport' => 'París',
+                'duration' => '12h 25m', 'stops' => 0, 'price' => 2400, 'best_price' => true,
+            ],
+            [
+                'id' => 6, 'airline' => 'Iberia', 'flight_number' => 'IB 341',
+                'departure_time' => '19:40', 'departure_airport' => 'LIM',
+                'arrival_time' => '17:25', 'arrival_next_day' => true, 'arrival_airport' => 'París',
+                'duration' => '14h 45m', 'stops' => 1, 'price' => 1800, 'best_price' => false,
+            ],
+            [
+                'id' => 7, 'airline' => 'LATAM Airlines', 'flight_number' => 'LA 801',
+                'departure_time' => '21:00', 'departure_airport' => 'BOG',
+                'arrival_time' => '14:30', 'arrival_next_day' => true, 'arrival_airport' => 'París',
+                'duration' => '11h 30m', 'stops' => 0, 'price' => 2100, 'best_price' => false,
+            ],
+
+            // RUTAS A BOGOTÁ (BOG)
+            [
+                'id' => 8, 'airline' => 'Avianca', 'flight_number' => 'AV 204',
+                'departure_time' => '10:30', 'departure_airport' => 'LIM',
+                'arrival_time' => '14:15', 'arrival_next_day' => false, 'arrival_airport' => 'Bogotá',
+                'duration' => '3h 45m', 'stops' => 0, 'price' => 620, 'best_price' => true,
+            ],
+            [
+                'id' => 9, 'airline' => 'LATAM Airlines', 'flight_number' => 'LA 2390',
+                'departure_time' => '15:00', 'departure_airport' => 'LIM',
+                'arrival_time' => '18:20', 'arrival_next_day' => false, 'arrival_airport' => 'Bogotá',
+                'duration' => '3h 20m', 'stops' => 0, 'price' => 750, 'best_price' => false,
+            ],
+
+            // RUTAS A CUSCO (CUZ)
+            [
+                'id' => 10, 'airline' => 'LATAM Airlines', 'flight_number' => 'LA 2011',
+                'departure_time' => '05:30', 'departure_airport' => 'LIM',
+                'arrival_time' => '06:50', 'arrival_next_day' => false, 'arrival_airport' => 'Cusco',
+                'duration' => '1h 20m', 'stops' => 0, 'price' => 150, 'best_price' => true,
+            ],
+            [
+                'id' => 11, 'airline' => 'Avianca', 'flight_number' => 'AV 105',
+                'departure_time' => '08:15', 'departure_airport' => 'LIM',
+                'arrival_time' => '09:40', 'arrival_next_day' => false, 'arrival_airport' => 'Cusco',
+                'duration' => '1h 25m', 'stops' => 0, 'price' => 180, 'best_price' => false,
+            ],
+            [
+                'id' => 12, 'airline' => 'Sky Airline', 'flight_number' => 'H2 5013',
+                'departure_time' => '14:00', 'departure_airport' => 'LIM',
+                'arrival_time' => '15:20', 'arrival_next_day' => false, 'arrival_airport' => 'Cusco',
+                'duration' => '1h 20m', 'stops' => 0, 'price' => 95, 'best_price' => true,
+            ],
+            
+            // RUTAS A MIAMI (MIA)
+            [
+                'id' => 13, 'airline' => 'American Airlines', 'flight_number' => 'AA 918',
+                'departure_time' => '08:00', 'departure_airport' => 'LIM',
+                'arrival_time' => '14:50', 'arrival_next_day' => false, 'arrival_airport' => 'Miami',
+                'duration' => '5h 50m', 'stops' => 0, 'price' => 1200, 'best_price' => true,
+            ],
+            [
+                'id' => 14, 'airline' => 'LATAM Airlines', 'flight_number' => 'LA 2500',
+                'departure_time' => '23:55', 'departure_airport' => 'LIM',
+                'arrival_time' => '06:40', 'arrival_next_day' => true, 'arrival_airport' => 'Miami',
+                'duration' => '5h 45m', 'stops' => 0, 'price' => 1350, 'best_price' => false,
+            ],
+            [
+                'id' => 15, 'airline' => 'Copa Airlines', 'flight_number' => 'CM 400',
+                'departure_time' => '11:20', 'departure_airport' => 'LIM',
+                'arrival_time' => '19:30', 'arrival_next_day' => false, 'arrival_airport' => 'Miami',
+                'duration' => '8h 10m', 'stops' => 1, 'price' => 950, 'best_price' => false,
+            ],
         ];
     }
 
@@ -122,8 +165,21 @@ class FlightModel
          * Si falla aunque sea UNA pregunta, el portero dice "return false;" y bota el vuelo.
          * Si pasa todas las preguntas de estilo, el portero dice "return true;" y lo aprueba.
          */
-        $vuelosFiltrados = array_filter($allFlights, function($vuelo) use ($precioMaximo, $escalasPermitidas, $aerolineasPermitidas) {
+        $vuelosFiltrados = array_filter($allFlights, function($vuelo) use ($precioMaximo, $escalasPermitidas, $aerolineasPermitidas, $filters) {
             
+            // FILTRO 0: Origen y Destino (de la Búsqueda Clásica)
+            if (isset($filters['origen']) && $filters['origen'] !== '') {
+                // Comparamos el origen (tolerante a mayúsculas/minúsculas o códigos)
+                if (stripos($vuelo['departure_airport'], $filters['origen']) === false && stripos($filters['origen'], $vuelo['departure_airport']) === false) {
+                    return false;
+                }
+            }
+            if (isset($filters['destino']) && $filters['destino'] !== '') {
+                if (stripos($vuelo['arrival_airport'], $filters['destino']) === false && stripos($filters['destino'], $vuelo['arrival_airport']) === false) {
+                    return false;
+                }
+            }
+
             // FILTRO 1: El Presupuesto
             // Pregunta: Señor vuelo, ¿tú cuestas ($vuelo['price']) más de lo que quiero pagar ($precioMaximo)?
             if ($vuelo['price'] > $precioMaximo) {
@@ -152,5 +208,51 @@ class FlightModel
         // Le mandamos a la Personal Shopper (FlightController) la cajita fina que contiene
         // ÚNICAMENTE los vuelos que la clienta va a amar.
         return $vuelosFiltrados;
+    }
+
+    /**
+     * 🌐 INTEGRACIÓN CON DUFFEL API (Preparación)
+     * ------------------------------------------------------------------------------------------
+     * ¿Para qué sirve?: Este es el conducto directo a la API real de Duffel para emitir boletos.
+     * Actualmente está simulando una respuesta exitosa, pero la estructura está lista.
+     */
+    public function bookFlightWithDuffel($flightId, $passengers): array
+    {
+        /*
+        // EJEMPLO DE CÓDIGO REAL PARA DUFFEL:
+        $duffelApiKey = DUFFEL_API_KEY; // Variable de entorno o config/api.php
+        $client = new \GuzzleHttp\Client();
+        
+        $response = $client->request('POST', 'https://api.duffel.com/air/orders', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $duffelApiKey,
+                'Duffel-Version' => 'beta',
+                'Content-Type' => 'application/json'
+            ],
+            'json' => [
+                'data' => [
+                    'selected_offers' => [$flightId],
+                    'passengers' => [
+                        // Aquí mapearíamos los datos de los pasajeros...
+                    ]
+                ]
+            ]
+        ]);
+        $data = json_decode($response->getBody(), true);
+        return $data['data']['booking_reference']; // El PNR real
+        */
+
+        // SIMULACIÓN: Generamos un PNR aleatorio de 6 caracteres (ej: XY8P2Q)
+        $caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $pnrSimulado = '';
+        for ($i = 0; $i < 6; $i++) {
+            $pnrSimulado .= $caracteres[rand(0, strlen($caracteres) - 1)];
+        }
+
+        return [
+            'status' => 'success',
+            'pnr' => $pnrSimulado,
+            'message' => 'Vuelo reservado exitosamente (Simulado)'
+        ];
     }
 }

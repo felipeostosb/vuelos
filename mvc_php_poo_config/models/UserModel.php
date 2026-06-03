@@ -52,7 +52,7 @@ class UserModel
 
     // =========================================================
     // NUEVA MEJORA: FUNCIÓN PARA EL LOGIN (INICIAR SESIÓN)
-    // Como VuelaIA tiene un botón de Iniciar Sesión, 
+    // Como NOVAIRLINES tiene un botón de Iniciar Sesión,  
     // necesitaremos validar que el usuario y la clave coincidan.
     // =========================================================
     public function verificarLogin(string $email, string $password): array|false
@@ -97,7 +97,7 @@ class UserModel
     public function verificarLogin(string $email, string $password): array|false
     {
         // Nuestro usuario administrador de prueba
-        $emailPrueba = 'admin@vuelaia.com';
+        $emailPrueba = 'admin@novairlines.com';
         $passwordPrueba = '123456';
         
         // Verificamos si los datos ingresados coinciden con los de prueba

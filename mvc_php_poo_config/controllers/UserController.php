@@ -83,4 +83,47 @@ class UserController extends BaseController
         header('Location: index.php?action=home');
         exit;
     }
+
+    /**
+     * Muestra el panel de usuario con sus vuelos reservados
+     */
+    public function panel(): void
+    {
+        // Protegemos la ruta
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: index.php?action=home');
+            exit;
+        }
+
+        // Leemos las reservas de la sesión
+        $reservas = $_SESSION['reservas'] ?? [];
+
+        // Filtramos solo las reservas del usuario actual por correo
+        $misReservas = [];
+        foreach ($reservas as $pnr => $reserva) {
+            if ($reserva['pasajero_email'] === $_SESSION['user_email']) {
+                $misReservas[$pnr] = $reserva;
+            }
+        }
+
+        $this->renderView('user', 'panel', ['misReservas' => $misReservas]);
+    }
+
+    /**
+     * Procesa el check-in de una reserva
+     */
+    public function procesarCheckin(): void
+    {
+        $pnr = $_POST['pnr'] ?? '';
+        $pnr = strtoupper(trim($pnr));
+
+        if (isset($_SESSION['reservas'][$pnr])) {
+            $_SESSION['reservas'][$pnr]['estado'] = 'Checked-in';
+            // Redirigimos al panel con éxito o a la vista de checkin
+            header('Location: index.php?action=checkin&success=1&pnr=' . $pnr);
+        } else {
+            header('Location: index.php?action=checkin&error=1');
+        }
+        exit;
+    }
 }

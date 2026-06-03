@@ -3,10 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VuelaIA - Tu viaje con Inteligencia Artificial</title>
+    <title>NOVAIRLINES - Tu viaje con Inteligencia Artificial</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link class="refe" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="assets/css/style.css">
+    
+    <!-- Flatpickr Date Picker -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
+    
+    <!-- Open Sauce Font -->
+    <link href="https://fonts.cdnfonts.com/css/open-sauce-one" rel="stylesheet">
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans">
 
@@ -15,7 +23,7 @@
             
             <div class="flex items-center gap-2">
                 <i class="fa-solid fa-paper-plane text-[#0070F3] text-2xl rotate-[15deg]"></i>
-                <span class="text-2xl font-bold tracking-tight">Vuela<span class="text-[#0070F3]">IA</span></span>
+                <span class="text-2xl font-bold tracking-tight font-['Open_Sauce_One']">NOVA <span class="text-[#0070F3]">AI</span>RLINES</span>
             </div>
 
             <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-gray-300">
@@ -42,11 +50,13 @@
                         </div>
                         
                         <!-- Menú Desplegable Oculto -->
-                        <div class="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg py-2 hidden group-hover:block border border-gray-100 z-50">
-                            <a href="?action=checkin" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#0070F3]"><i class="fa-solid fa-suitcase-rolling w-5"></i> Mis Viajes</a>
-                            <a href="?action=formulario" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#0070F3]"><i class="fa-solid fa-user w-5"></i> Mi Perfil</a>
-                            <div class="border-t border-gray-100 my-1"></div>
-                            <a href="?action=logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50"><i class="fa-solid fa-sign-out-alt w-5"></i> Cerrar sesión</a>
+                        <div class="absolute right-0 top-full pt-2 w-48 z-50 hidden group-hover:block">
+                            <div class="bg-white rounded-xl shadow-lg py-2 border border-gray-100">
+                                <a href="?action=panel" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#0070F3]"><i class="fa-solid fa-suitcase-rolling w-5"></i> Mis Viajes</a>
+                                <a href="?action=formulario" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#0070F3]"><i class="fa-solid fa-user w-5"></i> Mi Perfil</a>
+                                <div class="border-t border-gray-100 my-1"></div>
+                                <a href="?action=logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50"><i class="fa-solid fa-sign-out-alt w-5"></i> Cerrar sesión</a>
+                            </div>
                         </div>
                     </div>
                 <?php else: ?>

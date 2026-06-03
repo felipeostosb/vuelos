@@ -2,7 +2,7 @@
     <div class="max-w-[1560px] mx-auto px-12 grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
 
         <div>
-            <h4 class="text-white font-bold text-base mb-4">VuelaIA</h4>
+            <h4 class="text-white font-bold text-base mb-4 font-['Open_Sauce_One']">NOVAIRLINES</h4>
             <ul class="space-y-2.5">
                 <li><a href="?action=home" class="hover:text-white transition-colors">Acerca de nosotros</a></li>
                 <li><a href="?action=home" class="hover:text-white transition-colors">Cómo funciona la IA</a></li>
@@ -36,7 +36,7 @@
     </div>
 
     <div class="max-w-[1560px] mx-auto px-12 pt-6 border-t border-gray-800 text-center text-xs text-gray-500">
-        &copy; 2026 VuelaIA. Todos los derechos reservados.
+        &copy; 2026 NOVAIRLINES. Todos los derechos reservados.
     </div>
 </footer>
 
@@ -57,7 +57,7 @@
         <div class="text-center mb-6">
             <div class="flex items-center justify-center gap-2 mb-4">
                 <i class="fa-solid fa-paper-plane text-[#0070F3] text-2xl rotate-[15deg]"></i>
-                <span class="text-2xl font-bold text-[#0A192F] tracking-tight">Vuela<span class="text-[#0070F3]">IA</span></span>
+                <span class="text-2xl font-bold text-[#0A192F] tracking-tight font-['Open_Sauce_One']">NOVA <span class="text-[#0070F3]">AI</span>RLINES</span>
             </div>
             <h2 class="text-2xl font-bold text-[#0A192F] mb-1">Bienvenido</h2>
             <p class="text-gray-500 text-sm">Inicia sesión para gestionar tus vuelos</p>

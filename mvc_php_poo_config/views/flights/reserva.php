@@ -8,12 +8,17 @@
                     $destino = isset($_GET['destino']) ? htmlspecialchars($_GET['destino']) : 'Madrid';
                     $fecha = isset($_GET['fecha']) ? htmlspecialchars($_GET['fecha']) : '25 Jul 2026';
                     $pasajeros = isset($_GET['pasajeros']) ? htmlspecialchars($_GET['pasajeros']) : '1';
+                    $isRoundTrip = ($data['tipo_viaje'] ?? 'solo_ida') === 'ida_vuelta';
                 ?>
-                <span class="font-bold"><?php echo $origen; ?> → <?php echo $destino; ?></span>
+                <span class="font-bold">
+                    <?php echo $origen; ?> 
+                    <?php echo $isRoundTrip ? '<i class="fa-solid fa-arrow-right-arrow-left text-[#0070F3] mx-1"></i>' : '→'; ?> 
+                    <?php echo $destino; ?>
+                </span>
                 <span class="text-gray-400">·</span>
-                <span class="text-gray-300"><?php echo $fecha; ?></span>
+                <span class="text-gray-300"><?php echo $fecha; ?> <?php echo $isRoundTrip && !empty($data['fecha_retorno']) ? ' al ' . htmlspecialchars($data['fecha_retorno']) : ''; ?></span>
                 <span class="text-gray-400">·</span>
-                <span class="text-gray-300"><?php echo $pasajeros; ?> · Económica</span>
+                <span class="text-gray-300"><?php echo $pasajeros; ?> pasajero(s) <?php echo $isRoundTrip ? '<span class="ml-2 bg-[#0070F3] text-white px-2 py-0.5 rounded-full text-xs">Ida y Vuelta</span>' : ''; ?></span>
             </div>
             <a href="?action=home" class="text-[#0070F3] hover:text-blue-400 flex items-center gap-2 transition-colors font-medium">
                 <i class="fa-solid fa-pen"></i> Editar búsqueda
@@ -36,6 +41,44 @@
             <form method="GET" action="index.php">
                 <input type="hidden" name="action" value="reserva">
                 
+                <div class="mb-6">
+                    <h3 class="text-sm font-bold text-[#0A192F] text-center mb-3">Ruta de vuelo</h3>
+                    <?php 
+                        $origenSel = isset($_GET['origen']) ? $_GET['origen'] : '';
+                        $destinoSel = isset($_GET['destino']) ? $_GET['destino'] : '';
+                        $opciones = ['Lima', 'Cusco', 'Arequipa', 'Bogotá', 'Madrid', 'París'];
+                    ?>
+                    
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Origen</label>
+                            <select name="origen" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:outline-none focus:border-[#0070F3] bg-white">
+                                <option value="">Todos</option>
+                                <?php foreach($opciones as $op): ?>
+                                    <option value="<?php echo $op; ?>" <?php echo (stripos($origenSel, $op) !== false) ? 'selected' : ''; ?>><?php echo $op; ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Destino</label>
+                            <select name="destino" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:outline-none focus:border-[#0070F3] bg-white">
+                                <option value="">Todos</option>
+                                <?php foreach($opciones as $op): ?>
+                                    <option value="<?php echo $op; ?>" <?php echo (stripos($destinoSel, $op) !== false) ? 'selected' : ''; ?>><?php echo $op; ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 mb-1">Pasajeros</label>
+                            <input type="number" name="pasajeros" min="1" value="<?php echo htmlspecialchars($pasajeros); ?>" class="w-full px-3 py-2 text-sm rounded-lg border border-gray-300 focus:outline-none focus:border-[#0070F3] bg-white">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="w-full h-px bg-gray-100 my-6"></div>
+
                 <div class="mb-8">
                     <h3 class="text-sm font-bold text-[#0A192F] text-center mb-4">Precio máximo</h3>
                     <?php $currentPrice = isset($_GET['max_price']) ? $_GET['max_price'] : 4000; ?>
@@ -151,9 +194,18 @@
                                 <p class="text-2xl font-extrabold text-[#0A192F] precio-base" data-precio="<?php echo $vuelo['price']; ?>">S/. <?php echo $vuelo['price']; ?></p>
                                 <p class="text-xs text-gray-500">por persona</p>
                             </div>
-                            <button type="button" class="w-full bg-[#0070F3] hover:bg-[#0051CC] text-white py-2.5 rounded-xl font-bold transition-all shadow-md flex items-center justify-center gap-2 group">
-                                Reservar <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                            </button>
+                            <form action="index.php" method="POST" class="w-full">
+                                <input type="hidden" name="action" value="checkout">
+                                <input type="hidden" name="flight_id" value="<?php echo $vuelo['id']; ?>">
+                                <input type="hidden" name="pasajeros" class="input-pasajeros" value="<?php echo $pasajeros; ?>">
+                                <input type="hidden" name="origen" value="<?php echo $origen; ?>">
+                                <input type="hidden" name="destino" value="<?php echo $destino; ?>">
+                                <input type="hidden" name="tipo_viaje" value="<?php echo htmlspecialchars($data['tipo_viaje'] ?? 'solo_ida'); ?>">
+                                <input type="hidden" name="fecha_retorno" value="<?php echo htmlspecialchars($data['fecha_retorno'] ?? ''); ?>">
+                                <button type="submit" class="w-full bg-[#0070F3] hover:bg-[#0051CC] text-white py-2.5 rounded-xl font-bold transition-all shadow-md flex items-center justify-center gap-2 group">
+                                    Reservar <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                                </button>
+                            </form>
                         </div>
                     </div>
                     <?php endforeach; ?>
@@ -193,6 +245,12 @@
             const pPrecio = tarjeta.querySelector('.precio-base');
             const precioBase = parseInt(pPrecio.getAttribute('data-precio'));
             pPrecio.innerText = `S/. ${precioBase * cantidad}`;
+
+            // Actualizamos el input oculto para que el checkout sepa cuántos pasajeros son
+            const inputPasajeros = tarjeta.querySelector('.input-pasajeros');
+            if(inputPasajeros) {
+                inputPasajeros.value = cantidad;
+            }
         }
     }
 </script>

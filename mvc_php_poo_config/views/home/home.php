@@ -1,5 +1,5 @@
 <main>
-    <section class="relative bg-[url('https://images.unsplash.com/photo-1449844908441-8829872d2607?auto=format&fit=crop&w=2070&q=80')] bg-cover bg-center h-[600px] flex flex-col justify-center items-center">
+    <section id="hero-section" class="relative bg-cover bg-center h-[600px] flex flex-col justify-center items-center transition-all duration-1000" style="background-image: url('assets/img/hero_paris.png');">
         <div class="absolute inset-0 bg-black/40"></div>
 
         <div class="relative z-10 text-center text-white px-4 mt-[-100px]">
@@ -38,36 +38,83 @@
                 </form>
 
                 <!-- Formulario Clásico -->
-                <form id="form-clasica" method="GET" action="index.php" class="hidden flex-col md:flex-row gap-4">
+                <form id="form-clasica" method="GET" action="index.php" class="hidden flex-col gap-4">
                     <input type="hidden" name="action" value="reserva">
                     
-                    <div class="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"><i class="fa-solid fa-plane-departure"></i></span>
-                            <input type="text" name="origen" required placeholder="Origen (Ej. Lima)" class="w-full pl-10 pr-4 py-4 rounded-xl border border-gray-300 focus:outline-none focus:border-[#0070F3] focus:ring-1 focus:ring-[#0070F3] transition-all">
-                        </div>
-                        <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"><i class="fa-solid fa-plane-arrival"></i></span>
-                            <input type="text" name="destino" required placeholder="Destino (Ej. París)" class="w-full pl-10 pr-4 py-4 rounded-xl border border-gray-300 focus:outline-none focus:border-[#0070F3] focus:ring-1 focus:ring-[#0070F3] transition-all">
-                        </div>
-                        <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"><i class="fa-solid fa-calendar"></i></span>
-                            <input type="text" name="fecha" required placeholder="Fecha (Ej. 25 Jul)" class="w-full pl-10 pr-4 py-4 rounded-xl border border-gray-300 focus:outline-none focus:border-[#0070F3] focus:ring-1 focus:ring-[#0070F3] transition-all">
-                        </div>
-                        <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"><i class="fa-solid fa-users"></i></span>
-                            <input type="number" name="pasajeros" min="1" value="1" required class="w-full pl-10 pr-4 py-4 rounded-xl border border-gray-300 focus:outline-none focus:border-[#0070F3] focus:ring-1 focus:ring-[#0070F3] transition-all">
-                        </div>
+                    <!-- Toggle Tipo de Viaje -->
+                    <div class="flex items-center gap-4 mb-2">
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="radio" name="tipo_viaje" value="ida_vuelta" checked class="w-4 h-4 accent-[#0070F3]" onchange="toggleRetorno(this.value)">
+                            <span class="text-sm font-bold text-[#0A192F] group-hover:text-[#0070F3] transition-colors">Ida y vuelta</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="radio" name="tipo_viaje" value="solo_ida" class="w-4 h-4 accent-[#0070F3]" onchange="toggleRetorno(this.value)">
+                            <span class="text-sm font-bold text-gray-500 group-hover:text-[#0070F3] transition-colors">Solo ida</span>
+                        </label>
                     </div>
+                    
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="relative md:col-span-1">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"><i class="fa-solid fa-plane-departure"></i></span>
+                                <select name="origen" required class="w-full pl-10 pr-4 py-4 rounded-xl border border-gray-300 focus:outline-none focus:border-[#0070F3] focus:ring-1 focus:ring-[#0070F3] transition-all appearance-none bg-white">
+                                    <option value="" disabled selected>Origen</option>
+                                    <option value="Lima">Lima (LIM)</option>
+                                    <option value="Cusco">Cusco (CUZ)</option>
+                                    <option value="Arequipa">Arequipa (AQP)</option>
+                                    <option value="Bogotá">Bogotá (BOG)</option>
+                                    <option value="Madrid">Madrid (MAD)</option>
+                                    <option value="París">París (CDG)</option>
+                                </select>
+                                <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-xs"></i>
+                            </div>
+                            <div class="relative md:col-span-1">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"><i class="fa-solid fa-plane-arrival"></i></span>
+                                <select name="destino" required class="w-full pl-10 pr-4 py-4 rounded-xl border border-gray-300 focus:outline-none focus:border-[#0070F3] focus:ring-1 focus:ring-[#0070F3] transition-all appearance-none bg-white">
+                                    <option value="" disabled selected>Destino</option>
+                                    <option value="Lima">Lima (LIM)</option>
+                                    <option value="Cusco">Cusco (CUZ)</option>
+                                    <option value="Arequipa">Arequipa (AQP)</option>
+                                    <option value="Bogotá">Bogotá (BOG)</option>
+                                    <option value="Madrid">Madrid (MAD)</option>
+                                    <option value="París">París (CDG)</option>
+                                </select>
+                                <i class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-xs"></i>
+                            </div>
+                            <div class="relative md:col-span-1">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"><i class="fa-solid fa-calendar"></i></span>
+                                <input type="text" name="rango_fechas" id="rango_fechas" required placeholder="Fechas de viaje" class="w-full pl-10 pr-4 py-4 rounded-xl border border-gray-300 focus:outline-none focus:border-[#0070F3] focus:ring-1 focus:ring-[#0070F3] transition-all bg-white text-gray-700 bg-white">
+                            </div>
+                            <div class="relative md:col-span-1">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"><i class="fa-solid fa-users"></i></span>
+                                <input type="number" name="pasajeros" min="1" value="1" required class="w-full pl-10 pr-4 py-4 rounded-xl border border-gray-300 focus:outline-none focus:border-[#0070F3] focus:ring-1 focus:ring-[#0070F3] transition-all">
+                            </div>
+                        </div>
 
-                    <button type="submit" class="bg-[#0070F3] hover:bg-[#0051CC] text-white px-10 py-4 rounded-xl font-bold text-lg transition-all shadow-md">
-                        Buscar
-                    </button>
+                        <button type="submit" class="bg-[#0070F3] hover:bg-[#0051CC] text-white px-10 py-4 rounded-xl font-bold text-lg transition-all shadow-md shrink-0">
+                            Buscar
+                        </button>
+                    </div>
                 </form>
 
                 <p id="tip-text" class="text-center text-xs text-gray-400 mt-4"><i class="fa-regular fa-lightbulb text-yellow-500"></i> Tip: dile a la IA tu destino, fechas y número de personas</p>
 
                 <script>
+                    const backgrounds = [
+                        'assets/img/hero_paris.png',
+                        'assets/img/hero_peru.png',
+                        'assets/img/hero_maldives.png'
+                    ];
+                    let currentBg = 0;
+                    setInterval(() => {
+                        currentBg = (currentBg + 1) % backgrounds.length;
+                        document.getElementById('hero-section').style.backgroundImage = `url('${backgrounds[currentBg]}')`;
+                    }, 5000);
+                </script>
+
+                <script>
+                    let fpInstance = null;
+
                     function cambiarTab(tab) {
                         const formIa = document.getElementById('form-ia');
                         const formClasica = document.getElementById('form-clasica');
@@ -99,6 +146,39 @@
                             tipText.innerHTML = '<i class="fa-regular fa-lightbulb text-yellow-500"></i> Tip: Selecciona tus fechas y origen/destino manualmente';
                         }
                     }
+
+                    function toggleRetorno(valor) {
+                        const inputFechas = document.getElementById('rango_fechas');
+                        
+                        if (fpInstance) {
+                            fpInstance.destroy(); // Destruimos la instancia vieja
+                        }
+
+                        // Recreamos Flatpickr dependiendo del modo
+                        if (valor === 'ida_vuelta') {
+                            fpInstance = flatpickr(inputFechas, {
+                                mode: "range",
+                                locale: "es",
+                                minDate: "today",
+                                dateFormat: "Y-m-d",
+                                placeholder: "Ida y Vuelta"
+                            });
+                        } else {
+                            fpInstance = flatpickr(inputFechas, {
+                                mode: "single",
+                                locale: "es",
+                                minDate: "today",
+                                dateFormat: "Y-m-d",
+                                placeholder: "Fecha de Ida"
+                            });
+                        }
+                    }
+                    
+                    // Inicializar
+                    document.addEventListener('DOMContentLoaded', () => {
+                        const selectedRadio = document.querySelector('input[name="tipo_viaje"]:checked');
+                        if(selectedRadio) toggleRetorno(selectedRadio.value);
+                    });
                 </script>
             </div>
         </div>
