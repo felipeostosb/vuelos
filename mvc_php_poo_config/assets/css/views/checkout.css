@@ -1,0 +1,199 @@
+/* PAGE LAYOUT */
+.checkout-page {
+    background-color: #F9FAFB;
+    min-height: 100vh;
+    padding: 3rem 0;
+}
+
+.checkout-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+.checkout-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.checkout-title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #0A192F;
+    margin-bottom: 0.5rem;
+}
+
+.checkout-subtitle {
+    color: #6B7280;
+}
+
+/* CARDS */
+.summary-card, .passenger-card {
+    background-color: white;
+    border-radius: 1rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    border: 1px solid #F3F4F6;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.summary-header {
+    background-color: #EAF4FF;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #DBEAFE;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.summary-header-title {
+    font-weight: 700;
+    color: #0A192F;
+    margin: 0;
+}
+
+.badge-roundtrip {
+    background-color: #0070F3;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+}
+
+.badge-oneway {
+    background-color: #E5E7EB;
+    color: #374151;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+}
+
+.summary-content {
+    padding: 1.5rem;
+}
+
+.flight-overview {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    justify-content: space-between;
+    align-items: center;
+}
+
+@media (min-width: 768px) {
+    .flight-overview {
+        flex-direction: row;
+    }
+}
+
+.airline-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.time-overview {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    text-align: center;
+}
+
+.time-overview-arrow {
+    color: #9CA3AF;
+}
+
+.summary-footer {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #F3F4F6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.summary-passengers {
+    color: #4B5563;
+    font-weight: 500;
+}
+
+.summary-total {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #0A192F;
+}
+
+/* PASSENGER CARD */
+.passenger-header {
+    background-color: #F9FAFB;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #F3F4F6;
+}
+
+.passenger-header-title {
+    font-weight: 700;
+    color: #0A192F;
+    margin: 0;
+}
+
+.passenger-content {
+    padding: 1.5rem;
+}
+
+/* FORMS */
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+@media (min-width: 768px) {
+    .form-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #0A192F;
+    margin-bottom: 0.5rem;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid #D1D5DB;
+    transition: all 0.3s;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #0070F3;
+    box-shadow: 0 0 0 1px #0070F3;
+}
+
+.btn-checkout {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.security-notice {
+    text-align: center;
+    font-size: 0.75rem;
+    color: #9CA3AF;
+    margin-top: 1rem;
+}

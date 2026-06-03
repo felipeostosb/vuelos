@@ -18,6 +18,14 @@
     <!-- Layout CSS -->
     <link rel="stylesheet" href="assets/css/layout/header.css">
     <link rel="stylesheet" href="assets/css/layout/footer.css">
+    
+    <!-- Views CSS -->
+    <link rel="stylesheet" href="assets/css/views/home.css">
+    <link rel="stylesheet" href="assets/css/views/reserva.css">
+    <link rel="stylesheet" href="assets/css/views/checkout.css">
+    <link rel="stylesheet" href="assets/css/views/panel.css">
+    <link rel="stylesheet" href="assets/css/views/checkin.css">
+    
     <!-- Flatpickr Date Picker -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
