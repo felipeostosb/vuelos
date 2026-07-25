@@ -1,0 +1,22 @@
+# Archivos de entorno y configuración secreta
+.env
+
+# Archivos de sistema operativo y editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Archivos temporales y de logs
+*.log
+/logs/
+/temp/
+/tmp/
+
+# Dependencias (si usas composer más adelante)
+/vendor/

@@ -80,7 +80,7 @@
                         <div class="user-menu__dropdown">
                             <div class="dropdown__content">
                                 <a href="?action=panel" class="dropdown__item"><i class="fa-solid fa-suitcase-rolling w-5"></i> Mis Viajes</a>
-                                <a href="?action=formulario" class="dropdown__item"><i class="fa-solid fa-user w-5"></i> Mi Perfil</a>
+                                <a href="#" class="dropdown__item"><i class="fa-solid fa-user w-5"></i> Mi Perfil</a>
                                 <div class="dropdown__divider"></div>
                                 <a href="?action=logout" class="dropdown__item dropdown__item--danger"><i class="fa-solid fa-sign-out-alt w-5"></i> Cerrar sesión</a>
                             </div>
@@ -95,6 +95,46 @@
 
         </div>
     </header>
+
+    <!-- Notificaciones / Alertas Globales -->
+    <div id="toast-container" class="fixed top-24 right-5 z-[110] flex flex-col gap-2">
+        <?php if(isset($_GET['login']) && $_GET['login'] == 'error'): ?>
+            <div class="bg-red-500 text-white px-6 py-4 rounded-xl shadow-lg font-bold flex items-center gap-3 animate-[slideInRight_0.3s_ease-out]">
+                <i class="fa-solid fa-circle-exclamation text-xl"></i>
+                Credenciales incorrectas
+            </div>
+            <script>setTimeout(() => abrirLogin(), 500);</script>
+        <?php endif; ?>
+        
+        <?php if(isset($_GET['registro']) && $_GET['registro'] == 'success'): ?>
+            <div class="bg-green-500 text-white px-6 py-4 rounded-xl shadow-lg font-bold flex items-center gap-3 animate-[slideInRight_0.3s_ease-out]">
+                <i class="fa-solid fa-check-circle text-xl"></i>
+                ¡Cuenta creada y sesión iniciada!
+            </div>
+        <?php endif; ?>
+
+        <?php if(isset($_GET['login']) && $_GET['login'] == 'success'): ?>
+            <div class="bg-blue-500 text-white px-6 py-4 rounded-xl shadow-lg font-bold flex items-center gap-3 animate-[slideInRight_0.3s_ease-out]">
+                <i class="fa-solid fa-check-circle text-xl"></i>
+                ¡Bienvenido de nuevo!
+            </div>
+        <?php endif; ?>
+
+        <?php if(isset($_GET['login']) && $_GET['login'] == 'required'): ?>
+            <div class="bg-yellow-500 text-white px-6 py-4 rounded-xl shadow-lg font-bold flex items-center gap-3 animate-[slideInRight_0.3s_ease-out]">
+                <i class="fa-solid fa-lock text-xl"></i>
+                Debes iniciar sesión para continuar
+            </div>
+            <script>setTimeout(() => abrirLogin(), 800);</script>
+        <?php endif; ?>
+    </div>
+
+    <style>
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {

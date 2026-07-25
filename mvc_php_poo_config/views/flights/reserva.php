@@ -4,11 +4,18 @@
         <div class="route-container">
             <div class="route-info">
                 <?php 
-                    $origen = isset($_GET['origen']) ? htmlspecialchars($_GET['origen']) : 'Lima';
-                    $destino = isset($_GET['destino']) ? htmlspecialchars($_GET['destino']) : 'Madrid';
-                    $fecha = isset($_GET['fecha']) ? htmlspecialchars($_GET['fecha']) : '25 Jul 2026';
+                    $origen = isset($_GET['origen']) ? htmlspecialchars($_GET['origen']) : 'Origen';
+                    $destino = isset($_GET['destino']) ? htmlspecialchars($_GET['destino']) : 'Destino';
+                    $fechas = isset($_GET['rango_fechas']) ? htmlspecialchars($_GET['rango_fechas']) : date('Y-m-d');
+                    
+                    // Split if it's a range "2026-07-25 to 2026-08-01"
+                    $fecha_partes = explode(' to ', $fechas);
+                    $fecha_ida = $fecha_partes[0];
+                    $fecha_vuelta = $fecha_partes[1] ?? '';
+                    
                     $pasajeros = isset($_GET['pasajeros']) ? htmlspecialchars($_GET['pasajeros']) : '1';
-                    $isRoundTrip = ($data['tipo_viaje'] ?? 'solo_ida') === 'ida_vuelta';
+                    $tipo_viaje = isset($_GET['tipo_viaje']) ? htmlspecialchars($_GET['tipo_viaje']) : 'solo_ida';
+                    $isRoundTrip = $tipo_viaje === 'ida_vuelta';
                 ?>
                 <span class="route-destinations">
                     <?php echo $origen; ?> 
@@ -16,7 +23,7 @@
                     <?php echo $destino; ?>
                 </span>
                 <span class="route-separator">·</span>
-                <span class="route-text"><?php echo $fecha; ?> <?php echo $isRoundTrip && !empty($data['fecha_retorno']) ? ' al ' . htmlspecialchars($data['fecha_retorno']) : ''; ?></span>
+                <span class="route-text"><?php echo $fecha_ida; ?> <?php echo $isRoundTrip && !empty($fecha_vuelta) ? ' al ' . htmlspecialchars($fecha_vuelta) : ''; ?></span>
                 <span class="route-separator">·</span>
                 <span class="route-text"><?php echo $pasajeros; ?> pasajero(s) <?php echo $isRoundTrip ? '<span class="ml-2 bg-[#0070F3] text-white px-2 py-0.5 rounded-full text-xs">Ida y Vuelta</span>' : ''; ?></span>
             </div>
@@ -51,7 +58,7 @@
                     <?php 
                         $origenSel = isset($_GET['origen']) ? $_GET['origen'] : '';
                         $destinoSel = isset($_GET['destino']) ? $_GET['destino'] : '';
-                        $opciones = ['Lima', 'Cusco', 'Arequipa', 'Bogotá', 'Madrid', 'París'];
+                        $opciones = isset($vueloModel) ? $vueloModel->obtenerFiltrosDestinos() : [];
                     ?>
                     
                     <div class="filter-input-group">
@@ -120,9 +127,9 @@
 
                 <div class="filter-section">
                     <h3 class="filter-subtitle">Aerolíneas</h3>
-                    <?php 
-                        $airlines = isset($_GET['airlines']) ? $_GET['airlines'] : ['Copa Airlines', 'Avianca', 'LATAM Airlines', 'Iberia']; 
-                        $available_airlines = ['Copa Airlines', 'Avianca', 'LATAM Airlines', 'Iberia'];
+                    <?php
+                        $available_airlines = isset($vueloModel) ? $vueloModel->obtenerFiltrosAerolineas() : [];
+                        $airlines = isset($_GET['airlines']) ? $_GET['airlines'] : $available_airlines; 
                     ?>
                     <div class="filter-input-group">
                         <?php 

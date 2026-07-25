@@ -54,17 +54,19 @@
                     </div>
                     
                     <div class="search-fields-container">
+                        <?php
+                            require_once 'models/Vuelo.php';
+                            $vueloModel = new Vuelo();
+                            $opciones = $vueloModel->obtenerFiltrosDestinos();
+                        ?>
                         <div class="search-grid">
                             <div class="input-container">
                                 <span class="input-icon-left"><i class="fa-solid fa-plane-departure"></i></span>
                                 <select name="origen" required class="search-input">
                                     <option value="" disabled selected>Origen</option>
-                                    <option value="Lima">Lima (LIM)</option>
-                                    <option value="Cusco">Cusco (CUZ)</option>
-                                    <option value="Arequipa">Arequipa (AQP)</option>
-                                    <option value="Bogotá">Bogotá (BOG)</option>
-                                    <option value="Madrid">Madrid (MAD)</option>
-                                    <option value="París">París (CDG)</option>
+                                    <?php foreach ($opciones as $op): ?>
+                                        <option value="<?php echo htmlspecialchars($op); ?>"><?php echo htmlspecialchars($op); ?></option>
+                                    <?php endforeach; ?>
                                 </select>
                                 <i class="fa-solid fa-chevron-down input-icon-right"></i>
                             </div>
@@ -72,12 +74,9 @@
                                 <span class="input-icon-left"><i class="fa-solid fa-plane-arrival"></i></span>
                                 <select name="destino" required class="search-input">
                                     <option value="" disabled selected>Destino</option>
-                                    <option value="Lima">Lima (LIM)</option>
-                                    <option value="Cusco">Cusco (CUZ)</option>
-                                    <option value="Arequipa">Arequipa (AQP)</option>
-                                    <option value="Bogotá">Bogotá (BOG)</option>
-                                    <option value="Madrid">Madrid (MAD)</option>
-                                    <option value="París">París (CDG)</option>
+                                    <?php foreach ($opciones as $op): ?>
+                                        <option value="<?php echo htmlspecialchars($op); ?>"><?php echo htmlspecialchars($op); ?></option>
+                                    <?php endforeach; ?>
                                 </select>
                                 <i class="fa-solid fa-chevron-down input-icon-right"></i>
                             </div>
@@ -236,108 +235,61 @@
         <h2 class="section-title" style="margin-bottom: 0.5rem;">Ofertas y promociones</h2>
         <p class="section-subtitle">Precios actualizados por IA cada hora</p>
         
+        <?php
+            if (!isset($vueloModel)) {
+                $vueloModel = new Vuelo();
+            }
+            $todos = $vueloModel->obtenerTodos();
+            $ofertas_home = array_filter($todos, function($v) {
+                return (bool)$v['es_mejor_precio'];
+            });
+            $ofertas_home = array_slice($ofertas_home, 0, 3);
+        ?>
         <div class="cards-grid">
+            <?php foreach ($ofertas_home as $oferta): ?>
             <div class="card group">
-                <a href="?action=buscar&destino=Miami" class="card-image-wrapper">
-                    <img src="https://images.unsplash.com/photo-1552074284-5e88ef1aef18?auto=format&fit=crop&w=600&q=80" alt="Cancún" class="card-image">
+                <a href="?action=buscar&destino=<?php echo urlencode($oferta['destino_ciudad']); ?>" class="card-image-wrapper">
+                    <div class="h-full w-full bg-blue-50 flex items-center justify-center">
+                        <i class="fa-solid fa-fire text-5xl text-blue-300"></i>
+                    </div>
                     <span class="card-badge"><i class="fa-solid fa-fire"></i> HOT</span>
                 </a>
                 <div class="card-content">
                     <div>
-                        <h3 class="card-title">Lima → Cancún</h3>
-                        <p class="card-subtitle">Mañana · 1 escala</p>
+                        <h3 class="card-title"><?php echo htmlspecialchars($oferta['origen_nombre'] ?? 'LIM'); ?> → <?php echo htmlspecialchars($oferta['destino_ciudad']); ?></h3>
+                        <p class="card-subtitle">Con <?php echo htmlspecialchars($oferta['aerolinea_nombre']); ?></p>
                     </div>
                     <div class="card-footer">
                         <div>
                             <p class="card-price-label">desde</p>
-                            <p class="card-price-value">S/. 890</p>
+                            <p class="card-price-value">S/. <?php echo number_format($oferta['precio'], 2); ?></p>
                         </div>
-                        <a href="?action=buscar&destino=Miami" class="btn btn--primary">Reservar</a>
+                        <a href="?action=buscar&destino=<?php echo urlencode($oferta['destino_ciudad']); ?>" class="btn btn--primary">Reservar</a>
                     </div>
                 </div>
             </div>
-
-            <div class="card group">
-                <a href="?action=buscar&destino=Madrid" class="card-image-wrapper">
-                    <img src="https://images.unsplash.com/photo-1543783207-ec64e4d95325?auto=format&fit=crop&w=600&q=80" alt="Madrid" class="card-image">
-                    <span class="card-badge" style="background-color: #0070F3;"><i class="fa-regular fa-calendar-days"></i> Temporada</span>
-                </a>
-                <div class="card-content">
-                    <div>
-                        <h3 class="card-title">Lima → Madrid</h3>
-                        <p class="card-subtitle">Jul–Sep</p>
-                    </div>
-                    <div class="card-footer">
-                        <div>
-                            <p class="card-price-label">desde</p>
-                            <p class="card-price-value">S/. 2,100</p>
-                        </div>
-                        <a href="?action=buscar&destino=Madrid" class="btn btn--primary">Reservar</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card group">
-                <a href="?action=buscar&destino=París" class="card-image-wrapper">
-                    <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=600&q=80" alt="París" class="card-image">
-                    <span class="card-badge" style="background-color: #0A192F;"><i class="fa-solid fa-globe"></i> Especial</span>
-                </a>
-                <div class="card-content">
-                    <div>
-                        <h3 class="card-title">Especial Europa</h3>
-                        <p class="card-subtitle">Madrid · París · Roma</p>
-                    </div>
-                    <div class="card-footer">
-                        <div>
-                            <p class="card-price-label">desde</p>
-                            <p class="card-price-value">S/. 3,450</p>
-                        </div>
-                        <a href="?action=buscar&destino=París" class="btn btn--primary">Reservar</a>
-                    </div>
-                </div>
-            </div>
+            <?php endforeach; ?>
         </div>
     </section>
 
     <section class="section-container">
         <h2 class="section-title">Destinos populares</h2>
-        
+        <?php
+            $destinos_populares = array_slice($opciones, 0, 4); // Usar los 4 primeros de la BD
+        ?>
         <div class="cards-grid cards-grid--4">
+            <?php foreach ($destinos_populares as $destino_pop): ?>
             <div class="popular-card group">
-                <img src="https://images.unsplash.com/photo-1587595431973-160d0d94add1?auto=format&fit=crop&w=600&q=80" alt="Cusco" class="card-image">
+                <div class="h-full w-full bg-gray-200 flex items-center justify-center card-image">
+                    <i class="fa-solid fa-map-location-dot text-6xl text-gray-400 group-hover:scale-110 transition-transform duration-500"></i>
+                </div>
                 <div class="popular-card-overlay"></div>
                 <div class="popular-card-content">
-                    <h3 class="popular-card-title">Cusco</h3>
-                    <p class="popular-card-subtitle">Vuelos desde S/. 120</p>
+                    <h3 class="popular-card-title"><?php echo htmlspecialchars($destino_pop); ?></h3>
+                    <a href="?action=buscar&destino=<?php echo urlencode($destino_pop); ?>" class="text-white hover:underline text-sm font-medium mt-1 inline-block">Ver vuelos</a>
                 </div>
             </div>
-            
-            <div class="popular-card group">
-                <img src="assets/img/bogota.png" alt="Bogotá" class="card-image">
-                <div class="popular-card-overlay"></div>
-                <div class="popular-card-content">
-                    <h3 class="popular-card-title">Bogotá</h3>
-                    <p class="popular-card-subtitle">Vuelos desde S/. 450</p>
-                </div>
-            </div>
-
-            <div class="popular-card group">
-                <img src="https://images.unsplash.com/photo-1543783207-ec64e4d95325?auto=format&fit=crop&w=600&q=80" alt="Madrid" class="card-image">
-                <div class="popular-card-overlay"></div>
-                <div class="popular-card-content">
-                    <h3 class="popular-card-title">Madrid</h3>
-                    <p class="popular-card-subtitle">Vuelos directos diarios</p>
-                </div>
-            </div>
-
-            <div class="popular-card group">
-                <img src="assets/img/arequipa.png" alt="Arequipa" class="card-image">
-                <div class="popular-card-overlay"></div>
-                <div class="popular-card-content">
-                    <h3 class="popular-card-title">Arequipa</h3>
-                    <p class="popular-card-subtitle">Vuelos desde S/. 110</p>
-                </div>
-            </div>
+            <?php endforeach; ?>
         </div>
     </section>
 

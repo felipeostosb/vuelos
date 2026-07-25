@@ -64,11 +64,40 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label class="form-label">Nombre completo</label>
-                            <input type="text" name="nombre" required placeholder="Ej: Ana María García" class="form-input">
+                            <input type="text" name="nombre" required placeholder="Ej: Ana María García" class="form-input" value="<?php echo isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : ''; ?>">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Correo electrónico</label>
-                            <input type="email" name="email" required placeholder="tu@email.com" class="form-input">
+                            <input type="email" name="email" required placeholder="tu@email.com" class="form-input" value="<?php echo isset($_SESSION['user_email']) ? htmlspecialchars($_SESSION['user_email']) : ''; ?>">
+                        </div>
+                    </div>
+
+                    <div class="payment-section mt-8 pt-6 border-t border-gray-200">
+                        <h3 class="text-lg font-bold text-[#0A192F] mb-4"><i class="fa-regular fa-credit-card text-[#0070F3] mr-2"></i> Método de Pago</h3>
+                        
+                        <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                            <div class="mb-4">
+                                <label class="form-label">Número de Tarjeta</label>
+                                <div class="relative">
+                                    <input type="text" placeholder="0000 0000 0000 0000" class="form-input pl-10" required maxlength="19">
+                                    <i class="fa-brands fa-cc-visa absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl"></i>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="form-label">Vencimiento (MM/AA)</label>
+                                    <input type="text" placeholder="12/28" class="form-input" required maxlength="5">
+                                </div>
+                                <div>
+                                    <label class="form-label">CVC</label>
+                                    <input type="password" placeholder="123" class="form-input" required maxlength="4">
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <label class="form-label">Nombre en la tarjeta</label>
+                                <input type="text" placeholder="Como aparece en la tarjeta" class="form-input" required>
+                            </div>
                         </div>
                     </div>
 

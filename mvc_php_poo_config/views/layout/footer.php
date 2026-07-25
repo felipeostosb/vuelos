@@ -101,7 +101,7 @@
         <!-- Registro -->
         <div class="text-center text-sm">
             <span class="text-gray-500">¿No tienes cuenta?</span> 
-            <a href="?action=formulario" class="text-[#0070F3] font-bold hover:underline">Regístrate gratis</a>
+            <a href="?action=registro" class="text-[#0070F3] font-bold hover:underline">Regístrate gratis</a>
         </div>
 
     </div>

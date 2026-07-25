@@ -3,28 +3,22 @@ session_start();
 
 /**
  * 👨‍🍳 ============================================================================================== 👨‍🍳
- * EL MOSTRADOR PRINCIPAL: index.php
+ * EL MOSTRADOR PRINCIPAL: index.php (VERSIÓN BASE DE DATOS)
  * 👨‍🍳 ============================================================================================== 👨‍🍳
  * 
- * 💖 BIENVENIDO A LA ENTRADA DE TU RESTAURANTE:
- * Imagina que este archivo es el mostrador de entrada o el "Host" de tu restaurante.
- * ABSOLUTAMENTE TODOS los clientes (las páginas que alguien quiere ver) pasan por aquí primero.
- * 
- * 1. Lo primero que hace el host es ir a la cocina y traer la "Pizarra del Menú" (datos.php).
- * 2. Luego, le pregunta al cliente: "¿A qué mesa quieres ir?" (Leyendo $_GET['action']).
- * 3. Dependiendo de lo que diga el cliente, el host (usando un condicional SWITCH)
- *    lo acompaña a la zona correcta, mostrándole el archivo visual correspondiente.
- * 
- * Todo es directo y en orden. Sin magia, sin "clases", sin complicaciones.
+ * Ahora nuestro restaurante tiene un sistema de inventario real (Base de Datos) 
+ * y usa "Modelos" (POO) para acceder a los datos.
  * ==============================================================================================
  */
 
-// 📋 PASO 1: TRAER LA PIZARRA DEL MENÚ
-// 'require_once' le dice a PHP: "Ve y trae todo lo que está escrito en datos.php, lo necesitamos".
-require_once 'datos.php';
+// 📋 Cargamos nuestros Modelos
+require_once 'models/Usuario.php';
+require_once 'models/Vuelo.php';
+require_once 'models/Reserva.php';
+require_once 'models/GeminiAPI.php';
+require_once 'models/DuffelAPI.php';
 
-// 🗣️ PASO 2: ESCUCHAR LO QUE QUIERE EL CLIENTE
-// Leemos la acción tanto si viene por la URL ($_GET) como por un formulario oculto ($_POST)
+// 🗣️ ESCUCHAR LO QUE QUIERE EL CLIENTE
 if (isset($_GET['action'])) {
     $peticion = $_GET['action'];
 } elseif (isset($_POST['action'])) {
@@ -33,15 +27,12 @@ if (isset($_GET['action'])) {
     $peticion = 'home'; // Valor por defecto
 }
 
-// 🚦 PASO 3: EL HOST DIRIGE AL CLIENTE (EL ENRUTADOR)
-// El 'switch' es como un semáforo de múltiples vías o un guardia de seguridad.
-// Compara la variable $peticion con cada 'case' y cuando encuentra el que coincide, ejecuta ese bloque.
+// 🚦 EL HOST DIRIGE AL CLIENTE (EL ENRUTADOR)
 switch ($peticion) {
     // ---------------------------------------------------------
-    // ZONA PÚBLICA (El Salón Principal)
+    // ZONA PÚBLICA
     // ---------------------------------------------------------
     case 'home':
-        // Si pidieron 'home', mostramos la cabecera, la página de inicio y el pie de página.
         include 'views/layout/header.php';
         include 'views/home/home.php';
         include 'views/layout/footer.php';
@@ -70,64 +61,81 @@ switch ($peticion) {
         include 'views/user/checkin.php';
         include 'views/layout/footer.php';
         break;
+        
+    case 'registro':
+        include 'views/layout/header.php';
+        include 'views/user/registro.php';
+        include 'views/layout/footer.php';
+        break;
+
+    case 'procesarRegistro':
+        $nombre = $_POST['nombre'] ?? '';
+        $email = $_POST['email'] ?? '';
+        $password = $_POST['password'] ?? '';
+        
+        $usuarioModel = new Usuario();
+        if ($usuarioModel->registrar($nombre, $email, $password)) {
+            // Auto login after registration
+            $_SESSION['user_id'] = $usuarioModel->login($email, $password)['id'] ?? null;
+            $_SESSION['user_name'] = $nombre;
+            $_SESSION['user_email'] = $email;
+            header('Location: index.php?action=home&registro=success');
+        } else {
+            header('Location: index.php?action=registro&registro=error');
+        }
+        exit();
+        break;
 
     // ---------------------------------------------------------
-    // ZONA DE RESERVAS (Tomando la Orden)
+    // ZONA DE RESERVAS
     // ---------------------------------------------------------
     case 'buscar':
-        // 🧑‍🍳 EL MESERO TOMA TU ORDEN (Buscar Vuelo)
-        // Guardamos los datos que nos diste en el buscador (puede venir por GET o simulado por IA)
         $origen = $_GET['origen'] ?? '';
         $destino = $_GET['destino'] ?? '';
+        $query_ia = $_GET['query'] ?? '';
+        
+        $vueloModel = new Vuelo();
         
         // Si usaron la Búsqueda Inteligente (IA)
-        if (isset($_GET['query']) && !empty($_GET['query'])) {
-            // Simulamos que la IA extrajo el destino 'París' del texto
-            $destino = 'París'; 
-            $origen = 'Lima';
-        }
-        
-        $vuelos_encontrados = [];
-        
-        // El mesero lee toda la pizarra (todos los vuelos)
-        for ($i = 0; $i < count($menu_vuelos); $i++) {
-            $vuelo = $menu_vuelos[$i];
-            // Si el destino del vuelo es igual al que pidió el cliente...
-            // (Si no puso destino, mostramos todos)
-            if ($vuelo['arrival_airport'] == $destino || $destino == '') {
-                $vuelos_encontrados[] = $vuelo; // Lo anota en la libreta
+        if (!empty($query_ia)) {
+            $geminiAPI = new GeminiAPI();
+            // Interpretar y guardar la consulta
+            $destino_extraido = $geminiAPI->interpretarBusqueda($query_ia, $_SESSION['user_id'] ?? null);
+            if (!empty($destino_extraido)) {
+                $destino = $destino_extraido;
             }
         }
         
-        // Le pasamos la libreta con los resultados a la página de reservas
+        // Buscar vuelos tradicionales en nuestra base de datos
+        $vuelos_encontrados = $vueloModel->buscarTradicional($destino);
+        
+        // [FUTURO]: Aquí se integrará la llamada a DuffelAPI para unir los vuelos en tiempo real 
+        // a la variable $vuelos_encontrados
+        
         include 'views/layout/header.php';
         include 'views/flights/reserva.php';
         include 'views/layout/footer.php';
         break;
 
     case 'reserva':
-        // Aquí mostraremos los resultados de búsqueda de vuelos
         include 'views/layout/header.php';
         include 'views/flights/reserva.php';
         include 'views/layout/footer.php';
         break;
 
     case 'checkout':
-        // 💳 EL CAJERO PREPARA LA FACTURA (Checkout)
-        // El cliente seleccionó un plato (vuelo). Buscamos cuál es.
+        // Protección de ruta: Solo usuarios logueados pueden comprar
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: index.php?action=home&login=required');
+            exit();
+        }
+
         $id_vuelo_seleccionado = $_POST['flight_id'] ?? 1;
         $pasajeros = $_POST['pasajeros'] ?? 1;
         $tipo_viaje = $_POST['tipo_viaje'] ?? 'solo_ida';
         
-        $vuelo = null;
-        // Buscamos el vuelo en nuestro menú
-        for ($i = 0; $i < count($menu_vuelos); $i++) {
-            $v = $menu_vuelos[$i];
-            if ($v['id'] == $id_vuelo_seleccionado) {
-                $vuelo = $v;
-                break;
-            }
-        }
+        $vueloModel = new Vuelo();
+        $vuelo = $vueloModel->obtenerPorId($id_vuelo_seleccionado);
         
         include 'views/layout/header.php';
         include 'views/flights/checkout.php';
@@ -135,69 +143,61 @@ switch ($peticion) {
         break;
 
     case 'confirmarReserva':
-        // 🎉 EL CLIENTE PAGA Y GUARDAMOS LA RESERVA
         $id_vuelo = $_POST['flight_id'] ?? 1;
         $nombre_pasajero = $_POST['nombre'] ?? 'Pasajero Anónimo';
         
-        // Buscamos el vuelo para los detalles
-        $vuelo_reservado = null;
-        for ($i = 0; $i < count($menu_vuelos); $i++) {
-            $v = $menu_vuelos[$i];
-            if ($v['id'] == $id_vuelo) {
-                $vuelo_reservado = $v;
-                break;
-            }
-        }
+        // En una app real los calcularíamos, aquí lo simulamos
+        $pasajeros_count = $_POST['pasajeros'] ?? 1;
+        
+        $vueloModel = new Vuelo();
+        $vuelo = $vueloModel->obtenerPorId($id_vuelo);
+        $precio_total = $vuelo ? ($vuelo['price'] * $pasajeros_count) : 0;
         
         // Creamos un código de reserva aleatorio (PNR)
         $pnr = substr(str_shuffle("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"), 0, 6);
         
-        // Anotamos la reserva en nuestro libro (Sesión)
-        // Guardamos los datos exactamente como los espera el panel.
-        $_SESSION['reservas'][] = [
-            'pnr' => $pnr,
-            'vuelo' => $vuelo_reservado,
-            'pasajero_nombre' => $nombre_pasajero,
-            'estado' => 'Confirmada',
-            'fecha_reserva' => date('Y-m-d H:i:s')
-        ];
+        // Si el usuario era invitado, le damos un ID temporal para la base de datos local
+        // Nota: En producción deberías crear un usuario "guest" o forzar registro
+        $usuario_id = $_SESSION['user_id'] ?? 2; // Asignamos al usuario ID 2 (Juan Pérez) como fallback
         
-        // Si el usuario era invitado, le damos una cuenta temporal para que pueda ver su panel
-        if (!isset($_SESSION['user_id'])) {
-            $_SESSION['user_id'] = 999;
-            $_SESSION['user_name'] = $nombre_pasajero;
+        $reservaModel = new Reserva();
+        $reserva_id = $reservaModel->crearReserva($pnr, $usuario_id, $id_vuelo, $pasajeros_count, $precio_total);
+        
+        if ($reserva_id) {
+            // Separar nombre y apellido simple
+            $partes_nombre = explode(' ', $nombre_pasajero, 2);
+            $nombre = $partes_nombre[0];
+            $apellido = $partes_nombre[1] ?? '';
+            
+            $reservaModel->agregarPasajero($reserva_id, $nombre, $apellido);
         }
         
-        // Lo mandamos a su panel de viajes con un mensaje de éxito
-        header('Location: index.php?action=panel&success=1&pnr=' . $pnr);
+        // Lo mandamos a la pantalla de confirmación exitosa
+        header('Location: index.php?action=confirmacion&pnr=' . $pnr);
         exit();
         break;
 
+    case 'confirmacion':
+        include 'views/layout/header.php';
+        include 'views/flights/confirmacion.php';
+        include 'views/layout/footer.php';
+        break;
+
     // ---------------------------------------------------------
-    // ZONA PRIVADA (Login y Área de Clientes VIP)
+    // ZONA PRIVADA
     // ---------------------------------------------------------
     case 'login':
-        // 🏨 EL RECEPCIONISTA REVISA LA IDENTIFICACIÓN (Login)
-        // Tomamos lo que el cliente escribió en el formulario de la puerta.
         $email_ingresado = $_POST['email'] ?? '';
         $password_ingresada = $_POST['password'] ?? '';
         
-        $cliente_valido = false; // Asumimos que es un impostor hasta demostrar lo contrario
+        $usuarioModel = new Usuario();
+        $cliente = $usuarioModel->login($email_ingresado, $password_ingresada);
         
-        // El recepcionista lee nuestra pizarra (arreglo $clientes_vip) línea por línea
-        for ($i = 0; $i < count($clientes_vip); $i++) {
-            $cliente = $clientes_vip[$i];
-            if ($cliente['email'] == $email_ingresado && $cliente['password'] == $password_ingresada) {
-                // ¡Coincide! Le damos su pulsera VIP (Variables de Sesión)
-                $_SESSION['user_id'] = 1; // Un ID falso por ahora
-                $_SESSION['user_name'] = $cliente['nombre'];
-                $_SESSION['user_email'] = $cliente['email'];
-                $cliente_valido = true;
-                break; // Ya lo encontramos, dejamos de buscar en la pizarra
-            }
-        }
-        
-        if ($cliente_valido) {
+        if ($cliente) {
+            // ¡Coincide! Le damos su pulsera VIP
+            $_SESSION['user_id'] = $cliente['id'];
+            $_SESSION['user_name'] = $cliente['nombre'];
+            $_SESSION['user_email'] = $cliente['email'];
             header('Location: index.php?action=home&login=success');
         } else {
             header('Location: index.php?action=home&login=error');
@@ -206,20 +206,19 @@ switch ($peticion) {
         break;
 
     case 'logout':
-        // Aquí el cliente se va del restaurante. Destruimos su "sesión" (su ticket de visita).
         session_destroy();
-        header('Location: index.php?action=home'); // Lo regresamos a la calle (inicio)
+        header('Location: index.php?action=home');
         exit();
         break;
 
     case 'panel':
-        // Solo los que tienen sesión iniciada (ticket VIP) pueden ver esto
         if (!isset($_SESSION['user_id'])) {
             header('Location: index.php?action=home');
             exit();
         }
-        // El anfitrión saca la lista de reservas del cliente
-        $misReservas = $_SESSION['reservas'] ?? [];
+        
+        $reservaModel = new Reserva();
+        $misReservas = $reservaModel->obtenerReservasUsuario($_SESSION['user_id']);
         
         include 'views/layout/header.php';
         include 'views/user/panel.php';
@@ -227,30 +226,32 @@ switch ($peticion) {
         break;
 
     case 'procesarCheckin':
-        // 🎫 EL CLIENTE PIDE SU PASE DE ABORDAR
         $pnr_buscado = $_POST['pnr'] ?? '';
         
-        // Buscamos su reserva en la sesión y le cambiamos el estado
-        if (isset($_SESSION['reservas'])) {
-            for ($i = 0; $i < count($_SESSION['reservas']); $i++) {
-                $reserva = $_SESSION['reservas'][$i];
-                if ($reserva['pnr'] == $pnr_buscado) {
-                    $_SESSION['reservas'][$i]['estado'] = 'Checked-in';
-                    break;
-                }
+        $reservaModel = new Reserva();
+        // Allow checkin without user_id if they have the PNR (common in airlines)
+        // We pass 999 or handle it differently. The model currently accepts 999.
+        $usuario_id = $_SESSION['user_id'] ?? 999; 
+        
+        $resultado = $reservaModel->hacerCheckin($pnr_buscado, $usuario_id);
+        
+        if (isset($_SESSION['user_id'])) {
+            // If they are logged in, usually they check in from panel
+            header('Location: index.php?action=panel');
+        } else {
+            if ($resultado) {
+                 header('Location: index.php?action=checkin&success=1&pnr=' . urlencode($pnr_buscado));
+            } else {
+                 header('Location: index.php?action=checkin&error=1');
             }
         }
-        
-        // Lo mandamos de vuelta a su panel
-        header('Location: index.php?action=panel');
         exit();
         break;
 
     // ---------------------------------------------------------
-    // RUTA POR DEFECTO (Si piden algo que no existe)
+    // RUTA POR DEFECTO
     // ---------------------------------------------------------
     default:
-        // Si el cliente pide ir al baño de oro (algo que no existe), lo mandamos al inicio.
         header('Location: index.php?action=home');
         exit();
         break;

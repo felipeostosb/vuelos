@@ -8,68 +8,29 @@
     </section>
 
     <section class="max-w-[1560px] mx-auto px-12 mt-12">
+        <?php
+            require_once 'config/database.php';
+            $db = new Database();
+            $conn = $db->getConnection();
+            $stmt = $conn->query("SELECT * FROM aeropuertos ORDER BY pais, ciudad");
+            $aeropuertos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        ?>
+        
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            
+            <?php foreach ($aeropuertos as $aeropuerto): ?>
             <div class="bg-white rounded-2xl shadow-md overflow-hidden tarjeta-animada group">
-                <div class="h-48 overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80" alt="Playa" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                <div class="h-48 overflow-hidden bg-blue-100 flex items-center justify-center">
+                    <i class="fa-solid fa-map-location-dot text-6xl text-blue-300 group-hover:scale-110 transition-transform duration-500"></i>
                 </div>
-                <div class="p-8">
-                    <h3 class="text-xl font-bold text-[#0A2540] text-center mb-6">Playa</h3>
-                    <ul class="space-y-4">
-                        <li><a href="#" class="flex justify-between items-center text-[#0070F3] hover:text-blue-800 transition-colors text-sm font-medium"><span>Cancún</span> <span>→</span></a></li>
-                        <li><a href="#" class="flex justify-between items-center text-[#0070F3] hover:text-blue-800 transition-colors text-sm font-medium"><span>Punta Cana</span> <span>→</span></a></li>
-                        <li><a href="#" class="flex justify-between items-center text-[#0070F3] hover:text-blue-800 transition-colors text-sm font-medium"><span>Cartagena</span> <span>→</span></a></li>
-                        <li><a href="#" class="flex justify-between items-center text-[#0070F3] hover:text-blue-800 transition-colors text-sm font-medium"><span>Máncora</span> <span>→</span></a></li>
-                    </ul>
+                <div class="p-8 text-center">
+                    <h3 class="text-xl font-bold text-[#0A2540] mb-2"><?php echo htmlspecialchars($aeropuerto['ciudad']); ?></h3>
+                    <p class="text-gray-500 mb-6"><?php echo htmlspecialchars($aeropuerto['pais']); ?> (<?php echo htmlspecialchars($aeropuerto['codigo_iata']); ?>)</p>
+                    <a href="?action=buscar&destino=<?php echo urlencode($aeropuerto['ciudad']); ?>" class="w-full inline-block bg-[#0070F3] hover:bg-[#0051CC] text-white py-2 rounded-xl font-medium transition-colors">
+                        Ver vuelos
+                    </a>
                 </div>
             </div>
-
-            <div class="bg-white rounded-2xl shadow-md overflow-hidden tarjeta-animada group">
-                <div class="h-48 overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=800&q=80" alt="Ciudades" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                </div>
-                <div class="p-8">
-                    <h3 class="text-xl font-bold text-[#0A2540] text-center mb-6">Ciudades</h3>
-                    <ul class="space-y-4">
-                        <li><a href="#" class="flex justify-between items-center text-[#0070F3] hover:text-blue-800 transition-colors text-sm font-medium"><span>Madrid</span> <span>→</span></a></li>
-                        <li><a href="#" class="flex justify-between items-center text-[#0070F3] hover:text-blue-800 transition-colors text-sm font-medium"><span>Miami</span> <span>→</span></a></li>
-                        <li><a href="#" class="flex justify-between items-center text-[#0070F3] hover:text-blue-800 transition-colors text-sm font-medium"><span>Bogotá</span> <span>→</span></a></li>
-                        <li><a href="#" class="flex justify-between items-center text-[#0070F3] hover:text-blue-800 transition-colors text-sm font-medium"><span>Buenos Aires</span> <span>→</span></a></li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-md overflow-hidden tarjeta-animada group">
-                <div class="h-48 overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80" alt="Naturaleza" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                </div>
-                <div class="p-8">
-                    <h3 class="text-xl font-bold text-[#0A2540] text-center mb-6">Naturaleza</h3>
-                    <ul class="space-y-4">
-                        <li><a href="#" class="flex justify-between items-center text-[#0070F3] hover:text-blue-800 transition-colors text-sm font-medium"><span>Cusco</span> <span>→</span></a></li>
-                        <li><a href="#" class="flex justify-between items-center text-[#0070F3] hover:text-blue-800 transition-colors text-sm font-medium"><span>Iguazú</span> <span>→</span></a></li>
-                        <li><a href="#" class="flex justify-between items-center text-[#0070F3] hover:text-blue-800 transition-colors text-sm font-medium"><span>Patagonia</span> <span>→</span></a></li>
-                        <li><a href="#" class="flex justify-between items-center text-[#0070F3] hover:text-blue-800 transition-colors text-sm font-medium"><span>Galápagos</span> <span>→</span></a></li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-2xl shadow-md overflow-hidden tarjeta-animada group">
-                <div class="h-48 overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1555992828-ca4dbe41d294?auto=format&fit=crop&w=800&q=80" alt="Cultura" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                </div>
-                <div class="p-8">
-                    <h3 class="text-xl font-bold text-[#0A2540] text-center mb-6">Cultura</h3>
-                    <ul class="space-y-4">
-                        <li><a href="#" class="flex justify-between items-center text-[#0070F3] hover:text-blue-800 transition-colors text-sm font-medium"><span>Roma</span> <span>→</span></a></li>
-                        <li><a href="#" class="flex justify-between items-center text-[#0070F3] hover:text-blue-800 transition-colors text-sm font-medium"><span>París</span> <span>→</span></a></li>
-                        <li><a href="#" class="flex justify-between items-center text-[#0070F3] hover:text-blue-800 transition-colors text-sm font-medium"><span>Ciudad de México</span> <span>→</span></a></li>
-                        <li><a href="#" class="flex justify-between items-center text-[#0070F3] hover:text-blue-800 transition-colors text-sm font-medium"><span>Lima</span> <span>→</span></a></li>
-                    </ul>
-                </div>
-            </div>
-
+            <?php endforeach; ?>
         </div>
     </section>
 
