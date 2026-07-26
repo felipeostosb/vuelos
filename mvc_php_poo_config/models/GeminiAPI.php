@@ -2,12 +2,14 @@
 require_once __DIR__ . '/../config/database.php';
 
 class GeminiAPI {
-    private $apiKey;
+    private $apiKeys = [];
     private $conn;
 
     public function __construct() {
         // Obtenemos la key directamente de las variables de entorno
-        $this->apiKey = $_ENV['GEMINI_API_KEY'] ?? '';
+        $keys = $_ENV['GEMINI_API_KEY'] ?? '';
+        // Permitir múltiples llaves separadas por coma
+        $this->apiKeys = array_filter(array_map('trim', explode(',', $keys)));
         
         $database = new Database();
         $this->conn = $database->getConnection();
@@ -15,11 +17,9 @@ class GeminiAPI {
 
     public function interpretarBusqueda($prompt, $usuario_id = null) {
         // En caso de no tener API key o si está vacía, no fallamos
-        if (empty($this->apiKey)) {
+        if (empty($this->apiKeys)) {
             return $this->simularBusqueda($prompt, $usuario_id);
         }
-
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=" . $this->apiKey;
 
         $fecha_actual = date('Y-m-d');
         $system_instruction = "Eres un asistente experto de reservas de la aerolínea NovAirlines. Tu tarea es extraer la intención de búsqueda de vuelos del usuario y devolver un JSON puro (sin formato markdown ni bloques de código).
@@ -50,16 +50,29 @@ Ejemplo de salida:
             ]
         ];
 
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // En local a veces falla el certificado
+        $http_code = 0;
+        $response = null;
 
-        $response = curl_exec($ch);
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
+        // Intentar con cada llave hasta que una funcione
+        foreach ($this->apiKeys as $key) {
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=" . $key;
+            
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // En local a veces falla el certificado
+            
+            $response = curl_exec($ch);
+            $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+            
+            // Si la llamada es exitosa, salimos del bucle para no usar las otras llaves
+            if ($http_code == 200 && $response) {
+                break;
+            }
+        }
 
         $datos_extraidos = [
             'origen' => 'Lima',
