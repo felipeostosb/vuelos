@@ -86,6 +86,22 @@ Ejemplo de salida:
             $respuesta_raw = $response; // Guardamos todo el JSON original de Google
         } else {
             $respuesta_raw = json_encode(['error' => 'API falló', 'code' => $http_code, 'raw' => $response]);
+            
+            // Fallback manual de emergencia por si la API falla (ej. error 429 por falta de créditos)
+            if (stripos($prompt, 'Miami') !== false) {
+                $datos_extraidos['destino'] = 'Miami';
+            } elseif (stripos($prompt, 'París') !== false || stripos($prompt, 'Paris') !== false) {
+                $datos_extraidos['destino'] = 'París';
+            } elseif (stripos($prompt, 'Madrid') !== false) {
+                $datos_extraidos['destino'] = 'Madrid';
+            } elseif (stripos($prompt, 'Cusco') !== false || stripos($prompt, 'Cuzco') !== false) {
+                $datos_extraidos['destino'] = 'Cusco';
+            }
+            
+            // Si encontró algo en el fallback, actualizamos los parámetros que se guardarán
+            if (!empty($datos_extraidos['destino'])) {
+                $parametros = json_encode($datos_extraidos);
+            }
         }
 
         // Guardar el historial en la BD
