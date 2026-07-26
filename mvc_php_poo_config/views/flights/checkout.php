@@ -16,31 +16,51 @@
                 <?php endif; ?>
             </div>
             <div class="summary-content">
-                <div class="flight-overview">
-                    <div class="airline-group">
-                        <div class="airline-logo">
-                            <i class="fa-solid fa-plane"></i>
+                <?php 
+                    if (!function_exists('renderCheckoutSlice')) {
+                        function renderCheckoutSlice($slice, $title) {
+                ?>
+                    <div class="flight-overview" style="margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #f3f4f6;">
+                        <h4 style="font-size:0.75rem; font-weight:700; color:#6b7280; text-transform:uppercase; margin-bottom:0.5rem; letter-spacing:0.05em; grid-column: 1 / -1;"><?php echo $title; ?></h4>
+                        <div class="airline-group" style="align-items: flex-start;">
+                            <div class="airline-logo">
+                                <i class="fa-solid fa-plane"></i>
+                            </div>
+                            <div>
+                                <h4 class="airline-name"><?php echo htmlspecialchars($slice['airline']); ?></h4>
+                                <p class="flight-number">Vuelo <?php echo htmlspecialchars($slice['flight_number']); ?></p>
+                            </div>
                         </div>
-                        <div>
-                            <h4 class="airline-name"><?php echo htmlspecialchars($vuelo['airline']); ?></h4>
-                            <p class="flight-number">Vuelo <?php echo htmlspecialchars($vuelo['flight_number']); ?></p>
+                        
+                        <div class="time-overview" style="justify-content: flex-end;">
+                            <div style="text-align:right;">
+                                <p class="time-value"><?php echo htmlspecialchars($slice['departure_time']); ?></p>
+                                <p class="time-airport"><?php echo htmlspecialchars($slice['departure_airport']); ?></p>
+                                <p class="time-date" style="font-size:0.75rem; color:#6b7280; margin-top: 0.25rem; font-weight: 500;"><?php echo htmlspecialchars($slice['departure_date'] ?? ''); ?></p>
+                            </div>
+                            <div class="time-overview-arrow" style="margin: 0 1rem;">
+                                <i class="fa-solid fa-arrow-right text-gray-400"></i>
+                            </div>
+                            <div>
+                                <p class="time-value"><?php echo htmlspecialchars($slice['arrival_time']); ?></p>
+                                <p class="time-airport"><?php echo htmlspecialchars($slice['arrival_airport']); ?></p>
+                                <p class="time-date" style="font-size:0.75rem; color:#6b7280; margin-top: 0.25rem; font-weight: 500;"><?php echo htmlspecialchars($slice['arrival_date'] ?? ''); ?></p>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="time-overview">
-                        <div>
-                            <p class="time-value"><?php echo htmlspecialchars($vuelo['departure_time']); ?></p>
-                            <p class="time-airport"><?php echo htmlspecialchars($vuelo['departure_airport']); ?></p>
-                        </div>
-                        <div class="time-overview-arrow">
-                            <i class="fa-solid <?php echo ($tipo_viaje ?? 'solo_ida') === 'ida_vuelta' ? 'fa-arrow-right-arrow-left' : 'fa-arrow-right'; ?>"></i>
-                        </div>
-                        <div>
-                            <p class="time-value"><?php echo htmlspecialchars($vuelo['arrival_time']); ?></p>
-                            <p class="time-airport"><?php echo htmlspecialchars($vuelo['arrival_airport']); ?></p>
-                        </div>
-                    </div>
-                </div>
+                <?php 
+                        }
+                    }
+                ?>
+
+                <?php 
+                    if (!empty($vuelo['is_round_trip'])) {
+                        renderCheckoutSlice($vuelo['outbound'], '🛫 Vuelo de Ida');
+                        renderCheckoutSlice($vuelo['inbound'], '🛬 Vuelo de Vuelta');
+                    } else {
+                        renderCheckoutSlice($vuelo['outbound'] ?? $vuelo, '🛫 Vuelo de Ida');
+                    }
+                ?>
                 
                 <div class="summary-footer">
                     <span class="summary-passengers">Pasajeros: <?php echo htmlspecialchars($pasajeros); ?></span>
@@ -48,6 +68,16 @@
                 </div>
             </div>
         </div>
+
+        <?php if (!isset($_SESSION['user_id'])): ?>
+        <div class="guest-notice" style="background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 1rem; border-radius: 0.75rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <h3 style="font-weight: 600; color: #166534; font-size: 0.875rem;"><i class="fa-solid fa-circle-info" style="margin-right: 0.5rem;"></i> ¿Ya tienes una cuenta?</h3>
+                <p style="color: #15803d; font-size: 0.875rem; margin-top: 0.25rem;">Estás comprando como invitado. Inicia sesión si deseas autocompletar tus datos y guardar tu vuelo.</p>
+            </div>
+            <a href="index.php?action=home&login=required" style="background-color: #16a34a; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 500; text-decoration: none; white-space: nowrap; margin-left: 1rem;">Iniciar Sesión</a>
+        </div>
+        <?php endif; ?>
 
         <div class="passenger-card">
             <div class="passenger-header">

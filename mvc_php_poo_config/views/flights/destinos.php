@@ -12,8 +12,12 @@
             require_once 'config/database.php';
             $db = new Database();
             $conn = $db->getConnection();
-            $stmt = $conn->query("SELECT * FROM aeropuertos ORDER BY pais, ciudad");
-            $aeropuertos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $aeropuertos = [];
+            
+            if ($conn) {
+                $stmt = $conn->query("SELECT * FROM aeropuertos ORDER BY pais, ciudad");
+                $aeropuertos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            }
         ?>
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">

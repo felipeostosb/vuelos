@@ -95,25 +95,148 @@ switch ($peticion) {
         $query_ia = $_GET['query'] ?? '';
         
         $vueloModel = new Vuelo();
+        $duffelAPI = new DuffelAPI();
         
-        // Si usaron la Búsqueda Inteligente (IA)
-        if (!empty($query_ia)) {
+        // Traducimos ciudad a IATA para Duffel
+        $origen_iata = $vueloModel->obtenerIataPorCiudad($origen);
+        $destino_iata = $vueloModel->obtenerIataPorCiudad($destino);
+        
+        $rango_fechas = $_GET['rango_fechas'] ?? '';
+        $fecha_partes = explode(' to ', $rango_fechas);
+        if(count($fecha_partes) == 1) {
+            $fecha_partes = explode(' a ', $rango_fechas); // flatpickr es locale
+        }
+        
+        $tipo_busqueda = $_GET['tipo_busqueda'] ?? 'normal';
+        
+        if ($tipo_busqueda === 'ia' || !empty($query_ia)) {
+            $prompt = $query_ia;
+            
             $geminiAPI = new GeminiAPI();
-            // Interpretar y guardar la consulta
-            $destino_extraido = $geminiAPI->interpretarBusqueda($query_ia, $_SESSION['user_id'] ?? null);
-            if (!empty($destino_extraido)) {
-                $destino = $destino_extraido;
+            $datos_extraidos = $geminiAPI->interpretarBusqueda($prompt, $_SESSION['user_id'] ?? null);
+            
+            $origen_ciudad = $datos_extraidos['origen'] ?? 'Lima';
+            $destino_ciudad = $datos_extraidos['destino'] ?? '';
+            
+            $vueloModel = new Vuelo();
+            $origen = $vueloModel->obtenerIataPorCiudad($origen_ciudad);
+            $destino = $vueloModel->obtenerIataPorCiudad($destino_ciudad);
+            
+            $fecha_salida = $datos_extraidos['fecha_salida'] ?? date('Y-m-d', strtotime('+1 day'));
+            $fecha_vuelta = $datos_extraidos['fecha_vuelta'] ?? '';
+            $tipo_viaje = $datos_extraidos['tipo_viaje'] ?? 'solo_ida';
+            $pasajeros = $datos_extraidos['pasajeros'] ?? 1;
+            
+            // Guardamos en sesión los parámetros interpretados para mostrarlos
+            $_SESSION['datos_busqueda'] = [
+                'origen' => $origen,
+                'destino' => $destino,
+                'fecha_salida' => $fecha_salida,
+                'fecha_vuelta' => $fecha_vuelta,
+                'pasajeros' => $pasajeros,
+                'tipo_viaje' => $tipo_viaje,
+                'origen_ciudad' => $origen_ciudad,
+                'destino_ciudad' => $destino_ciudad
+            ];
+            
+        } else {
+            $origen_ciudad = $_GET['origen'] ?? '';
+            $destino_ciudad = $_GET['destino'] ?? '';
+            
+            $vueloModel = new Vuelo();
+            $origen = $vueloModel->obtenerIataPorCiudad($origen_ciudad);
+            $destino = $vueloModel->obtenerIataPorCiudad($destino_ciudad);
+            
+            $rango_fechas = $_GET['rango_fechas'] ?? date('Y-m-d');
+            $partes_fecha = explode(' to ', $rango_fechas);
+            if (count($partes_fecha) == 1) {
+                $partes_fecha = explode(' a ', $rango_fechas);
+            }
+            $fecha_salida = $partes_fecha[0];
+            $fecha_vuelta = $partes_fecha[1] ?? '';
+            
+            $pasajeros = $_GET['pasajeros'] ?? 1;
+            $tipo_viaje = $_GET['tipo_viaje'] ?? 'solo_ida';
+            
+            $_SESSION['datos_busqueda'] = [
+                'origen' => $origen,
+                'destino' => $destino,
+                'fecha_salida' => $fecha_salida,
+                'fecha_vuelta' => $fecha_vuelta,
+                'pasajeros' => $pasajeros,
+                'tipo_viaje' => $tipo_viaje,
+                'origen_ciudad' => $origen_ciudad,
+                'destino_ciudad' => $destino_ciudad
+            ];
+        }
+        
+        // Buscar vuelos SOLO en Duffel
+        $ofertas_completas = $duffelAPI->buscarVuelosEnTiempoReal($origen, $destino, $fecha_salida, $fecha_vuelta, $pasajeros);
+        
+        $_SESSION['ofertas_actuales'] = $ofertas_completas;
+
+        // Agrupar por el trayecto de ida para mostrar únicas (por aerolínea y horario)
+        $idas_unicas = [];
+        $vuelos_encontrados = [];
+        
+        foreach ($ofertas_completas as $vuelo) {
+            $signature = $vuelo['outbound']['flight_number'] . '_' . $vuelo['outbound']['departure_time'];
+            if (!in_array($signature, $idas_unicas)) {
+                // Guardamos la firma en el array original para usarla en el HTML
+                $vuelo['outbound']['signature'] = $signature;
+                $idas_unicas[] = $signature;
+                $vuelos_encontrados[] = $vuelo;
             }
         }
         
-        // Buscar vuelos tradicionales en nuestra base de datos
-        $vuelos_encontrados = $vueloModel->buscarTradicional($destino);
-        
-        // [FUTURO]: Aquí se integrará la llamada a DuffelAPI para unir los vuelos en tiempo real 
-        // a la variable $vuelos_encontrados
+        // Ordenar las idas por precio (de más barato a más caro)
+        usort($vuelos_encontrados, function($a, $b) {
+            return $a['price'] <=> $b['price'];
+        });
         
         include 'views/layout/header.php';
         include 'views/flights/reserva.php';
+        include 'views/layout/footer.php';
+        break;
+
+    case 'seleccionar_vuelta':
+        $outbound_signature = $_GET['outbound_id'] ?? '';
+        $ofertas = $_SESSION['ofertas_actuales'] ?? [];
+        $datos = $_SESSION['datos_busqueda'] ?? [];
+        
+        $origen = $datos['origen'] ?? '';
+        $destino = $datos['destino'] ?? '';
+        $pasajeros = $datos['pasajeros'] ?? 1;
+        
+        $vuelo_ida_seleccionado = null;
+        $vuelos_encontrados = [];
+        $vueltas_unicas = [];
+        
+        foreach ($ofertas as $oferta) {
+            $sig_ida = $oferta['outbound']['flight_number'] . '_' . $oferta['outbound']['departure_time'];
+            
+            if ($sig_ida === $outbound_signature) {
+                if (!$vuelo_ida_seleccionado) {
+                    $vuelo_ida_seleccionado = $oferta['outbound'];
+                }
+                
+                if (isset($oferta['inbound'])) {
+                    $sig_vuelta = $oferta['inbound']['flight_number'] . '_' . $oferta['inbound']['departure_time'] . '_' . $oferta['price'];
+                    if (!in_array($sig_vuelta, $vueltas_unicas)) {
+                        $vueltas_unicas[] = $sig_vuelta;
+                        $vuelos_encontrados[] = $oferta;
+                    }
+                }
+            }
+        }
+
+        // Ordenar los regresos por precio (de más barato a más caro)
+        usort($vuelos_encontrados, function($a, $b) {
+            return $a['price'] <=> $b['price'];
+        });
+        
+        include 'views/layout/header.php';
+        include 'views/flights/reserva_vuelta.php';
         include 'views/layout/footer.php';
         break;
 
@@ -124,18 +247,23 @@ switch ($peticion) {
         break;
 
     case 'checkout':
-        // Protección de ruta: Solo usuarios logueados pueden comprar
-        if (!isset($_SESSION['user_id'])) {
-            header('Location: index.php?action=home&login=required');
-            exit();
-        }
-
-        $id_vuelo_seleccionado = $_POST['flight_id'] ?? 1;
+        $offer_id = $_POST['flight_id'] ?? '';
         $pasajeros = $_POST['pasajeros'] ?? 1;
         $tipo_viaje = $_POST['tipo_viaje'] ?? 'solo_ida';
         
-        $vueloModel = new Vuelo();
-        $vuelo = $vueloModel->obtenerPorId($id_vuelo_seleccionado);
+        $duffelAPI = new DuffelAPI();
+        $vuelo = $duffelAPI->obtenerOfertaPorId($offer_id);
+        
+        // Adaptamos los nombres de variables para la vista checkout.php
+        if ($vuelo) {
+            $vuelo['origen_iata'] = $vuelo['departure_airport'];
+            $vuelo['destino_iata'] = $vuelo['arrival_airport'];
+            $vuelo['destino_ciudad'] = $vuelo['arrival_airport'];
+            $vuelo['aerolinea_nombre'] = $vuelo['airline'];
+            $vuelo['numero_vuelo'] = $vuelo['flight_number'];
+            $vuelo['hora_salida'] = date('H:i:s', strtotime($vuelo['departure_time']));
+            $vuelo['hora_llegada'] = date('H:i:s', strtotime($vuelo['arrival_time']));
+        }
         
         include 'views/layout/header.php';
         include 'views/flights/checkout.php';
@@ -143,25 +271,63 @@ switch ($peticion) {
         break;
 
     case 'confirmarReserva':
-        $id_vuelo = $_POST['flight_id'] ?? 1;
+        $offer_id = $_POST['flight_id'] ?? '';
         $nombre_pasajero = $_POST['nombre'] ?? 'Pasajero Anónimo';
-        
-        // En una app real los calcularíamos, aquí lo simulamos
+        $email_pasajero = $_POST['email'] ?? 'test@example.com';
         $pasajeros_count = $_POST['pasajeros'] ?? 1;
+        $tipo_viaje = $_POST['tipo_viaje'] ?? 'solo_ida';
         
+        $duffelAPI = new DuffelAPI();
         $vueloModel = new Vuelo();
-        $vuelo = $vueloModel->obtenerPorId($id_vuelo);
-        $precio_total = $vuelo ? ($vuelo['price'] * $pasajeros_count) : 0;
+        
+        $offer_data = $duffelAPI->obtenerOfertaPorId($offer_id);
+        $duffel_order_id = null;
+        
+        if ($offer_data) {
+            // Preparar pasajeros para Duffel
+            $partes_nombre = explode(' ', $nombre_pasajero, 2);
+            $nombre = $partes_nombre[0];
+            $apellido = $partes_nombre[1] ?? $nombre; // Duffel requiere family_name
+            
+            $passengers_payload = [];
+            // Aquí asumimos que el usuario compra para 1 solo adulto y usa el ID de la oferta
+            if (!empty($offer_data['passengers'])) {
+                $passengers_payload[] = [
+                    'id' => $offer_data['passengers'][0]['id'],
+                    'phone_number' => '+1234567890', // Requiere E.164
+                    'email' => $email_pasajero,
+                    'title' => 'mr',
+                    'gender' => 'm',
+                    'family_name' => $apellido,
+                    'given_name' => $nombre,
+                    'born_on' => '1990-01-01'
+                ];
+            }
+
+            $precio_total = $offer_data['price'] * $pasajeros_count;
+            
+            // Intentar crear la orden en Duffel
+            $orden = $duffelAPI->crearOrdenDuffel($offer_id, $passengers_payload, $offer_data['price'], $offer_data['currency']);
+            
+            if ($orden && isset($orden['id'])) {
+                $duffel_order_id = $orden['id'];
+            }
+
+            // Guardamos el vuelo de Duffel en nuestra base de datos local
+            $id_vuelo = $vueloModel->guardarVueloDuffel($offer_data);
+        } else {
+            $id_vuelo = null;
+            $precio_total = 0;
+        }
         
         // Creamos un código de reserva aleatorio (PNR)
         $pnr = substr(str_shuffle("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"), 0, 6);
         
-        // Si el usuario era invitado, le damos un ID temporal para la base de datos local
-        // Nota: En producción deberías crear un usuario "guest" o forzar registro
-        $usuario_id = $_SESSION['user_id'] ?? 2; // Asignamos al usuario ID 2 (Juan Pérez) como fallback
+        // Asignamos NULL si el comprador es un invitado
+        $usuario_id = $_SESSION['user_id'] ?? null;
         
         $reservaModel = new Reserva();
-        $reserva_id = $reservaModel->crearReserva($pnr, $usuario_id, $id_vuelo, $pasajeros_count, $precio_total);
+        $reserva_id = $reservaModel->crearReserva($pnr, $usuario_id, $id_vuelo, $pasajeros_count, $precio_total, $duffel_order_id);
         
         if ($reserva_id) {
             // Separar nombre y apellido simple

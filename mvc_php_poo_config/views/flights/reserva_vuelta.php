@@ -8,11 +8,8 @@
                     $destino = isset($_GET['destino']) ? htmlspecialchars($_GET['destino']) : 'Destino';
                     $fechas = isset($_GET['rango_fechas']) ? htmlspecialchars($_GET['rango_fechas']) : date('Y-m-d');
                     
-                    // Split if it's a range "2026-07-25 to 2026-08-01" or Spanish locale "2026-07-25 a 2026-08-01"
+                    // Split if it's a range "2026-07-25 to 2026-08-01"
                     $fecha_partes = explode(' to ', $fechas);
-                    if (count($fecha_partes) == 1) {
-                        $fecha_partes = explode(' a ', $fechas);
-                    }
                     $fecha_ida = $fecha_partes[0];
                     $fecha_vuelta = $fecha_partes[1] ?? '';
                     
@@ -150,9 +147,38 @@
         <div class="results-area">
             
             <div class="sort-buttons">
-                <button class="btn-sort btn-sort--active">Mejor precio</button>
+                <button class="btn-sort btn-sort--active">Mejor precio (Vuelta)</button>
                 <button class="btn-sort btn-sort--inactive">Duración</button>
             </div>
+
+            <?php if (isset($vuelo_ida_seleccionado)): ?>
+            <div class="flight-card" style="margin-bottom: 2rem; border: 2px solid #0070F3; background-color: #f0f7ff;">
+                <div style="font-size:0.875rem; font-weight:bold; color:#0070F3; margin-bottom: 1rem; border-bottom: 1px solid #cce4ff; padding-bottom: 0.5rem;">
+                    <i class="fa-solid fa-check-circle"></i> Vuelo de Ida Seleccionado
+                </div>
+                <div class="flight-times">
+                    <div class="time-block">
+                        <p class="time-value"><?php echo $vuelo_ida_seleccionado['departure_time']; ?></p>
+                        <p class="time-airport"><?php echo $vuelo_ida_seleccionado['departure_airport']; ?></p>
+                        <p class="time-date" style="font-size:0.75rem; color:#6b7280; font-weight: 500; margin-top: 0.25rem;"><?php echo $vuelo_ida_seleccionado['departure_date']; ?></p>
+                    </div>
+                    
+                    <div class="duration-line">
+                        <span class="duration-text"><?php echo str_replace(['PT', 'H', 'M'], ['','h ','m'], $vuelo_ida_seleccionado['duration']); ?></span>
+                        <div class="line-graphic"></div>
+                        <span class="stops-badge stops-badge--direct"><?php echo $vuelo_ida_seleccionado['airline']; ?></span>
+                    </div>
+                    
+                    <div class="time-block">
+                        <p class="time-value"><?php echo $vuelo_ida_seleccionado['arrival_time']; ?></p>
+                        <p class="time-airport"><?php echo $vuelo_ida_seleccionado['arrival_airport']; ?></p>
+                        <p class="time-date" style="font-size:0.75rem; color:#6b7280; font-weight: 500; margin-top: 0.25rem;"><?php echo $vuelo_ida_seleccionado['arrival_date']; ?></p>
+                    </div>
+                </div>
+            </div>
+            
+            <h3 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem; color: #111827;">Paso 2: Selecciona tu vuelo de regreso</h3>
+            <?php endif; ?>
 
             <div id="lista-vuelos" class="flight-list">
                 <?php if (count($vuelos_encontrados) > 0): ?>
@@ -220,35 +246,25 @@
 
                         <div style="flex-grow: 1;">
                             <?php 
-                                renderSlice($vuelo['outbound'], '🛫 Vuelo de Ida');
+                                renderSlice($vuelo['inbound'], '🛬 Vuelo de Regreso');
                             ?>
                         </div>
 
                         <div class="flight-action">
                             <div class="price-container">
                                 <p class="price-value precio-base" data-precio="<?php echo $vuelo['price']; ?>">S/. <?php echo number_format($vuelo['price'], 2); ?></p>
-                                <p class="price-label">por persona</p>
+                                <p class="price-label">precio total (ida y vuelta)</p>
                             </div>
                             
-                            <?php if ($vuelo['is_round_trip']): ?>
-                            <form action="index.php" method="GET" style="width: 100%;">
-                                <input type="hidden" name="action" value="seleccionar_vuelta">
-                                <input type="hidden" name="outbound_id" value="<?php echo htmlspecialchars($vuelo['outbound']['signature']); ?>">
-                                <button type="submit" class="btn btn--primary" style="width: 100%;">
-                                    Seleccionar Ida <i class="fa-solid fa-arrow-right" style="margin-left: 0.5rem;"></i>
-                                </button>
-                            </form>
-                            <?php else: ?>
                             <form action="index.php" method="POST" style="width: 100%;">
                                 <input type="hidden" name="action" value="checkout">
                                 <input type="hidden" name="flight_id" value="<?php echo $vuelo['id']; ?>">
                                 <input type="hidden" name="pasajeros" class="input-pasajeros" value="<?php echo htmlspecialchars($pasajeros); ?>">
-                                <input type="hidden" name="tipo_viaje" value="solo_ida">
+                                <input type="hidden" name="tipo_viaje" value="ida_vuelta">
                                 <button type="submit" class="btn btn--primary" style="width: 100%;">
-                                    Reservar <i class="fa-solid fa-arrow-right" style="margin-left: 0.5rem;"></i>
+                                    Seleccionar y Reservar <i class="fa-solid fa-arrow-right" style="margin-left: 0.5rem;"></i>
                                 </button>
                             </form>
-                            <?php endif; ?>
                             
                         </div>
                         

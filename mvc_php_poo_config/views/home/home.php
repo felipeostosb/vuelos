@@ -62,22 +62,22 @@
                         <div class="search-grid">
                             <div class="input-container">
                                 <span class="input-icon-left"><i class="fa-solid fa-plane-departure"></i></span>
-                                <select name="origen" required class="search-input">
-                                    <option value="" disabled selected>Origen</option>
+                                <input list="ciudades_origen" name="origen" required class="search-input" placeholder="Origen" autocomplete="off">
+                                <datalist id="ciudades_origen">
                                     <?php foreach ($opciones as $op): ?>
-                                        <option value="<?php echo htmlspecialchars($op); ?>"><?php echo htmlspecialchars($op); ?></option>
+                                        <option value="<?php echo htmlspecialchars($op); ?>">
                                     <?php endforeach; ?>
-                                </select>
+                                </datalist>
                                 <i class="fa-solid fa-chevron-down input-icon-right"></i>
                             </div>
                             <div class="input-container">
                                 <span class="input-icon-left"><i class="fa-solid fa-plane-arrival"></i></span>
-                                <select name="destino" required class="search-input">
-                                    <option value="" disabled selected>Destino</option>
+                                <input list="ciudades_destino" name="destino" required class="search-input" placeholder="Destino" autocomplete="off">
+                                <datalist id="ciudades_destino">
                                     <?php foreach ($opciones as $op): ?>
-                                        <option value="<?php echo htmlspecialchars($op); ?>"><?php echo htmlspecialchars($op); ?></option>
+                                        <option value="<?php echo htmlspecialchars($op); ?>">
                                     <?php endforeach; ?>
-                                </select>
+                                </datalist>
                                 <i class="fa-solid fa-chevron-down input-icon-right"></i>
                             </div>
                             <div class="input-container">

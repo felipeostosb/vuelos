@@ -124,5 +124,92 @@ class Vuelo {
         }
         return $resultados;
     }
+
+    public function obtenerIataPorCiudad($ciudad) {
+        $query = "SELECT codigo_iata FROM aeropuertos WHERE ciudad = :ciudad LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':ciudad', $ciudad);
+        $stmt->execute();
+        if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            return $row['codigo_iata'];
+        }
+        return 'LIM'; // Default fallback
+    }
+
+    public function garantizarAeropuerto($iata, $nombre, $ciudad = '', $pais = '') {
+        // Busca si existe, si no lo inserta
+        $query = "SELECT id FROM aeropuertos WHERE codigo_iata = :iata LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':iata', $iata);
+        $stmt->execute();
+        if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            return $row['id'];
+        }
+        // Insert
+        $query = "INSERT INTO aeropuertos (codigo_iata, nombre, ciudad, pais) VALUES (:iata, :nombre, :ciudad, :pais)";
+        $stmt = $this->conn->prepare($query);
+        if(empty($ciudad)) $ciudad = $nombre;
+        if(empty($pais)) $pais = 'Desconocido';
+        $stmt->bindParam(':iata', $iata);
+        $stmt->bindParam(':nombre', $nombre);
+        $stmt->bindParam(':ciudad', $ciudad);
+        $stmt->bindParam(':pais', $pais);
+        $stmt->execute();
+        return $this->conn->lastInsertId();
+    }
+
+    public function garantizarAerolinea($iata, $nombre) {
+        $query = "SELECT id FROM aerolineas WHERE codigo_iata = :iata LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':iata', $iata);
+        $stmt->execute();
+        if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            return $row['id'];
+        }
+        $query = "INSERT INTO aerolineas (codigo_iata, nombre) VALUES (:iata, :nombre)";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':iata', $iata);
+        $stmt->bindParam(':nombre', $nombre);
+        $stmt->execute();
+        return $this->conn->lastInsertId();
+    }
+
+    public function guardarVueloDuffel($offer) {
+        // Verifica si ya lo guardamos por su duffel_offer_id
+        $query = "SELECT id FROM vuelos WHERE duffel_offer_id = :offer_id LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':offer_id', $offer['offer_id']);
+        $stmt->execute();
+        if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            return $row['id'];
+        }
+
+        $id_origen = $this->garantizarAeropuerto($offer['departure_airport'], $offer['departure_airport']);
+        $id_destino = $this->garantizarAeropuerto($offer['arrival_airport'], $offer['arrival_airport']);
+        $id_aerolinea = $this->garantizarAerolinea(substr($offer['flight_number'], 0, 2), $offer['airline']);
+
+        $query = "INSERT INTO vuelos (aerolinea_id, numero_vuelo, origen_aeropuerto_id, destino_aeropuerto_id, hora_salida, hora_llegada, llegada_dia_siguiente, duracion, escalas, precio, duffel_offer_id) 
+                  VALUES (:aero_id, :num_vuelo, :orig_id, :dest_id, :h_salida, :h_llegada, :dia_sig, :duracion, :escalas, :precio, :offer_id)";
+        $stmt = $this->conn->prepare($query);
+        
+        $h_salida = date('H:i:s', strtotime($offer['departure_time']));
+        $h_llegada = date('H:i:s', strtotime($offer['arrival_time']));
+        $dia_sig = $offer['arrival_next_day'] ? 1 : 0;
+        
+        $stmt->bindParam(':aero_id', $id_aerolinea);
+        $stmt->bindParam(':num_vuelo', $offer['flight_number']);
+        $stmt->bindParam(':orig_id', $id_origen);
+        $stmt->bindParam(':dest_id', $id_destino);
+        $stmt->bindParam(':h_salida', $h_salida);
+        $stmt->bindParam(':h_llegada', $h_llegada);
+        $stmt->bindParam(':dia_sig', $dia_sig, PDO::PARAM_INT);
+        $stmt->bindParam(':duracion', $offer['duration']);
+        $stmt->bindParam(':escalas', $offer['stops']);
+        $stmt->bindParam(':precio', $offer['price']);
+        $stmt->bindParam(':offer_id', $offer['offer_id']);
+        
+        $stmt->execute();
+        return $this->conn->lastInsertId();
+    }
 }
 ?>
