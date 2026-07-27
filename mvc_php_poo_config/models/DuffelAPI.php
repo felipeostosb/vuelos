@@ -141,6 +141,50 @@ class DuffelAPI {
         
         return null;
     }
+
+    public function sugerirIata($query) {
+        if (empty($this->token) || empty(trim($query))) return null;
+        
+        $iata = $this->realizarPeticionSugerencia(trim($query));
+        
+        // Si no encuentra nada, intentar limpiar el query (ej: "Roma italia" -> "Roma")
+        if (!$iata) {
+            $palabras = explode(' ', trim($query));
+            if (count($palabras) > 1) {
+                // Intentamos solo con la primera palabra, que suele ser la ciudad
+                $iata = $this->realizarPeticionSugerencia($palabras[0]);
+            }
+        }
+        
+        return $iata;
+    }
+    
+    private function realizarPeticionSugerencia($query) {
+        $url = "https://api.duffel.com/places/suggestions?query=" . urlencode($query);
+        
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Duffel-Version: v2',
+            'Authorization: Bearer ' . $this->token
+        ]);
+        
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($http_code == 200) {
+            $json = json_decode($response, true);
+            if (!empty($json['data']) && isset($json['data'][0]['iata_code'])) {
+                foreach ($json['data'] as $place) {
+                    if (isset($place['iata_code']) && !empty($place['iata_code'])) {
+                        return $place['iata_code'];
+                    }
+                }
+            }
+        }
+        return null;
+    }
     
     private function parseOffer($offer) {
         if (empty($offer['slices'])) return null;

@@ -134,7 +134,16 @@
                 <div class="filter-section">
                     <h3 class="filter-subtitle">Aerolíneas</h3>
                     <?php
-                        $available_airlines = isset($vueloModel) ? $vueloModel->obtenerFiltrosAerolineas() : [];
+                        $available_airlines = [];
+                        if (isset($_SESSION['ofertas_actuales'])) {
+                            foreach ($_SESSION['ofertas_actuales'] as $oferta) {
+                                $air = $oferta['airline'];
+                                if (!in_array($air, $available_airlines)) {
+                                    $available_airlines[] = $air;
+                                }
+                            }
+                            sort($available_airlines);
+                        }
                         $airlines = isset($_GET['airlines']) ? $_GET['airlines'] : $available_airlines; 
                     ?>
                     <div class="filter-input-group">

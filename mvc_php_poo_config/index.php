@@ -127,6 +127,8 @@ switch ($peticion) {
             $tipo_viaje = $datos_extraidos['tipo_viaje'] ?? 'solo_ida';
             $pasajeros = $datos_extraidos['pasajeros'] ?? 1;
             
+            $use_cache = false; // Las búsquedas IA siempre fuerzan recarga por seguridad y precisión
+
             // Guardamos en sesión los parámetros interpretados para mostrarlos
             $_SESSION['datos_busqueda'] = [
                 'origen' => $origen,
@@ -158,6 +160,20 @@ switch ($peticion) {
             $pasajeros = $_GET['pasajeros'] ?? 1;
             $tipo_viaje = $_GET['tipo_viaje'] ?? 'solo_ida';
             
+            // Verificamos si podemos usar la caché ANTES de sobreescribir la sesión
+            $use_cache = false;
+            if (isset($_SESSION['datos_busqueda']) && isset($_SESSION['ofertas_actuales'])) {
+                $sess = $_SESSION['datos_busqueda'];
+                if ($sess['origen'] === $origen && 
+                    $sess['destino'] === $destino && 
+                    $sess['fecha_salida'] === $fecha_salida && 
+                    $sess['fecha_vuelta'] === $fecha_vuelta && 
+                    $sess['pasajeros'] == $pasajeros) { 
+                    $use_cache = true;
+                }
+            }
+
+            // AHORA sí podemos sobreescribir la sesión con los nuevos parámetros
             $_SESSION['datos_busqueda'] = [
                 'origen' => $origen,
                 'destino' => $destino,
@@ -168,20 +184,6 @@ switch ($peticion) {
                 'origen_ciudad' => $origen_ciudad,
                 'destino_ciudad' => $destino_ciudad
             ];
-        }
-        
-        // Verificamos si podemos usar la caché (si los parámetros principales no cambiaron)
-        $use_cache = false;
-        if (isset($_SESSION['datos_busqueda']) && isset($_SESSION['ofertas_actuales'])) {
-            $sess = $_SESSION['datos_busqueda'];
-            if ($sess['origen'] === $origen && 
-                $sess['destino'] === $destino && 
-                $sess['fecha_salida'] === $fecha_salida && 
-                $sess['fecha_vuelta'] === $fecha_vuelta && 
-                $sess['pasajeros'] == $pasajeros &&
-                empty($query_ia)) { // Si es una nueva consulta IA, forzamos recarga
-                $use_cache = true;
-            }
         }
 
         if ($use_cache) {

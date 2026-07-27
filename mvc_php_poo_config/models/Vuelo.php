@@ -141,12 +141,11 @@ class Vuelo {
         if (empty($ciudad)) return 'LIM';
 
         // 1. Inteligencia para extraer el código IATA directamente si el usuario seleccionó del datalist
-        // Ej: "Lima (LIM) - Perú" -> Extrae "LIM"
         if (preg_match('/\(([A-Z]{3})\)/i', $ciudad, $matches)) {
             return strtoupper($matches[1]);
         }
 
-        // 2. Búsqueda flexible en la base de datos local (ciudad, país, nombre o código directo)
+        // 2. Búsqueda flexible en la base de datos local
         $query = "SELECT codigo_iata FROM aeropuertos 
                   WHERE ciudad LIKE :busqueda 
                      OR pais LIKE :busqueda 
@@ -164,7 +163,15 @@ class Vuelo {
             return $row['codigo_iata'];
         }
         
-        return 'LIM'; // Default fallback si no existe en BD
+        // 3. Fallback dinámico: Consultar directamente a Duffel Places API
+        require_once __DIR__ . '/DuffelAPI.php';
+        $duffel = new DuffelAPI();
+        $duffel_iata = $duffel->sugerirIata($ciudad);
+        if ($duffel_iata) {
+            return $duffel_iata;
+        }
+        
+        return 'LIM'; // Default fallback absoluto si Duffel tampoco sabe qué es
     }
 
     public function garantizarAeropuerto($iata, $nombre, $ciudad = '', $pais = '') {

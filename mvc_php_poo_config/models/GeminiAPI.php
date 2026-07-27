@@ -101,6 +101,19 @@ Ejemplo de salida:
             $respuesta_raw = json_encode(['error' => 'API falló', 'code' => $http_code, 'raw' => $response]);
             
             // Fallback manual de emergencia por si la API falla (ej. error 429 por falta de créditos)
+            // Extraer posible origen si dice "desde X" o "de X"
+            if (preg_match('/(?:desde|de)\s+([a-zA-Z\s]+?)\s+(?:a|hacia|para)/i', $prompt, $matches)) {
+                $datos_extraidos['origen'] = trim($matches[1]);
+            } elseif (stripos($prompt, 'new york') !== false || stripos($prompt, 'nueva york') !== false) {
+                // Si menciona new york pero no capturó el regex, asumimos origen o destino según contexto (por defecto origen si no hay otro)
+                if (stripos($prompt, 'a new york') !== false || stripos($prompt, 'para new york') !== false) {
+                    $datos_extraidos['destino'] = 'New York';
+                } else {
+                    $datos_extraidos['origen'] = 'New York';
+                }
+            }
+
+            // Extraer posible destino
             if (stripos($prompt, 'Miami') !== false) {
                 $datos_extraidos['destino'] = 'Miami';
             } elseif (stripos($prompt, 'París') !== false || stripos($prompt, 'Paris') !== false) {
@@ -109,10 +122,16 @@ Ejemplo de salida:
                 $datos_extraidos['destino'] = 'Madrid';
             } elseif (stripos($prompt, 'Cusco') !== false || stripos($prompt, 'Cuzco') !== false) {
                 $datos_extraidos['destino'] = 'Cusco';
+            } elseif (stripos($prompt, 'Corea') !== false || stripos($prompt, 'Seoul') !== false || stripos($prompt, 'Seul') !== false) {
+                $datos_extraidos['destino'] = 'Seúl';
+            } elseif (stripos($prompt, 'Roma') !== false || stripos($prompt, 'Rome') !== false) {
+                $datos_extraidos['destino'] = 'Roma';
+            } elseif (stripos($prompt, 'Buenos Aires') !== false || stripos($prompt, 'Argentina') !== false) {
+                $datos_extraidos['destino'] = 'Buenos Aires';
             }
             
             // Si encontró algo en el fallback, actualizamos los parámetros que se guardarán
-            if (!empty($datos_extraidos['destino'])) {
+            if (!empty($datos_extraidos['destino']) || $datos_extraidos['origen'] !== 'Lima') {
                 $parametros = json_encode($datos_extraidos);
             }
         }
