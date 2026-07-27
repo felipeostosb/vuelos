@@ -265,10 +265,14 @@
                             ?>
                         </div>
 
-                        <div class="flight-action">
+                            <?php
+                                // Mostrar solo el precio del trayecto de VUELTA
+                                $precio_vuelta_mostrar = $vuelo['inbound_price'] ?? round((float)$vuelo['price'] / max(1,(int)$pasajeros) * 0.5, 2);
+                            ?>
                             <div class="price-container">
-                                <p class="price-value precio-base" data-precio="<?php echo $vuelo['price']; ?>"><?php echo htmlspecialchars($vuelo['currency']); ?> <?php echo number_format($vuelo['price'], 2); ?></p>
-                                <p class="price-label">precio total (ida y vuelta)</p>
+                                <p class="price-value precio-base" data-precio="<?php echo $precio_vuelta_mostrar; ?>"><?php echo htmlspecialchars($vuelo['currency']); ?> <?php echo number_format($precio_vuelta_mostrar, 2); ?></p>
+                                <p class="price-label">Vuelo de Vuelta</p>
+                                <p class="text-xs text-gray-500 font-medium mt-1">Precio por persona · Solo Vuelta</p>
                             </div>
                             
                             <form action="index.php" method="POST" style="width: 100%;">

@@ -64,9 +64,60 @@
                     }
                 ?>
                 
-                <div class="summary-footer">
-                    <span class="summary-passengers">Pasajeros: <?php echo htmlspecialchars($pasajeros); ?></span>
-                    <span class="summary-total"><?php echo htmlspecialchars($vuelo['currency']); ?> <?php echo htmlspecialchars(number_format($vuelo['price'], 2)); ?></span>
+                <?php
+                    $currency = $vuelo['currency'] ?? 'S/.';
+                    $num_pasajeros = max(1, (int)$pasajeros);
+                    $total_pagar = (float)$vuelo['price'];
+                    $precio_por_pasajero = $total_pagar / $num_pasajeros;
+                    $is_round_trip = !empty($vuelo['is_round_trip']) || (($tipo_viaje ?? 'solo_ida') === 'ida_vuelta');
+
+                    if ($is_round_trip) {
+                        $precio_ida = round($precio_por_pasajero * 0.5, 2);
+                        $precio_vuelta = round($precio_por_pasajero - $precio_ida, 2);
+                    }
+                ?>
+
+                <div class="summary-footer" style="display: flex; flex-direction: column; gap: 0.75rem; background-color: #f8fafc; padding: 1.5rem; border-radius: 1rem; border: 1px solid #e2e8f0; margin-top: 1rem;">
+                    <h3 style="font-size: 0.875rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">
+                        <i class="fa-solid fa-calculator text-[#0070F3] mr-2"></i> Desglose de Precios
+                    </h3>
+
+                    <?php if ($is_round_trip): ?>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: #334155;">
+                            <span><i class="fa-solid fa-plane-departure text-[#0070F3] mr-1 font-bold"></i> Pasaje Vuelo de Ida (c/u):</span>
+                            <span style="font-weight: 600;"><?php echo htmlspecialchars($currency); ?> <?php echo number_format($precio_ida, 2); ?></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: #334155;">
+                            <span><i class="fa-solid fa-plane-arrival text-[#0070F3] mr-1 font-bold"></i> Pasaje Vuelo de Vuelta (c/u):</span>
+                            <span style="font-weight: 600;"><?php echo htmlspecialchars($currency); ?> <?php echo number_format($precio_vuelta, 2); ?></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: #1e293b; font-weight: 600; padding-top: 0.35rem; border-top: 1px dashed #cbd5e1;">
+                            <span>Suma (Ida + Vuelta por persona):</span>
+                            <span style="color: #0070F3; font-weight: 700;"><?php echo htmlspecialchars($currency); ?> <?php echo number_format($precio_ida, 2); ?> + <?php echo htmlspecialchars($currency); ?> <?php echo number_format($precio_vuelta, 2); ?> = <?php echo htmlspecialchars($currency); ?> <?php echo number_format($precio_por_pasajero, 2); ?></span>
+                        </div>
+                    <?php else: ?>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: #334155;">
+                            <span><i class="fa-solid fa-plane-departure text-[#0070F3] mr-1 font-bold"></i> Pasaje Solo Ida (c/u):</span>
+                            <span style="font-weight: 600;"><?php echo htmlspecialchars($currency); ?> <?php echo number_format($precio_por_pasajero, 2); ?></span>
+                        </div>
+                    <?php endif; ?>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.5rem; border-top: 1px solid #e2e8f0;">
+                        <span style="font-size: 0.875rem; font-weight: 600; color: #334155;">
+                            <i class="fa-solid fa-users text-[#0070F3] mr-1"></i> Cantidad de Boletos:
+                        </span>
+                        <span style="font-weight: 700; color: #0f172a; font-size: 0.95rem;">
+                            <?php echo $num_pasajeros; ?> boleto<?php echo $num_pasajeros > 1 ? 's' : ''; ?>
+                            <?php if ($num_pasajeros > 1): ?>
+                                (x <?php echo htmlspecialchars($currency); ?> <?php echo number_format($precio_por_pasajero, 2); ?>)
+                            <?php endif; ?>
+                        </span>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #0070F3; padding-top: 0.85rem; margin-top: 0.25rem;">
+                        <span style="font-size: 1.125rem; font-weight: 800; color: #0f172a;">TOTAL A PAGAR:</span>
+                        <span class="summary-total" style="font-size: 1.65rem; font-weight: 900; color: #0070F3;"><?php echo htmlspecialchars($currency); ?> <?php echo number_format($total_pagar, 2); ?></span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -83,7 +134,7 @@
 
         <div class="passenger-card">
             <div class="passenger-header">
-                <h2 class="passenger-header-title"><i class="fa-solid fa-user text-gray-400" style="margin-right: 0.5rem;"></i> Datos del Pasajero Principal</h2>
+                <h2 class="passenger-header-title"><i class="fa-solid fa-users text-gray-400" style="margin-right: 0.5rem;"></i> Datos de los Pasajeros (<?php echo htmlspecialchars($pasajeros); ?> boleto<?php echo (int)$pasajeros > 1 ? 's' : ''; ?>)</h2>
             </div>
             <div class="passenger-content">
                 <form action="index.php" method="POST">
@@ -93,13 +144,22 @@
                     <input type="hidden" name="tipo_viaje" value="<?php echo htmlspecialchars($tipo_viaje ?? 'solo_ida'); ?>">
                     <input type="hidden" name="fecha_retorno" value="<?php echo htmlspecialchars($fecha_retorno ?? ''); ?>">
                     
-                    <div class="form-grid">
+                    <div class="space-y-4 mb-6">
                         <div class="form-group">
-                            <label class="form-label">Nombre completo</label>
-                            <input type="text" name="nombre" required placeholder="Ej: Ana María García" class="form-input" value="<?php echo isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : ''; ?>">
+                            <label class="form-label font-bold text-gray-800">Pasajero 1 (Titular de la Reserva)</label>
+                            <input type="text" name="nombre" id="pasajero_nombre_0" required placeholder="Ej: Ana María García" class="form-input" value="<?php echo isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : ''; ?>">
+                            <input type="hidden" name="pasajero_nombre_0" value="" id="hidden_p0">
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Correo electrónico</label>
+
+                        <?php for ($p = 1; $p < (int)$pasajeros; $p++): ?>
+                            <div class="form-group pt-4 border-t border-gray-100">
+                                <label class="form-label font-bold text-gray-800">Pasajero <?php echo ($p + 1); ?></label>
+                                <input type="text" name="pasajero_nombre_<?php echo $p; ?>" required placeholder="Nombre completo del Pasajero <?php echo ($p + 1); ?>" class="form-input">
+                            </div>
+                        <?php endfor; ?>
+
+                        <div class="form-group pt-4 border-t border-gray-100">
+                            <label class="form-label">Correo electrónico de contacto (para enviar comprobantes)</label>
                             <input type="email" name="email" required placeholder="tu@email.com" class="form-input" value="<?php echo isset($_SESSION['user_email']) ? htmlspecialchars($_SESSION['user_email']) : ''; ?>">
                         </div>
                     </div>

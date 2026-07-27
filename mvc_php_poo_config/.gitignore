@@ -18,5 +18,12 @@ Thumbs.db
 /temp/
 /tmp/
 
+# Scripts de migración temporales
+migrate_vuelta.php
+
+# Archivos de test y prueba
+test_*.php
+fix_*.php
+
 # Dependencias (si usas composer más adelante)
 /vendor/

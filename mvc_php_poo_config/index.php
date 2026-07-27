@@ -299,14 +299,16 @@ switch ($peticion) {
 
     case 'checkout':
         $offer_id = $_POST['flight_id'] ?? '';
-        $pasajeros = $_POST['pasajeros'] ?? 1;
+        $pasajeros = max(1, (int)($_POST['pasajeros'] ?? 1));
         $tipo_viaje = $_POST['tipo_viaje'] ?? 'solo_ida';
         
         $duffelAPI = new DuffelAPI();
+        $vueloModel = new Vuelo();
+        
         $vuelo = $duffelAPI->obtenerOfertaPorId($offer_id);
         
-        // Adaptamos los nombres de variables para la vista checkout.php
         if ($vuelo) {
+            $vuelo['unit_price'] = (float)$vuelo['price'] / $pasajeros;
             $vuelo['origen_iata'] = $vuelo['departure_airport'];
             $vuelo['destino_iata'] = $vuelo['arrival_airport'];
             $vuelo['destino_ciudad'] = $vuelo['arrival_airport'];
@@ -314,6 +316,21 @@ switch ($peticion) {
             $vuelo['numero_vuelo'] = $vuelo['flight_number'];
             $vuelo['hora_salida'] = date('H:i:s', strtotime($vuelo['departure_time']));
             $vuelo['hora_llegada'] = date('H:i:s', strtotime($vuelo['arrival_time']));
+        } else {
+            // Fallback a vuelo en base de datos local
+            $vuelo = $vueloModel->obtenerPorId($offer_id);
+            if ($vuelo) {
+                $vuelo['currency'] = 'S/.';
+                $vuelo['unit_price'] = (float)$vuelo['price'];
+                $vuelo['price'] = $vuelo['unit_price'] * $pasajeros;
+                $vuelo['origen_iata'] = $vuelo['departure_airport'];
+                $vuelo['destino_iata'] = $vuelo['arrival_airport'];
+                $vuelo['destino_ciudad'] = $vuelo['arrival_city'];
+                $vuelo['aerolinea_nombre'] = $vuelo['airline'];
+                $vuelo['numero_vuelo'] = $vuelo['flight_number'];
+                $vuelo['hora_salida'] = date('H:i:s', strtotime($vuelo['departure_time']));
+                $vuelo['hora_llegada'] = date('H:i:s', strtotime($vuelo['arrival_time']));
+            }
         }
         
         include 'views/layout/header.php';
@@ -325,7 +342,7 @@ switch ($peticion) {
         $offer_id = $_POST['flight_id'] ?? '';
         $nombre_pasajero = $_POST['nombre'] ?? 'Pasajero Anónimo';
         $email_pasajero = $_POST['email'] ?? 'test@example.com';
-        $pasajeros_count = $_POST['pasajeros'] ?? 1;
+        $pasajeros_count = max(1, (int)($_POST['pasajeros'] ?? 1));
         $tipo_viaje = $_POST['tipo_viaje'] ?? 'solo_ida';
         
         $duffelAPI = new DuffelAPI();
@@ -335,67 +352,95 @@ switch ($peticion) {
         $duffel_order_id = null;
         
         if ($offer_data) {
-            // Preparar pasajeros para Duffel
-            $partes_nombre = explode(' ', $nombre_pasajero, 2);
-            $nombre = $partes_nombre[0];
-            $apellido = $partes_nombre[1] ?? $nombre; // Duffel requiere family_name
+            $precio_total = (float)$offer_data['price'];
             
             $passengers_payload = [];
-            // Aquí asumimos que el usuario compra para 1 solo adulto y usa el ID de la oferta
-            if (!empty($offer_data['passengers'])) {
-                $passengers_payload[] = [
-                    'id' => $offer_data['passengers'][0]['id'],
-                    'phone_number' => '+1234567890', // Requiere E.164
-                    'email' => $email_pasajero,
-                    'title' => 'mr',
-                    'gender' => 'm',
-                    'family_name' => $apellido,
-                    'given_name' => $nombre,
-                    'born_on' => '1990-01-01'
-                ];
-            }
-
-            // Duffel ya devuelve en 'price' el monto total combinado para TODOS los pasajeros y TODOS los trayectos (ida y vuelta)
-            $precio_total = $offer_data['price'];
+            $partes_nombre = explode(' ', $nombre_pasajero, 2);
+            $nombre_primero = $partes_nombre[0];
+            $apellido_primero = $partes_nombre[1] ?? $nombre_primero;
             
-            // Intentar crear la orden en Duffel
-            $orden = $duffelAPI->crearOrdenDuffel($offer_id, $passengers_payload, $offer_data['price'], $offer_data['currency']);
+            if (!empty($offer_data['passengers'])) {
+                foreach ($offer_data['passengers'] as $idx => $p_data) {
+                    $p_nombre = $_POST['pasajero_nombre_' . $idx] ?? ($idx === 0 ? $nombre_pasajero : "Pasajero " . ($idx + 1));
+                    $p_partes = explode(' ', trim($p_nombre), 2);
+                    $passengers_payload[] = [
+                        'id' => $p_data['id'],
+                        'phone_number' => '+1234567890',
+                        'email' => $email_pasajero,
+                        'title' => 'mr',
+                        'gender' => 'm',
+                        'family_name' => $p_partes[1] ?? $apellido_primero,
+                        'given_name' => $p_partes[0] ?? $nombre_primero,
+                        'born_on' => '1990-01-01'
+                    ];
+                }
+            }
+            
+            $orden = $duffelAPI->crearOrdenDuffel($offer_id, $passengers_payload, $precio_total, $offer_data['currency']);
             
             if ($orden && isset($orden['id'])) {
                 $duffel_order_id = $orden['id'];
             }
 
-            // Guardamos el vuelo de Duffel en nuestra base de datos local
             $id_vuelo = $vueloModel->guardarVueloDuffel($offer_data);
         } else {
-            $id_vuelo = null;
-            $precio_total = 0;
+            // Vuelo local de BD
+            $vuelo_db = $vueloModel->obtenerPorId($offer_id);
+            if ($vuelo_db) {
+                $id_vuelo = $vuelo_db['id'];
+                $precio_unitario = (float)$vuelo_db['price'];
+                $precio_total = $precio_unitario * $pasajeros_count;
+            } else {
+                $id_vuelo = null;
+                $precio_total = 0;
+            }
         }
         
-        // Creamos un código de reserva aleatorio (PNR)
         $pnr = substr(str_shuffle("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"), 0, 6);
-        
-        // Asignamos NULL si el comprador es un invitado
         $usuario_id = $_SESSION['user_id'] ?? null;
         
-        $reservaModel = new Reserva();
-        $reserva_id = $reservaModel->crearReserva($pnr, $usuario_id, $id_vuelo, $pasajeros_count, $precio_total, $duffel_order_id);
-        
-        if ($reserva_id) {
-            // Separar nombre y apellido simple
-            $partes_nombre = explode(' ', $nombre_pasajero, 2);
-            $nombre = $partes_nombre[0];
-            $apellido = $partes_nombre[1] ?? '';
-            
-            $reservaModel->agregarPasajero($reserva_id, $nombre, $apellido);
+        // Preparar datos del trayecto de vuelta si es ida y vuelta
+        $vuelo_vuelta_data = null;
+        if ($tipo_viaje === 'ida_vuelta' && isset($offer_data['inbound']) && !empty($offer_data['inbound'])) {
+            $inbound = $offer_data['inbound'];
+            $vuelo_vuelta_data = [
+                'airline'           => $inbound['airline'] ?? ($offer_data['airline'] ?? 'Aerolínea'),
+                'flight_number'     => $inbound['flight_number'] ?? 'N/A',
+                'departure_airport' => $inbound['departure_airport'] ?? $offer_data['arrival_airport'] ?? '',
+                'departure_city'    => $inbound['departure_city'] ?? $offer_data['arrival_city'] ?? '',
+                'arrival_airport'   => $inbound['arrival_airport'] ?? $offer_data['departure_airport'] ?? '',
+                'arrival_city'      => $inbound['arrival_city'] ?? $offer_data['departure_city'] ?? '',
+                'departure_time'    => $inbound['departure_time'] ?? '',
+                'departure_date'    => $inbound['departure_date'] ?? '',
+                'arrival_time'      => $inbound['arrival_time'] ?? '',
+                'arrival_date'      => $inbound['arrival_date'] ?? '',
+                'duration'          => $inbound['duration'] ?? 'N/A',
+                'stops'             => $inbound['stops'] ?? 0,
+                'price'             => $offer_data['inbound_price'] ?? round((float)$offer_data['price'] * 0.5, 2),
+                'currency'          => $offer_data['currency'] ?? 'USD',
+            ];
         }
         
-        // Lo mandamos a la pantalla de confirmación exitosa
+        $reservaModel = new Reserva();
+        $reserva_id = $reservaModel->crearReserva($pnr, $usuario_id, $id_vuelo, $pasajeros_count, $precio_total, $duffel_order_id, $tipo_viaje, $vuelo_vuelta_data);
+        
+        if ($reserva_id) {
+            for ($i = 0; $i < $pasajeros_count; $i++) {
+                $p_nombre_input = $_POST['pasajero_nombre_' . $i] ?? ($i === 0 ? $nombre_pasajero : "Pasajero " . ($i + 1));
+                $partes = explode(' ', trim($p_nombre_input), 2);
+                $reservaModel->agregarPasajero($reserva_id, $partes[0], $partes[1] ?? '');
+            }
+        }
+        
         header('Location: index.php?action=confirmacion&pnr=' . $pnr);
         exit();
         break;
 
     case 'confirmacion':
+        $pnr = $_GET['pnr'] ?? '';
+        $reservaModel = new Reserva();
+        $reserva = $reservaModel->obtenerReservaPorPnr($pnr);
+        
         include 'views/layout/header.php';
         include 'views/flights/confirmacion.php';
         include 'views/layout/footer.php';

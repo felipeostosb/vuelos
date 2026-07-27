@@ -244,10 +244,22 @@
                             ?>
                         </div>
 
-                        <div class="flight-action">
+                            <?php
+                                // Para round trip mostramos solo el precio de IDA; para solo ida el precio completo
+                                if (!empty($vuelo['is_round_trip'])) {
+                                    $precio_mostrar = $vuelo['outbound_price'] ?? round((float)$vuelo['price'] / max(1,(int)$pasajeros) * 0.5, 2);
+                                    $label_precio = 'Vuelo de Ida';
+                                    $sublabel = 'Precio por persona · Solo Ida';
+                                } else {
+                                    $precio_mostrar = round((float)$vuelo['price'] / max(1,(int)$pasajeros), 2);
+                                    $label_precio = 'Precio Total';
+                                    $sublabel = '(' . $pasajeros . ' boleto' . ($pasajeros > 1 ? 's' : '') . ')';
+                                }
+                            ?>
                             <div class="price-container">
-                                <p class="price-value precio-base" data-precio="<?php echo $vuelo['price']; ?>"><?php echo htmlspecialchars($vuelo['currency']); ?> <?php echo number_format($vuelo['price'], 2); ?></p>
-                                <p class="price-label">precio total (incluye todos los pasajeros)</p>
+                                <p class="price-value precio-base" data-precio="<?php echo $precio_mostrar; ?>"><?php echo htmlspecialchars($vuelo['currency']); ?> <?php echo number_format($precio_mostrar, 2); ?></p>
+                                <p class="price-label"><?php echo $label_precio; ?></p>
+                                <p class="text-xs text-gray-500 font-medium mt-1"><?php echo $sublabel; ?></p>
                             </div>
                             
                             <?php if ($vuelo['is_round_trip']): ?>
