@@ -162,11 +162,21 @@ class DuffelAPI {
                 'flight_number' => ($outbound_segment['operating_carrier']['iata_code'] ?? '') . ' ' . ($outbound_segment['operating_carrier_flight_number'] ?? ''),
                 'departure_time' => date('H:i', strtotime($outbound_segment['departing_at'])),
                 'departure_date' => date('d/m/Y', strtotime($outbound_segment['departing_at'])),
+                
                 'departure_airport' => $outbound_segment['origin']['iata_code'],
+                'departure_airport_name' => $outbound_segment['origin']['name'] ?? $outbound_segment['origin']['iata_code'],
+                'departure_city' => $outbound_segment['origin']['city_name'] ?? $outbound_segment['origin']['iata_code'],
+                'departure_country' => $outbound_segment['origin']['iata_country_code'] ?? '',
+                
                 'arrival_time' => date('H:i', strtotime($outbound_slice['segments'][count($outbound_slice['segments'])-1]['arriving_at'])),
                 'arrival_date' => date('d/m/Y', strtotime($outbound_slice['segments'][count($outbound_slice['segments'])-1]['arriving_at'])),
                 'arrival_next_day' => (date('Y-m-d', strtotime($outbound_segment['departing_at'])) != date('Y-m-d', strtotime($outbound_slice['segments'][count($outbound_slice['segments'])-1]['arriving_at']))),
+                
                 'arrival_airport' => $outbound_slice['segments'][count($outbound_slice['segments'])-1]['destination']['iata_code'],
+                'arrival_airport_name' => $outbound_slice['segments'][count($outbound_slice['segments'])-1]['destination']['name'] ?? $outbound_slice['segments'][count($outbound_slice['segments'])-1]['destination']['iata_code'],
+                'arrival_city' => $outbound_slice['segments'][count($outbound_slice['segments'])-1]['destination']['city_name'] ?? $outbound_slice['segments'][count($outbound_slice['segments'])-1]['destination']['iata_code'],
+                'arrival_country' => $outbound_slice['segments'][count($outbound_slice['segments'])-1]['destination']['iata_country_code'] ?? '',
+                
                 'duration' => $outbound_slice['duration'] ?? 'N/A',
                 'stops' => count($outbound_slice['segments']) - 1,
             ]

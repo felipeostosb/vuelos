@@ -170,16 +170,49 @@ switch ($peticion) {
             ];
         }
         
-        // Buscar vuelos SOLO en Duffel
-        $ofertas_completas = $duffelAPI->buscarVuelosEnTiempoReal($origen, $destino, $fecha_salida, $fecha_vuelta, $pasajeros);
-        
-        $_SESSION['ofertas_actuales'] = $ofertas_completas;
+        // Verificamos si podemos usar la caché (si los parámetros principales no cambiaron)
+        $use_cache = false;
+        if (isset($_SESSION['datos_busqueda']) && isset($_SESSION['ofertas_actuales'])) {
+            $sess = $_SESSION['datos_busqueda'];
+            if ($sess['origen'] === $origen && 
+                $sess['destino'] === $destino && 
+                $sess['fecha_salida'] === $fecha_salida && 
+                $sess['fecha_vuelta'] === $fecha_vuelta && 
+                $sess['pasajeros'] == $pasajeros &&
+                empty($query_ia)) { // Si es una nueva consulta IA, forzamos recarga
+                $use_cache = true;
+            }
+        }
+
+        if ($use_cache) {
+            $ofertas_completas = $_SESSION['ofertas_actuales'];
+        } else {
+            // Buscar vuelos SOLO en Duffel
+            $ofertas_completas = $duffelAPI->buscarVuelosEnTiempoReal($origen, $destino, $fecha_salida, $fecha_vuelta, $pasajeros);
+            $_SESSION['ofertas_actuales'] = $ofertas_completas;
+        }
+
+        // Filtros adicionales (precio, escalas, aerolíneas)
+        $max_price = isset($_GET['max_price']) ? (float)$_GET['max_price'] : 999999;
+        $stops_filter = isset($_GET['stops']) ? (array)$_GET['stops'] : null;
+        $airlines_filter = isset($_GET['airlines']) ? (array)$_GET['airlines'] : null;
 
         // Agrupar por el trayecto de ida para mostrar únicas (por aerolínea y horario)
         $idas_unicas = [];
         $vuelos_encontrados = [];
         
         foreach ($ofertas_completas as $vuelo) {
+            // Aplicar filtros
+            if ((float)$vuelo['price'] > $max_price) {
+                continue;
+            }
+            if ($stops_filter !== null && !in_array((string)$vuelo['outbound']['stops'], $stops_filter)) {
+                continue;
+            }
+            if ($airlines_filter !== null && !in_array($vuelo['airline'], $airlines_filter)) {
+                continue;
+            }
+
             $signature = $vuelo['outbound']['flight_number'] . '_' . $vuelo['outbound']['departure_time'];
             if (!in_array($signature, $idas_unicas)) {
                 // Guardamos la firma en el array original para usarla en el HTML
@@ -211,6 +244,11 @@ switch ($peticion) {
         $vuelo_ida_seleccionado = null;
         $vuelos_encontrados = [];
         $vueltas_unicas = [];
+
+        // Filtros adicionales (precio, escalas, aerolíneas)
+        $max_price = isset($_GET['max_price']) ? (float)$_GET['max_price'] : 999999;
+        $stops_filter = isset($_GET['stops']) ? (array)$_GET['stops'] : null;
+        $airlines_filter = isset($_GET['airlines']) ? (array)$_GET['airlines'] : null;
         
         foreach ($ofertas as $oferta) {
             $sig_ida = $oferta['outbound']['flight_number'] . '_' . $oferta['outbound']['departure_time'];
@@ -221,6 +259,17 @@ switch ($peticion) {
                 }
                 
                 if (isset($oferta['inbound'])) {
+                    // Aplicar filtros
+                    if ((float)$oferta['price'] > $max_price) {
+                        continue;
+                    }
+                    if ($stops_filter !== null && !in_array((string)$oferta['inbound']['stops'], $stops_filter)) {
+                        continue;
+                    }
+                    if ($airlines_filter !== null && !in_array($oferta['airline'], $airlines_filter)) {
+                        continue;
+                    }
+
                     $sig_vuelta = $oferta['inbound']['flight_number'] . '_' . $oferta['inbound']['departure_time'] . '_' . $oferta['price'];
                     if (!in_array($sig_vuelta, $vueltas_unicas)) {
                         $vueltas_unicas[] = $sig_vuelta;
@@ -304,7 +353,8 @@ switch ($peticion) {
                 ];
             }
 
-            $precio_total = $offer_data['price'] * $pasajeros_count;
+            // Duffel ya devuelve en 'price' el monto total combinado para TODOS los pasajeros y TODOS los trayectos (ida y vuelta)
+            $precio_total = $offer_data['price'];
             
             // Intentar crear la orden en Duffel
             $orden = $duffelAPI->crearOrdenDuffel($offer_id, $passengers_payload, $offer_data['price'], $offer_data['currency']);

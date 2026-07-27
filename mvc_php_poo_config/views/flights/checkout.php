@@ -35,16 +35,18 @@
                         <div class="time-overview" style="justify-content: flex-end;">
                             <div style="text-align:right;">
                                 <p class="time-value"><?php echo htmlspecialchars($slice['departure_time']); ?></p>
-                                <p class="time-airport"><?php echo htmlspecialchars($slice['departure_airport']); ?></p>
-                                <p class="time-date" style="font-size:0.75rem; color:#6b7280; margin-top: 0.25rem; font-weight: 500;"><?php echo htmlspecialchars($slice['departure_date'] ?? ''); ?></p>
+                                <p class="time-airport" title="<?php echo htmlspecialchars($slice['departure_airport_name'] ?? ''); ?>"><?php echo htmlspecialchars($slice['departure_airport']); ?></p>
+                                <p style="font-size:0.75rem; color:#4b5563; font-weight:600; margin-top:0.25rem;"><?php echo htmlspecialchars($slice['departure_city'] ?? ''); ?></p>
+                                <p class="time-date" style="font-size:0.75rem; color:#6b7280; font-weight: 500;"><?php echo htmlspecialchars($slice['departure_date'] ?? ''); ?></p>
                             </div>
                             <div class="time-overview-arrow" style="margin: 0 1rem;">
                                 <i class="fa-solid fa-arrow-right text-gray-400"></i>
                             </div>
                             <div>
                                 <p class="time-value"><?php echo htmlspecialchars($slice['arrival_time']); ?></p>
-                                <p class="time-airport"><?php echo htmlspecialchars($slice['arrival_airport']); ?></p>
-                                <p class="time-date" style="font-size:0.75rem; color:#6b7280; margin-top: 0.25rem; font-weight: 500;"><?php echo htmlspecialchars($slice['arrival_date'] ?? ''); ?></p>
+                                <p class="time-airport" title="<?php echo htmlspecialchars($slice['arrival_airport_name'] ?? ''); ?>"><?php echo htmlspecialchars($slice['arrival_airport']); ?></p>
+                                <p style="font-size:0.75rem; color:#4b5563; font-weight:600; margin-top:0.25rem;"><?php echo htmlspecialchars($slice['arrival_city'] ?? ''); ?></p>
+                                <p class="time-date" style="font-size:0.75rem; color:#6b7280; font-weight: 500;"><?php echo htmlspecialchars($slice['arrival_date'] ?? ''); ?></p>
                             </div>
                         </div>
                     </div>
@@ -64,7 +66,7 @@
                 
                 <div class="summary-footer">
                     <span class="summary-passengers">Pasajeros: <?php echo htmlspecialchars($pasajeros); ?></span>
-                    <span class="summary-total">S/. <?php echo htmlspecialchars($vuelo['price'] * $pasajeros); ?></span>
+                    <span class="summary-total"><?php echo htmlspecialchars($vuelo['currency']); ?> <?php echo htmlspecialchars(number_format($vuelo['price'], 2)); ?></span>
                 </div>
             </div>
         </div>
@@ -132,7 +134,7 @@
                     </div>
 
                     <button type="submit" class="btn btn--primary btn--large btn-checkout">
-                        <i class="fa-solid fa-lock"></i> Confirmar y Pagar S/. <?php echo htmlspecialchars($vuelo['price'] * $pasajeros); ?>
+                        <i class="fa-solid fa-lock"></i> Confirmar y Pagar <?php echo htmlspecialchars($vuelo['currency']); ?> <?php echo htmlspecialchars(number_format($vuelo['price'], 2)); ?>
                     </button>
                     <p class="security-notice"><i class="fa-solid fa-shield-halved"></i> Pago 100% seguro y encriptado</p>
                 </form>

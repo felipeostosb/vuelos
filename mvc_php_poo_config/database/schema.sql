@@ -131,14 +131,20 @@ INSERT INTO usuarios (id, nombre, email, password, rol) VALUES
 (1, 'Administrador', 'admin@novairlines.com', '$2y$10$e8wFh.z9gY.d49.27P8Bquk3F1aGf59L.YfS6J3eMvA0k6b6S7f2S', 'admin'),
 (2, 'Juan Pérez', 'juan@ejemplo.com', '$2y$10$w6x9jY.s8K2Z5V5L7P8Bquk3F1aGf59L.YfS6J3eMvA0k6b6S7f2S', 'cliente');
 
--- 2. Insertar Aeropuertos
+-- 2. Insertar Aeropuertos Principales
 INSERT INTO aeropuertos (id, codigo_iata, nombre, ciudad, pais) VALUES
 (1, 'LIM', 'Aeropuerto Internacional Jorge Chávez', 'Lima', 'Perú'),
 (2, 'MAD', 'Aeropuerto Adolfo Suárez Madrid-Barajas', 'Madrid', 'España'),
 (3, 'CDG', 'Aeropuerto de París-Charles de Gaulle', 'París', 'Francia'),
 (4, 'BOG', 'Aeropuerto Internacional El Dorado', 'Bogotá', 'Colombia'),
 (5, 'CUZ', 'Aeropuerto Internacional Alejandro Velasco Astete', 'Cusco', 'Perú'),
-(6, 'MIA', 'Aeropuerto Internacional de Miami', 'Miami', 'Estados Unidos');
+(6, 'MIA', 'Aeropuerto Internacional de Miami', 'Miami', 'Estados Unidos'),
+(7, 'JFK', 'Aeropuerto Internacional John F. Kennedy', 'Nueva York', 'Estados Unidos'),
+(8, 'LHR', 'Aeropuerto de Londres-Heathrow', 'Londres', 'Reino Unido'),
+(9, 'FCO', 'Aeropuerto de Roma-Fiumicino', 'Roma', 'Italia'),
+(10, 'HND', 'Aeropuerto Internacional de Haneda', 'Tokio', 'Japón'),
+(11, 'BER', 'Aeropuerto de Berlín-Brandeburgo', 'Berlín', 'Alemania'),
+(12, 'AMS', 'Aeropuerto de Ámsterdam-Schiphol', 'Ámsterdam', 'Países Bajos');
 
 -- 3. Insertar Aerolíneas
 INSERT INTO aerolineas (id, codigo_iata, nombre, logo_url) VALUES

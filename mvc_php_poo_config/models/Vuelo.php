@@ -57,9 +57,14 @@ class Vuelo {
                 'flight_number' => $row['numero_vuelo'],
                 'departure_time' => date('H:i', strtotime($row['hora_salida'])),
                 'departure_airport' => $row['origen_iata'],
+                'departure_city' => $row['origen_nombre'], // using nombre or ciudad as fallback
+                'departure_airport_name' => $row['origen_nombre'],
+                
                 'arrival_time' => date('H:i', strtotime($row['hora_llegada'])),
                 'arrival_next_day' => (bool)$row['llegada_dia_siguiente'],
-                'arrival_airport' => $row['destino_ciudad'] == 'Madrid' ? 'MAD' : $row['destino_ciudad'], // Adaptación rápida al formato anterior
+                'arrival_airport' => $row['destino_iata'],
+                'arrival_city' => $row['destino_ciudad'],
+                'arrival_airport_name' => $row['destino_nombre'],
                 'duration' => $row['duracion'],
                 'stops' => $row['escalas'],
                 'price' => $row['precio'],
@@ -91,9 +96,14 @@ class Vuelo {
                 'flight_number' => $row['numero_vuelo'],
                 'departure_time' => date('H:i', strtotime($row['hora_salida'])),
                 'departure_airport' => $row['origen_iata'],
+                'departure_city' => $row['origen_nombre'],
+                'departure_airport_name' => $row['origen_nombre'],
+                
                 'arrival_time' => date('H:i', strtotime($row['hora_llegada'])),
                 'arrival_next_day' => (bool)$row['llegada_dia_siguiente'],
-                'arrival_airport' => $row['destino_ciudad'],
+                'arrival_airport' => $row['destino_iata'],
+                'arrival_city' => $row['destino_ciudad'],
+                'arrival_airport_name' => $row['destino_nombre'],
                 'duration' => $row['duracion'],
                 'stops' => $row['escalas'],
                 'price' => $row['precio'],
@@ -126,14 +136,21 @@ class Vuelo {
     }
 
     public function obtenerIataPorCiudad($ciudad) {
-        $query = "SELECT codigo_iata FROM aeropuertos WHERE ciudad = :ciudad LIMIT 1";
+        $ciudad = trim($ciudad);
+        if (empty($ciudad)) return 'LIM';
+
+        // Búsqueda flexible en la base de datos local usando LIKE para evitar errores de tipeo menores
+        $query = "SELECT codigo_iata FROM aeropuertos WHERE ciudad LIKE :ciudad OR nombre LIKE :ciudad LIMIT 1";
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':ciudad', $ciudad);
+        $searchTerm = "%" . $ciudad . "%";
+        $stmt->bindParam(':ciudad', $searchTerm);
         $stmt->execute();
+        
         if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             return $row['codigo_iata'];
         }
-        return 'LIM'; // Default fallback
+        
+        return 'LIM'; // Default fallback si no existe en BD
     }
 
     public function garantizarAeropuerto($iata, $nombre, $ciudad = '', $pais = '') {
@@ -184,8 +201,17 @@ class Vuelo {
             return $row['id'];
         }
 
-        $id_origen = $this->garantizarAeropuerto($offer['departure_airport'], $offer['departure_airport']);
-        $id_destino = $this->garantizarAeropuerto($offer['arrival_airport'], $offer['arrival_airport']);
+        // Extraer los nombres y ciudades que enviamos desde DuffelAPI, con fallback al código IATA si fallara algo
+        $orig_name = $offer['outbound']['departure_airport_name'] ?? $offer['departure_airport'];
+        $orig_city = $offer['outbound']['departure_city'] ?? $offer['departure_airport'];
+        $orig_country = $offer['outbound']['departure_country'] ?? '';
+        $id_origen = $this->garantizarAeropuerto($offer['departure_airport'], $orig_name, $orig_city, $orig_country);
+
+        $dest_name = $offer['outbound']['arrival_airport_name'] ?? $offer['arrival_airport'];
+        $dest_city = $offer['outbound']['arrival_city'] ?? $offer['arrival_airport'];
+        $dest_country = $offer['outbound']['arrival_country'] ?? '';
+        $id_destino = $this->garantizarAeropuerto($offer['arrival_airport'], $dest_name, $dest_city, $dest_country);
+        
         $id_aerolinea = $this->garantizarAerolinea(substr($offer['flight_number'], 0, 2), $offer['airline']);
 
         $query = "INSERT INTO vuelos (aerolinea_id, numero_vuelo, origen_aeropuerto_id, destino_aeropuerto_id, hora_salida, hora_llegada, llegada_dia_siguiente, duracion, escalas, precio, duffel_offer_id) 
