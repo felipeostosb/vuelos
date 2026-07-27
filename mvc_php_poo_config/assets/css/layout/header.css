@@ -3,9 +3,12 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  background-color: var(--color-secondary); /* #0A192F */
+  background-color: rgba(10, 22, 40, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   color: white;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid rgba(197, 168, 128, 0.15);
 }
 
 .header__container {
@@ -21,25 +24,27 @@
 .header__logo-link {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
 }
 
 .header__logo-icon {
   color: var(--color-primary);
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   transform: rotate(15deg);
+  text-shadow: 0 0 10px rgba(197, 168, 128, 0.4);
 }
 
 .header__logo-text {
   font-size: 1.5rem;
-  font-weight: 700;
-  letter-spacing: -0.025em;
+  font-weight: 800;
+  letter-spacing: 0.5px;
   font-family: var(--font-family-main);
   color: white;
 }
 
 .header__logo-highlight {
   color: var(--color-primary);
+  text-shadow: 0 0 8px rgba(197, 168, 128, 0.3);
 }
 
 .header__nav {
@@ -50,23 +55,23 @@
   .header__nav {
     display: flex;
     align-items: center;
-    gap: 2rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--color-border); /* gray-300 approx for dark headers */
+    gap: 2.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #c5cde0;
   }
 }
 
 .nav__link {
   color: inherit;
   transition: all var(--transition-normal);
-  padding-bottom: 0.25rem;
+  padding: 0.5rem 0;
   border-bottom: 2px solid transparent;
 }
 
 .nav__link:hover {
-  color: white;
-  transform: scale(1.05);
+  color: var(--color-primary);
+  transform: translateY(-1px);
 }
 
 .header__actions {
@@ -85,12 +90,12 @@
     align-items: center;
     gap: 0.5rem;
     font-size: 0.875rem;
-    color: var(--color-border);
+    color: #c5cde0;
     transition: color var(--transition-normal);
   }
   
   .header__phone:hover {
-    color: white;
+    color: var(--color-primary);
   }
 }
 
@@ -103,24 +108,26 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background-color: rgba(31, 41, 55, 0.5);
-  border: 1px solid rgba(55, 65, 81, 1);
-  padding: 0.5rem 1rem;
+  background-color: rgba(19, 34, 56, 0.6);
+  border: 1px solid rgba(197, 168, 128, 0.25);
+  padding: 0.5rem 1.2rem;
   border-radius: var(--radius-xl);
   transition: all var(--transition-normal);
   color: white;
 }
 
 .user-menu__trigger:hover {
-  background-color: rgba(31, 41, 55, 1);
+  background-color: rgba(28, 49, 79, 0.8);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 10px rgba(197, 168, 128, 0.2);
 }
 
 .user-menu__avatar {
   width: 2rem;
   height: 2rem;
   border-radius: 50%;
-  background-color: var(--color-primary);
-  color: white;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+  color: var(--color-dark);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -128,7 +135,7 @@
 }
 
 .user-menu__name {
-  font-weight: 500;
+  font-weight: 600;
   font-size: 0.875rem;
 }
 
@@ -137,7 +144,7 @@
   right: 0;
   top: 100%;
   padding-top: 0.5rem;
-  width: 12rem;
+  width: 13rem;
   z-index: 50;
   display: none;
 }
@@ -147,35 +154,37 @@
 }
 
 .dropdown__content {
-  background-color: var(--color-surface);
+  background-color: rgba(19, 34, 56, 0.95);
+  backdrop-filter: blur(10px);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   padding: 0.5rem 0;
-  border: 1px solid var(--color-border);
+  border: 1px solid rgba(197, 168, 128, 0.25);
 }
 
 .dropdown__item {
   display: block;
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1.2rem;
   font-size: 0.875rem;
-  color: var(--color-text-main);
+  color: #FFFFFF;
   transition: all var(--transition-fast);
 }
 
 .dropdown__item:hover {
-  background-color: var(--color-surface-hover);
+  background-color: rgba(197, 168, 128, 0.1);
   color: var(--color-primary);
 }
 
 .dropdown__item--danger {
-  color: #DC2626; /* red-600 */
+  color: #ef4444;
 }
 
 .dropdown__item--danger:hover {
-  background-color: #FEF2F2; /* red-50 */
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444 !important;
 }
 
 .dropdown__divider {
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid rgba(197, 168, 128, 0.15);
   margin: 0.25rem 0;
 }

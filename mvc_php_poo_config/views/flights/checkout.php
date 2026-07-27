@@ -77,36 +77,36 @@
                     }
                 ?>
 
-                <div class="summary-footer" style="display: flex; flex-direction: column; gap: 0.75rem; background-color: #f8fafc; padding: 1.5rem; border-radius: 1rem; border: 1px solid #e2e8f0; margin-top: 1rem;">
-                    <h3 style="font-size: 0.875rem; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">
-                        <i class="fa-solid fa-calculator text-[#0070F3] mr-2"></i> Desglose de Precios
+                <div class="summary-footer" style="display: flex; flex-direction: column; gap: 0.75rem; background-color: rgba(10,22,40,0.7); padding: 1.5rem; border-radius: 1rem; border: 1px solid rgba(197,168,128,0.2); margin-top: 1rem;">
+                    <h3 style="font-size: 0.875rem; font-weight: 700; color: rgba(197,168,128,0.85); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">
+                        <i class="fa-solid fa-calculator text-brand-gold mr-2"></i> Desglose de Precios
                     </h3>
 
                     <?php if ($is_round_trip): ?>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: #334155;">
-                            <span><i class="fa-solid fa-plane-departure text-[#0070F3] mr-1 font-bold"></i> Pasaje Vuelo de Ida (c/u):</span>
-                            <span style="font-weight: 600;"><?php echo htmlspecialchars($currency); ?> <?php echo number_format($precio_ida, 2); ?></span>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: rgba(255,255,255,0.8);">
+                            <span><i class="fa-solid fa-plane-departure mr-1" style="color: #C5A880;"></i> Pasaje Vuelo de Ida (c/u):</span>
+                            <span style="font-weight: 600; color: #ffffff;"><?php echo htmlspecialchars($currency); ?> <?php echo number_format($precio_ida, 2); ?></span>
                         </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: #334155;">
-                            <span><i class="fa-solid fa-plane-arrival text-[#0070F3] mr-1 font-bold"></i> Pasaje Vuelo de Vuelta (c/u):</span>
-                            <span style="font-weight: 600;"><?php echo htmlspecialchars($currency); ?> <?php echo number_format($precio_vuelta, 2); ?></span>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: rgba(255,255,255,0.8);">
+                            <span><i class="fa-solid fa-plane-arrival mr-1" style="color: #C5A880;"></i> Pasaje Vuelo de Vuelta (c/u):</span>
+                            <span style="font-weight: 600; color: #ffffff;"><?php echo htmlspecialchars($currency); ?> <?php echo number_format($precio_vuelta, 2); ?></span>
                         </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: #1e293b; font-weight: 600; padding-top: 0.35rem; border-top: 1px dashed #cbd5e1;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: #ffffff; font-weight: 600; padding-top: 0.35rem; border-top: 1px dashed rgba(197,168,128,0.3);">
                             <span>Suma (Ida + Vuelta por persona):</span>
-                            <span style="color: #0070F3; font-weight: 700;"><?php echo htmlspecialchars($currency); ?> <?php echo number_format($precio_ida, 2); ?> + <?php echo htmlspecialchars($currency); ?> <?php echo number_format($precio_vuelta, 2); ?> = <?php echo htmlspecialchars($currency); ?> <?php echo number_format($precio_por_pasajero, 2); ?></span>
+                            <span style="color: #C5A880; font-weight: 700;"><?php echo htmlspecialchars($currency); ?> <?php echo number_format($precio_ida, 2); ?> + <?php echo htmlspecialchars($currency); ?> <?php echo number_format($precio_vuelta, 2); ?> = <?php echo htmlspecialchars($currency); ?> <?php echo number_format($precio_por_pasajero, 2); ?></span>
                         </div>
                     <?php else: ?>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: #334155;">
-                            <span><i class="fa-solid fa-plane-departure text-[#0070F3] mr-1 font-bold"></i> Pasaje Solo Ida (c/u):</span>
-                            <span style="font-weight: 600;"><?php echo htmlspecialchars($currency); ?> <?php echo number_format($precio_por_pasajero, 2); ?></span>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.875rem; color: rgba(255,255,255,0.8);">
+                            <span><i class="fa-solid fa-plane-departure mr-1" style="color: #C5A880;"></i> Pasaje Solo Ida (c/u):</span>
+                            <span style="font-weight: 600; color: #ffffff;"><?php echo htmlspecialchars($currency); ?> <?php echo number_format($precio_por_pasajero, 2); ?></span>
                         </div>
                     <?php endif; ?>
 
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.5rem; border-top: 1px solid #e2e8f0;">
-                        <span style="font-size: 0.875rem; font-weight: 600; color: #334155;">
-                            <i class="fa-solid fa-users text-[#0070F3] mr-1"></i> Cantidad de Boletos:
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 0.5rem; border-top: 1px solid rgba(197,168,128,0.2);">
+                        <span style="font-size: 0.875rem; font-weight: 600; color: rgba(255,255,255,0.8);">
+                            <i class="fa-solid fa-users mr-1" style="color: #C5A880;"></i> Cantidad de Boletos:
                         </span>
-                        <span style="font-weight: 700; color: #0f172a; font-size: 0.95rem;">
+                        <span style="font-weight: 700; color: #C5A880; font-size: 0.95rem;">
                             <?php echo $num_pasajeros; ?> boleto<?php echo $num_pasajeros > 1 ? 's' : ''; ?>
                             <?php if ($num_pasajeros > 1): ?>
                                 (x <?php echo htmlspecialchars($currency); ?> <?php echo number_format($precio_por_pasajero, 2); ?>)
@@ -114,19 +114,19 @@
                         </span>
                     </div>
 
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px solid #0070F3; padding-top: 0.85rem; margin-top: 0.25rem;">
-                        <span style="font-size: 1.125rem; font-weight: 800; color: #0f172a;">TOTAL A PAGAR:</span>
-                        <span class="summary-total" style="font-size: 1.65rem; font-weight: 900; color: #0070F3;"><?php echo htmlspecialchars($currency); ?> <?php echo number_format($total_pagar, 2); ?></span>
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px solid rgba(197,168,128,0.5); padding-top: 0.85rem; margin-top: 0.25rem;">
+                        <span style="font-size: 1.125rem; font-weight: 800; color: #ffffff;">TOTAL A PAGAR:</span>
+                        <span class="summary-total" style="font-size: 1.65rem; font-weight: 900; color: #C5A880;"><?php echo htmlspecialchars($currency); ?> <?php echo number_format($total_pagar, 2); ?></span>
                     </div>
                 </div>
             </div>
         </div>
 
         <?php if (!isset($_SESSION['user_id'])): ?>
-        <div class="guest-notice" style="background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 1rem; border-radius: 0.75rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+        <div class="guest-notice" style="background-color: rgba(10,22,40,0.8); border: 1px solid rgba(34,197,94,0.3); padding: 1rem; border-radius: 0.75rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
             <div>
-                <h3 style="font-weight: 600; color: #166534; font-size: 0.875rem;"><i class="fa-solid fa-circle-info" style="margin-right: 0.5rem;"></i> ¿Ya tienes una cuenta?</h3>
-                <p style="color: #15803d; font-size: 0.875rem; margin-top: 0.25rem;">Estás comprando como invitado. Inicia sesión si deseas autocompletar tus datos y guardar tu vuelo.</p>
+                <h3 style="font-weight: 600; color: #4ade80; font-size: 0.875rem;"><i class="fa-solid fa-circle-info" style="margin-right: 0.5rem;"></i> ¿Ya tienes una cuenta?</h3>
+                <p style="color: rgba(255,255,255,0.7); font-size: 0.875rem; margin-top: 0.25rem;">Estás comprando como invitado. Inicia sesión si deseas autocompletar tus datos y guardar tu vuelo.</p>
             </div>
             <a href="index.php?action=home&login=required" style="background-color: #16a34a; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 500; text-decoration: none; white-space: nowrap; margin-left: 1rem;">Iniciar Sesión</a>
         </div>
@@ -146,14 +146,14 @@
                     
                     <div class="space-y-4 mb-6">
                         <div class="form-group">
-                            <label class="form-label font-bold text-gray-800">Pasajero 1 (Titular de la Reserva)</label>
+                            <label class="form-label">Pasajero 1 (Titular de la Reserva)</label>
                             <input type="text" name="nombre" id="pasajero_nombre_0" required placeholder="Ej: Ana María García" class="form-input" value="<?php echo isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : ''; ?>">
                             <input type="hidden" name="pasajero_nombre_0" value="" id="hidden_p0">
                         </div>
 
                         <?php for ($p = 1; $p < (int)$pasajeros; $p++): ?>
-                            <div class="form-group pt-4 border-t border-gray-100">
-                                <label class="form-label font-bold text-gray-800">Pasajero <?php echo ($p + 1); ?></label>
+                            <div class="form-group pt-4" style="border-top: 1px solid rgba(197,168,128,0.15);">
+                                <label class="form-label">Pasajero <?php echo ($p + 1); ?></label>
                                 <input type="text" name="pasajero_nombre_<?php echo $p; ?>" required placeholder="Nombre completo del Pasajero <?php echo ($p + 1); ?>" class="form-input">
                             </div>
                         <?php endfor; ?>
@@ -164,30 +164,30 @@
                         </div>
                     </div>
 
-                    <div class="payment-section mt-8 pt-6 border-t border-gray-200">
-                        <h3 class="text-lg font-bold text-[#0A192F] mb-4"><i class="fa-regular fa-credit-card text-[#0070F3] mr-2"></i> Método de Pago</h3>
+                    <div class="payment-section mt-8 pt-6 border-t border-brand-gold/20">
+                        <h3 class="text-lg font-bold mb-4" style="color: #C5A880;"><i class="fa-regular fa-credit-card mr-2" style="color: #C5A880;"></i> Método de Pago</h3>
                         
-                        <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                        <div style="background-color: rgba(10,22,40,0.7); padding: 1.5rem; border-radius: 1rem; border: 1px solid rgba(197,168,128,0.2);">
                             <div class="mb-4">
-                                <label class="form-label">Número de Tarjeta</label>
+                                <label class="form-label" style="color: rgba(197,168,128,0.8);">Número de Tarjeta</label>
                                 <div class="relative">
                                     <input type="text" placeholder="0000 0000 0000 0000" class="form-input pl-10" required maxlength="19">
-                                    <i class="fa-brands fa-cc-visa absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl"></i>
+                                    <i class="fa-brands fa-cc-visa absolute left-3 top-1/2 transform -translate-y-1/2 text-brand-gold text-xl"></i>
                                 </div>
                             </div>
                             
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label class="form-label">Vencimiento (MM/AA)</label>
+                                    <label class="form-label" style="color: rgba(197,168,128,0.8);">Vencimiento (MM/AA)</label>
                                     <input type="text" placeholder="12/28" class="form-input" required maxlength="5">
                                 </div>
                                 <div>
-                                    <label class="form-label">CVC</label>
+                                    <label class="form-label" style="color: rgba(197,168,128,0.8);">CVC</label>
                                     <input type="password" placeholder="123" class="form-input" required maxlength="4">
                                 </div>
                             </div>
                             <div class="mt-4">
-                                <label class="form-label">Nombre en la tarjeta</label>
+                                <label class="form-label" style="color: rgba(197,168,128,0.8);">Nombre en la tarjeta</label>
                                 <input type="text" placeholder="Como aparece en la tarjeta" class="form-input" required>
                             </div>
                         </div>

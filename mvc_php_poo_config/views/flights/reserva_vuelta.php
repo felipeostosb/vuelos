@@ -13,8 +13,8 @@
                     $fecha_ida = $fecha_partes[0];
                     $fecha_vuelta = $fecha_partes[1] ?? '';
                     
-                    $pasajeros = isset($_GET['pasajeros']) ? htmlspecialchars($_GET['pasajeros']) : '1';
-                    $tipo_viaje = isset($_GET['tipo_viaje']) ? htmlspecialchars($_GET['tipo_viaje']) : 'solo_ida';
+                    $pasajeros = $pasajeros ?? $_SESSION['datos_busqueda']['pasajeros'] ?? (isset($_GET['pasajeros']) ? htmlspecialchars($_GET['pasajeros']) : '1');
+                    $tipo_viaje = isset($_GET['tipo_viaje']) ? htmlspecialchars($_GET['tipo_viaje']) : ($_SESSION['datos_busqueda']['tipo_viaje'] ?? 'solo_ida');
                     $isRoundTrip = $tipo_viaje === 'ida_vuelta';
                 ?>
                 <span class="route-destinations">
@@ -103,7 +103,7 @@
                     
                     <div class="range-labels">
                         <span>S/. 500</span>
-                        <span id="precio-etiqueta" class="bg-[#0070F3] text-white font-bold px-3 py-1 rounded-full">S/. <?php echo $currentPrice; ?></span>
+                        <span id="precio-etiqueta" style="background: linear-gradient(135deg, #C5A880, #9C694C); color: #0A1628; font-weight: 700; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.8rem;">S/. <?php echo $currentPrice; ?></span>
                         <span>S/. 4,000</span>
                     </div>
                 </div>
@@ -165,15 +165,15 @@
             </div>
 
             <?php if (isset($vuelo_ida_seleccionado)): ?>
-            <div class="flight-card" style="margin-bottom: 2rem; border: 2px solid #0070F3; background-color: #f0f7ff;">
-                <div style="font-size:0.875rem; font-weight:bold; color:#0070F3; margin-bottom: 1rem; border-bottom: 1px solid #cce4ff; padding-bottom: 0.5rem;">
+            <div class="flight-card" style="margin-bottom: 2rem; border: 2px solid rgba(197,168,128,0.5); background-color: rgba(19,34,56,0.9);">
+                <div style="font-size:0.875rem; font-weight:bold; color:#4ade80; margin-bottom: 1rem; border-bottom: 1px solid rgba(197,168,128,0.15); padding-bottom: 0.5rem;">
                     <i class="fa-solid fa-check-circle"></i> Vuelo de Ida Seleccionado
                 </div>
                 <div class="flight-times">
                     <div class="time-block">
                         <p class="time-value"><?php echo $vuelo_ida_seleccionado['departure_time']; ?></p>
                         <p class="time-airport"><?php echo $vuelo_ida_seleccionado['departure_airport']; ?></p>
-                        <p class="time-date" style="font-size:0.75rem; color:#6b7280; font-weight: 500; margin-top: 0.25rem;"><?php echo $vuelo_ida_seleccionado['departure_date']; ?></p>
+                        <p class="time-date-text"><?php echo $vuelo_ida_seleccionado['departure_date']; ?></p>
                     </div>
                     
                     <div class="duration-line">
@@ -185,12 +185,12 @@
                     <div class="time-block">
                         <p class="time-value"><?php echo $vuelo_ida_seleccionado['arrival_time']; ?></p>
                         <p class="time-airport"><?php echo $vuelo_ida_seleccionado['arrival_airport']; ?></p>
-                        <p class="time-date" style="font-size:0.75rem; color:#6b7280; font-weight: 500; margin-top: 0.25rem;"><?php echo $vuelo_ida_seleccionado['arrival_date']; ?></p>
+                        <p class="time-date-text"><?php echo $vuelo_ida_seleccionado['arrival_date']; ?></p>
                     </div>
                 </div>
             </div>
             
-            <h3 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem; color: #111827;">Paso 2: Selecciona tu vuelo de regreso</h3>
+            <h3 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem; color: #C5A880;">Paso 2: Selecciona tu vuelo de regreso</h3>
             <?php endif; ?>
 
             <div id="lista-vuelos" class="flight-list">
@@ -202,9 +202,7 @@
                     <div class="flight-card">
                         
                         <?php if ($vuelo['best_price']): ?>
-                        <div class="best-price-badge">
-                            Mejor precio
-                        </div>
+                        <div class="best-price-badge">Mejor precio</div>
                         <?php endif; ?>
 
                         <?php 
@@ -212,45 +210,42 @@
                             if (!function_exists('renderSlice')) {
                                 function renderSlice($slice, $title) {
                         ?>
-                            <div class="slice-container" style="display:flex; flex-direction:column; width:100%; margin-bottom:1rem; border-bottom:1px solid #f3f4f6; padding-bottom:1rem;">
-                                <div style="font-size:0.75rem; font-weight:700; color:#6b7280; text-transform:uppercase; margin-bottom:0.5rem; letter-spacing:0.05em;">
-                                    <?php echo $title; ?>
-                                </div>
-                                <div style="display:flex; width:100%; gap:1.5rem; align-items:center;">
-                                    <div class="airline-info" style="min-width: 150px; flex-shrink: 0; padding-top:0;">
-                                        <div class="airline-logo">
-                                            <i class="fa-solid fa-plane"></i>
-                                        </div>
-                                        <div>
-                                            <h4 class="airline-name" style="font-size:0.875rem;"><?php echo $slice['airline']; ?></h4>
-                                            <p class="flight-number" style="font-size:0.75rem;"><?php echo $slice['flight_number']; ?></p>
-                                        </div>
-                                    </div>
+                            <div class="slice-container">
+                                <span class="slice-title"><?php echo $title; ?></span>
 
-                                    <div class="flight-times" style="flex-grow:1;">
-                                        <div class="time-block">
-                                            <p class="time-value"><?php echo $slice['departure_time']; ?></p>
-                                            <p class="time-airport" title="<?php echo htmlspecialchars($slice['departure_airport_name'] ?? ''); ?>"><?php echo $slice['departure_airport']; ?></p>
-                                            <p style="font-size:0.75rem; color:#4b5563; font-weight:600; margin-top:0.25rem;"><?php echo htmlspecialchars($slice['departure_city'] ?? ''); ?></p>
-                                            <p class="time-date" style="font-size:0.75rem; color:#6b7280; font-weight: 500;"><?php echo $slice['departure_date'] ?? ''; ?></p>
-                                        </div>
-                                        
-                                        <div class="duration-line">
-                                            <span class="duration-text"><?php echo str_replace(['PT', 'H', 'M'], ['','h ','m'], $slice['duration']); ?></span>
-                                            <div class="line-graphic"></div>
-                                            <?php if ($slice['stops'] == 0): ?>
-                                                <span class="stops-badge stops-badge--direct">Directo</span>
-                                            <?php else: ?>
-                                                <span class="stops-badge stops-badge--stops"><?php echo $slice['stops']; ?> escala<?php echo $slice['stops'] > 1 ? 's' : ''; ?></span>
-                                            <?php endif; ?>
-                                        </div>
-                                        
-                                        <div class="time-block">
-                                            <p class="time-value"><?php echo $slice['arrival_time']; ?></p>
-                                            <p class="time-airport" title="<?php echo htmlspecialchars($slice['arrival_airport_name'] ?? ''); ?>"><?php echo $slice['arrival_airport']; ?></p>
-                                            <p style="font-size:0.75rem; color:#4b5563; font-weight:600; margin-top:0.25rem;"><?php echo htmlspecialchars($slice['arrival_city'] ?? ''); ?></p>
-                                            <p class="time-date" style="font-size:0.75rem; color:#6b7280; font-weight: 500;"><?php echo $slice['arrival_date'] ?? ''; ?></p>
-                                        </div>
+                                <div class="airline-info">
+                                    <div class="airline-logo">
+                                        <i class="fa-solid fa-plane"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="airline-name"><?php echo $slice['airline']; ?></h4>
+                                        <p class="flight-number"><?php echo $slice['flight_number']; ?></p>
+                                    </div>
+                                </div>
+
+                                <div class="flight-times">
+                                    <div class="time-block">
+                                        <p class="time-value"><?php echo $slice['departure_time']; ?></p>
+                                        <p class="time-airport" title="<?php echo htmlspecialchars($slice['departure_airport_name'] ?? ''); ?>"><?php echo $slice['departure_airport']; ?></p>
+                                        <p class="time-city"><?php echo htmlspecialchars($slice['departure_city'] ?? ''); ?></p>
+                                        <p class="time-date-text"><?php echo $slice['departure_date'] ?? ''; ?></p>
+                                    </div>
+                                    
+                                    <div class="duration-line">
+                                        <span class="duration-text"><?php echo str_replace(['PT', 'H', 'M'], ['','h ','m'], $slice['duration']); ?></span>
+                                        <div class="line-graphic"></div>
+                                        <?php if ($slice['stops'] == 0): ?>
+                                            <span class="stops-badge stops-badge--direct">Directo</span>
+                                        <?php else: ?>
+                                            <span class="stops-badge stops-badge--stops"><?php echo $slice['stops']; ?> escala<?php echo $slice['stops'] > 1 ? 's' : ''; ?></span>
+                                        <?php endif; ?>
+                                    </div>
+                                    
+                                    <div class="time-block">
+                                        <p class="time-value"><?php echo $slice['arrival_time']; ?></p>
+                                        <p class="time-airport" title="<?php echo htmlspecialchars($slice['arrival_airport_name'] ?? ''); ?>"><?php echo $slice['arrival_airport']; ?></p>
+                                        <p class="time-city"><?php echo htmlspecialchars($slice['arrival_city'] ?? ''); ?></p>
+                                        <p class="time-date-text"><?php echo $slice['arrival_date'] ?? ''; ?></p>
                                     </div>
                                 </div>
                             </div>
@@ -259,32 +254,31 @@
                             }
                         ?>
 
-                        <div style="flex-grow: 1;">
-                            <?php 
-                                renderSlice($vuelo['inbound'], '🛬 Vuelo de Regreso');
-                            ?>
+                        <!-- Cuerpo principal: vuelo de regreso -->
+                        <div class="flight-card-body">
+                            <?php renderSlice($vuelo['inbound'], '🛬 Vuelo de Regreso'); ?>
                         </div>
 
+                        <!-- Panel derecho: precio + botón -->
+                        <div class="flight-action">
                             <?php
-                                // Mostrar solo el precio del trayecto de VUELTA
                                 $precio_vuelta_mostrar = $vuelo['inbound_price'] ?? round((float)$vuelo['price'] / max(1,(int)$pasajeros) * 0.5, 2);
                             ?>
                             <div class="price-container">
                                 <p class="price-value precio-base" data-precio="<?php echo $precio_vuelta_mostrar; ?>"><?php echo htmlspecialchars($vuelo['currency']); ?> <?php echo number_format($precio_vuelta_mostrar, 2); ?></p>
-                                <p class="price-label">Vuelo de Vuelta</p>
-                                <p class="text-xs text-gray-500 font-medium mt-1">Precio por persona · Solo Vuelta</p>
+                                <p class="price-label">VUELO DE VUELTA</p>
+                                <p class="price-sublabel">por persona · solo vuelta</p>
                             </div>
                             
-                            <form action="index.php" method="POST" style="width: 100%;">
+                            <form action="index.php" method="POST" style="width:100%;">
                                 <input type="hidden" name="action" value="checkout">
                                 <input type="hidden" name="flight_id" value="<?php echo $vuelo['id']; ?>">
                                 <input type="hidden" name="pasajeros" class="input-pasajeros" value="<?php echo htmlspecialchars($pasajeros); ?>">
                                 <input type="hidden" name="tipo_viaje" value="ida_vuelta">
-                                <button type="submit" class="btn btn--primary" style="width: 100%;">
-                                    Seleccionar y Reservar <i class="fa-solid fa-arrow-right" style="margin-left: 0.5rem;"></i>
+                                <button type="submit" class="btn-reserve">
+                                    Seleccionar y Reservar <i class="fa-solid fa-arrow-right"></i>
                                 </button>
                             </form>
-                            
                         </div>
                         
                     </div>
