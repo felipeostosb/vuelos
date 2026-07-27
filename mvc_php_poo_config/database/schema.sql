@@ -144,7 +144,9 @@ INSERT INTO aeropuertos (id, codigo_iata, nombre, ciudad, pais) VALUES
 (9, 'FCO', 'Aeropuerto de Roma-Fiumicino', 'Roma', 'Italia'),
 (10, 'HND', 'Aeropuerto Internacional de Haneda', 'Tokio', 'Japón'),
 (11, 'BER', 'Aeropuerto de Berlín-Brandeburgo', 'Berlín', 'Alemania'),
-(12, 'AMS', 'Aeropuerto de Ámsterdam-Schiphol', 'Ámsterdam', 'Países Bajos');
+(12, 'AMS', 'Aeropuerto de Ámsterdam-Schiphol', 'Ámsterdam', 'Países Bajos'),
+(13, 'ICN', 'Aeropuerto Internacional de Incheon', 'Seúl', 'Corea del Sur'),
+(14, 'EZE', 'Aeropuerto Internacional Ministro Pistarini', 'Buenos Aires', 'Argentina');
 
 -- 3. Insertar Aerolíneas
 INSERT INTO aerolineas (id, codigo_iata, nombre, logo_url) VALUES

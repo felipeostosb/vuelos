@@ -114,12 +114,13 @@ class Vuelo {
     }
 
     public function obtenerFiltrosDestinos() {
-        $query = "SELECT DISTINCT ciudad FROM aeropuertos ORDER BY ciudad ASC";
+        $query = "SELECT codigo_iata, ciudad, pais, nombre FROM aeropuertos ORDER BY ciudad ASC";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         $resultados = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $resultados[] = $row['ciudad'];
+            // Formato descriptivo: "Lima (LIM) - Perú"
+            $resultados[] = $row['ciudad'] . ' (' . $row['codigo_iata'] . ') - ' . $row['pais'];
         }
         return $resultados;
     }
@@ -139,11 +140,24 @@ class Vuelo {
         $ciudad = trim($ciudad);
         if (empty($ciudad)) return 'LIM';
 
-        // Búsqueda flexible en la base de datos local usando LIKE para evitar errores de tipeo menores
-        $query = "SELECT codigo_iata FROM aeropuertos WHERE ciudad LIKE :ciudad OR nombre LIKE :ciudad LIMIT 1";
+        // 1. Inteligencia para extraer el código IATA directamente si el usuario seleccionó del datalist
+        // Ej: "Lima (LIM) - Perú" -> Extrae "LIM"
+        if (preg_match('/\(([A-Z]{3})\)/i', $ciudad, $matches)) {
+            return strtoupper($matches[1]);
+        }
+
+        // 2. Búsqueda flexible en la base de datos local (ciudad, país, nombre o código directo)
+        $query = "SELECT codigo_iata FROM aeropuertos 
+                  WHERE ciudad LIKE :busqueda 
+                     OR pais LIKE :busqueda 
+                     OR nombre LIKE :busqueda 
+                     OR codigo_iata = :exacto
+                  LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $searchTerm = "%" . $ciudad . "%";
-        $stmt->bindParam(':ciudad', $searchTerm);
+        $exacto = strtoupper($ciudad);
+        $stmt->bindParam(':busqueda', $searchTerm);
+        $stmt->bindParam(':exacto', $exacto);
         $stmt->execute();
         
         if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
