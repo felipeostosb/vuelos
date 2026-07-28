@@ -395,4 +395,123 @@ function guardar_vuelo_duffel($vuelo_oferta) {
     $consulta_insert->execute();
     return $conexion->lastInsertId();
 }
+
+/**
+ * Obtiene el modo actual de ofertas configurado en el sistema ('peru_destacadas' o 'duffel_api').
+ */
+function obtener_modo_ofertas() {
+    $archivo = __DIR__ . '/../config/settings.json';
+    if (file_exists($archivo)) {
+        $json = json_decode(file_get_contents($archivo), true);
+        if (isset($json['modo_ofertas'])) {
+            return $json['modo_ofertas'];
+        }
+    }
+    return 'peru_destacadas';
+}
+
+/**
+ * Actualiza el modo de ofertas en el archivo de configuración settings.json.
+ */
+function actualizar_modo_ofertas($nuevo_modo) {
+    $archivo = __DIR__ . '/../config/settings.json';
+    $modos_validos = ['peru_destacadas', 'duffel_api'];
+    if (!in_array($nuevo_modo, $modos_validos)) {
+        return false;
+    }
+    $datos = ['modo_ofertas' => $nuevo_modo];
+    return file_put_contents($archivo, json_encode($datos, JSON_PRETTY_PRINT)) !== false;
+}
+
+/**
+ * Obtiene la ruta física de la imagen de un destino o null si no existe.
+ */
+function obtener_imagen_destino($ciudad) {
+    $ciudad_norm = mb_strtolower(trim($ciudad), 'UTF-8');
+    $ciudad_norm = str_replace(['á', 'é', 'í', 'ó', 'ú', 'ñ'], ['a', 'e', 'i', 'o', 'u', 'n'], $ciudad_norm);
+    
+    // Mapeo específico por ciudad
+    if (strpos($ciudad_norm, 'tarapoto') !== false) {
+        $slug = 'tarapoto';
+    } elseif (strpos($ciudad_norm, 'cusco') !== false || strpos($ciudad_norm, 'cuzco') !== false) {
+        $slug = 'cusco';
+    } elseif (strpos($ciudad_norm, 'arequipa') !== false) {
+        $slug = 'arequipa';
+    } elseif (strpos($ciudad_norm, 'bogota') !== false) {
+        $slug = 'bogota';
+    } elseif (strpos($ciudad_norm, 'paris') !== false) {
+        $slug = 'hero_paris';
+    } elseif (strpos($ciudad_norm, 'lima') !== false || strpos($ciudad_norm, 'peru') !== false) {
+        $slug = 'hero_peru';
+    } else {
+        $slug = preg_replace('/[^a-z0-9]/', '', $ciudad_norm);
+    }
+
+    $base_dir = __DIR__ . '/../assets/img/';
+    
+    // Comprobar primero en subcarpeta destinos/
+    if (file_exists($base_dir . 'destinos/' . $slug . '.png')) {
+        return 'assets/img/destinos/' . $slug . '.png';
+    }
+    if (file_exists($base_dir . 'destinos/' . $slug . '.jpg')) {
+        return 'assets/img/destinos/' . $slug . '.jpg';
+    }
+    // Comprobar en raíz de img/
+    if (file_exists($base_dir . $slug . '.png')) {
+        return 'assets/img/' . $slug . '.png';
+    }
+    if (file_exists($base_dir . $slug . '.jpg')) {
+        return 'assets/img/' . $slug . '.jpg';
+    }
+
+    return null; // Fallback automático a ícono
+}
+
+/**
+ * Retorna las 3 ofertas exclusivas destacadas de Perú (Tarapoto, Cusco, Arequipa)
+ */
+function obtener_ofertas_peru_destacadas() {
+    return [
+        [
+            'id' => 'peru_tpp',
+            'origen_iata' => 'LIM',
+            'origen_nombre' => 'Lima',
+            'destino_ciudad' => 'Tarapoto',
+            'destino_iata' => 'TPP',
+            'aerolinea_nombre' => 'NovAirlines Boutique',
+            'escalas' => 0,
+            'precio' => 189.00,
+            'tag' => 'Selva & Palmeras',
+            'desc' => 'Disfrute de la magia de la Laguna Azul y la selva alta en un vuelo directo exclusivo.',
+            'imagen' => obtener_imagen_destino('Tarapoto')
+        ],
+        [
+            'id' => 'peru_cuz',
+            'origen_iata' => 'LIM',
+            'origen_nombre' => 'Lima',
+            'destino_ciudad' => 'Cusco',
+            'destino_iata' => 'CUZ',
+            'aerolinea_nombre' => 'NovAirlines Boutique',
+            'escalas' => 0,
+            'precio' => 219.00,
+            'tag' => 'Machu Picchu & Valle Sagrado',
+            'desc' => 'Conecte con la capital del Imperio Inca y la majestuosidad de los Andes con servicio de primera.',
+            'imagen' => obtener_imagen_destino('Cusco')
+        ],
+        [
+            'id' => 'peru_aqp',
+            'origen_iata' => 'LIM',
+            'origen_nombre' => 'Lima',
+            'destino_ciudad' => 'Arequipa',
+            'destino_iata' => 'AQP',
+            'aerolinea_nombre' => 'NovAirlines Boutique',
+            'escalas' => 0,
+            'precio' => 199.00,
+            'tag' => 'Ciudad Blanca & Colca',
+            'desc' => 'Admire los majestuosos volcanes Misti y Chachani y la mejor arquitectura en sillar de Sudamérica.',
+            'imagen' => obtener_imagen_destino('Arequipa')
+        ]
+    ];
+}
 ?>
+

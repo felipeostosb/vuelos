@@ -221,4 +221,44 @@ function crear_usuario_admin($nombre, $email, $password, $rol = 'cliente') {
         return false;
     }
 }
+
+/**
+ * Permite subir/reemplazar la fotografía de un destino desde el panel de administración.
+ */
+function subir_imagen_destino_admin($ciudad_slug, $archivo_file) {
+    if (empty($archivo_file['name']) || $archivo_file['error'] !== UPLOAD_ERR_OK) {
+        return false;
+    }
+
+    $ext = strtolower(pathinfo($archivo_file['name'], PATHINFO_EXTENSION));
+    $extensiones_permitidas = ['jpg', 'jpeg', 'png', 'webp'];
+    
+    if (!in_array($ext, $extensiones_permitidas)) {
+        return false;
+    }
+
+    $dir_destinos = __DIR__ . '/../assets/img/destinos/';
+    if (!is_dir($dir_destinos)) {
+        mkdir($dir_destinos, 0755, true);
+    }
+
+    $slug_limpio = preg_replace('/[^a-z0-9_-]/', '', strtolower($ciudad_slug));
+    if (empty($slug_limpio)) {
+        return false;
+    }
+
+    // Eliminar versiones anteriores con otras extensiones si existieran
+    foreach (['jpg', 'jpeg', 'png', 'webp'] as $old_ext) {
+        $old_file = $dir_destinos . $slug_limpio . '.' . $old_ext;
+        if (file_exists($old_file)) {
+            @unlink($old_file);
+        }
+    }
+
+    $extension_guardar = ($ext === 'jpeg') ? 'jpg' : $ext;
+    $target_file = $dir_destinos . $slug_limpio . '.' . $extension_guardar;
+
+    return move_uploaded_file($archivo_file['tmp_name'], $target_file);
+}
 ?>
+

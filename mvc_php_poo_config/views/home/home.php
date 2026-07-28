@@ -232,28 +232,39 @@
 
     <section class="section-container" style="background-color: rgba(72, 50, 79, 0.15); border-top: 1px solid rgba(197, 168, 128, 0.15); border-bottom: 1px solid rgba(197, 168, 128, 0.15);">
         <h2 class="section-title" style="margin-bottom: 0.5rem;">Ofertas y promociones</h2>
-        <p class="section-subtitle">Precios actualizados por IA cada hora</p>
+        <p class="section-subtitle">Tarifas destacadas y promociones exclusivas NovAirlines</p>
         
         <?php
             require_once 'models/Vuelo.php';
-            $todos = obtener_todos_los_vuelos();
-            $ofertas_home = array_filter($todos, function($v) {
-                return (bool)$v['es_mejor_precio'];
-            });
-            $ofertas_home = array_slice($ofertas_home, 0, 3);
+            $modo_home = obtener_modo_ofertas();
+            if ($modo_home === 'peru_destacadas') {
+                $ofertas_home = obtener_ofertas_peru_destacadas();
+            } else {
+                $todos = obtener_todos_los_vuelos();
+                $ofertas_home = array_filter($todos, function($v) {
+                    return (bool)($v['es_mejor_precio'] ?? true);
+                });
+                $ofertas_home = array_slice($ofertas_home, 0, 3);
+            }
         ?>
         <div class="cards-grid">
             <?php foreach ($ofertas_home as $oferta): ?>
+            <?php $img_home = $oferta['imagen'] ?? obtener_imagen_destino($oferta['destino_ciudad'] ?? ''); ?>
             <div class="card group">
-                <a href="?action=buscar&destino=<?php echo urlencode($oferta['destino_ciudad']); ?>" class="card-image-wrapper">
-                    <div class="h-full w-full bg-brand-purple/40 flex items-center justify-center">
-                        <i class="fa-solid fa-fire text-5xl text-brand-gold"></i>
-                    </div>
-                    <span class="card-badge"><i class="fa-solid fa-fire"></i> HOT</span>
+                <a href="?action=buscar&origen=Lima&destino=<?php echo urlencode($oferta['destino_ciudad']); ?>" class="card-image-wrapper relative overflow-hidden" style="height: 17rem;">
+                    <?php if (!empty($img_home)): ?>
+                        <img src="<?php echo htmlspecialchars($img_home); ?>" alt="<?php echo htmlspecialchars($oferta['destino_ciudad']); ?>" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#0A1628] via-transparent to-transparent"></div>
+                    <?php else: ?>
+                        <div class="h-full w-full bg-brand-purple/40 flex items-center justify-center">
+                            <i class="fa-solid fa-fire text-5xl text-brand-gold"></i>
+                        </div>
+                    <?php endif; ?>
+                    <span class="card-badge absolute top-3 right-3 z-10"><i class="fa-solid fa-fire"></i> HOT</span>
                 </a>
                 <div class="card-content">
                     <div>
-                        <h3 class="card-title"><?php echo htmlspecialchars($oferta['origen_nombre'] ?? 'LIM'); ?> → <?php echo htmlspecialchars($oferta['destino_ciudad']); ?></h3>
+                        <h3 class="card-title"><?php echo htmlspecialchars($oferta['origen_nombre'] ?? 'Lima'); ?> → <?php echo htmlspecialchars($oferta['destino_ciudad']); ?></h3>
                         <p class="card-subtitle">Con <?php echo htmlspecialchars($oferta['aerolinea_nombre']); ?></p>
                     </div>
                     <div class="card-footer">
@@ -261,7 +272,7 @@
                             <p class="card-price-label">desde</p>
                             <p class="card-price-value">S/. <?php echo number_format($oferta['precio'], 2); ?></p>
                         </div>
-                        <a href="?action=buscar&destino=<?php echo urlencode($oferta['destino_ciudad']); ?>" class="btn btn--primary">Reservar</a>
+                        <a href="?action=buscar&origen=Lima&destino=<?php echo urlencode($oferta['destino_ciudad']); ?>" class="btn btn--primary">Reservar</a>
                     </div>
                 </div>
             </div>

@@ -78,6 +78,85 @@ require_once __DIR__ . '/../layout/header.php';
             </div>
         </div>
 
+        <?php $modo_actual_ofertas = obtener_modo_ofertas(); ?>
+        <!-- CONFIGURACIÓN DE OFERTAS DEL SITIO -->
+        <div class="bg-[#132238]/80 backdrop-blur border border-[#C5A880]/30 rounded-3xl p-6 shadow-xl">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-[#C5A880] text-lg">⚙️</span>
+                        <h2 class="text-lg font-light text-white tracking-wide">Configuración de Ofertas y Promociones</h2>
+                    </div>
+                    <p class="text-xs text-slate-300 font-light mt-1">Seleccione el origen de las ofertas mostradas en la portada y la sección de Promociones</p>
+                </div>
+
+                <form action="index.php?action=admin_guardar_modo_ofertas" method="POST" class="flex flex-wrap items-center gap-3">
+                    <label class="flex items-center space-x-2 bg-[#0A1628] border border-[#C5A880]/30 px-4 py-2.5 rounded-xl cursor-pointer hover:border-[#C5A880] transition">
+                        <input type="radio" name="modo_ofertas" value="peru_destacadas" <?= $modo_actual_ofertas === 'peru_destacadas' ? 'checked' : '' ?> class="accent-[#C5A880]">
+                        <span class="text-xs font-light text-white">🇵🇪 3 Ofertas Perú (Tarapoto, Cusco, Arequipa)</span>
+                    </label>
+                    
+                    <label class="flex items-center space-x-2 bg-[#0A1628] border border-[#C5A880]/30 px-4 py-2.5 rounded-xl cursor-pointer hover:border-[#C5A880] transition">
+                        <input type="radio" name="modo_ofertas" value="duffel_api" <?= $modo_actual_ofertas === 'duffel_api' ? 'checked' : '' ?> class="accent-[#C5A880]">
+                        <span class="text-xs font-light text-white">⚡ Ofertas Live Duffel API</span>
+                    </label>
+
+                    <button type="submit" class="px-5 py-2.5 bg-[#C5A880] hover:bg-[#b4966e] text-[#0A1628] font-light text-xs uppercase tracking-widest rounded-xl transition duration-300 shadow-md">
+                        Guardar
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- GESTOR DE SUBIDA DE FOTOGRAFÍAS DE DESTINOS -->
+        <div class="bg-[#132238]/80 backdrop-blur border border-[#C5A880]/30 rounded-3xl p-6 shadow-xl mt-4">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-[#C5A880] text-lg">🖼️</span>
+                        <h2 class="text-lg font-light text-white tracking-wide">Gestor de Fotografías de Destinos</h2>
+                    </div>
+                    <p class="text-xs text-slate-300 font-light mt-1">Suba y reemplace fotografías (horizontales o verticales) para los destinos de Perú. Se adaptan automáticamente al diseño.</p>
+                </div>
+
+                <form action="index.php?action=admin_subir_imagen_oferta" method="POST" enctype="multipart/form-data" class="flex flex-wrap items-center gap-3">
+                    <select name="destino_slug" required class="bg-[#0A1628] border border-[#C5A880]/30 text-xs font-light text-white px-4 py-2.5 rounded-xl focus:outline-none focus:border-[#C5A880]">
+                        <option value="" disabled selected>-- Seleccione Destino --</option>
+                        <option value="tarapoto">🌴 Tarapoto (TPP)</option>
+                        <option value="cusco">🏔️ Cusco (CUZ)</option>
+                        <option value="arequipa">🌋 Arequipa (AQP)</option>
+                    </select>
+
+                    <input type="file" name="imagen_destino" accept="image/jpeg,image/png,image/webp" required class="text-xs text-slate-300 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-light file:bg-[#C5A880]/15 file:text-[#C5A880] hover:file:bg-[#C5A880]/25 cursor-pointer">
+
+                    <button type="submit" class="px-5 py-2.5 bg-[#C5A880] hover:bg-[#b4966e] text-[#0A1628] font-light text-xs uppercase tracking-widest rounded-xl transition duration-300 shadow-md flex items-center space-x-1.5">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <span>Subir Imagen</span>
+                    </button>
+                </form>
+            </div>
+            
+            <!-- VISTAS PREVIAS DE LAS FOTOS ACTUALES -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 pt-4 border-t border-[#C5A880]/15">
+                <?php foreach (['Tarapoto' => 'tarapoto', 'Cusco' => 'cusco', 'Arequipa' => 'arequipa'] as $nombre_c => $slug_c): ?>
+                    <?php $img_actual = obtener_imagen_destino($nombre_c); ?>
+                    <div class="flex items-center space-x-3 bg-[#0A1628]/60 p-2.5 rounded-xl border border-[#C5A880]/15">
+                        <div class="w-12 h-14 rounded-lg overflow-hidden bg-[#132238] flex-shrink-0 flex items-center justify-center border border-[#C5A880]/20">
+                            <?php if ($img_actual): ?>
+                                <img src="<?= htmlspecialchars($img_actual) ?>" class="w-full h-full object-cover">
+                            <?php else: ?>
+                                <i class="fa-solid fa-plane-departure text-slate-500 text-xs"></i>
+                            <?php endif; ?>
+                        </div>
+                        <div class="overflow-hidden">
+                            <span class="block text-xs font-light text-white truncate"><?= $nombre_c ?></span>
+                            <span class="block text-[10px] text-slate-400 font-light truncate"><?= $img_actual ? 'Foto Personalizada' : 'Sin foto (Ícono)' ?></span>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
         <!-- PESTAÑAS NAVEGABLES -->
         <div class="border-b border-[#C5A880]/20 flex space-x-6">
             <button onclick="cambiarPestana('reservas')" id="tab-btn-reservas" class="tab-btn pb-3 font-light text-xs uppercase tracking-widest border-b-2 border-[#C5A880] text-[#C5A880] transition flex items-center space-x-2">

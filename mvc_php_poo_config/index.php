@@ -624,6 +624,46 @@ switch ($accion) {
         exit();
         break;
 
+    case 'admin_guardar_modo_ofertas':
+        $rol_actual = $_SESSION['usuario']['rol'] ?? '';
+        if ($rol_actual !== 'admin') {
+            header('Location: index.php?action=home');
+            exit();
+        }
+
+        $modo = $_POST['modo_ofertas'] ?? 'peru_destacadas';
+        if (actualizar_modo_ofertas($modo)) {
+            $nombre_modo = ($modo === 'peru_destacadas') ? 'Ofertas Destacadas de Perú (Tarapoto, Cusco, Arequipa)' : 'Ofertas en Tiempo Real de Duffel API';
+            header('Location: index.php?action=admin&mensaje=Modo+de+ofertas+actualizado+exitosamente+a:+' . urlencode($nombre_modo));
+        } else {
+            header('Location: index.php?action=admin&error=Error+al+actualizar+modo+de+ofertas');
+        }
+        exit();
+        break;
+
+    case 'admin_subir_imagen_oferta':
+        $rol_actual = $_SESSION['usuario']['rol'] ?? '';
+        if ($rol_actual !== 'admin') {
+            header('Location: index.php?action=home');
+            exit();
+        }
+
+        $ciudad_slug = $_POST['destino_slug'] ?? '';
+        $archivo = $_FILES['imagen_destino'] ?? null;
+
+        if (!empty($ciudad_slug) && $archivo) {
+            $exito = subir_imagen_destino_admin($ciudad_slug, $archivo);
+            if ($exito) {
+                header('Location: index.php?action=admin&mensaje=Fotografía+de+' . urlencode($ciudad_slug) . '+actualizada+exitosamente');
+            } else {
+                header('Location: index.php?action=admin&error=Error+al+subir+la+imagen.+Asegúrese+de+usar+formato+JPG,+PNG+o+WEBP');
+            }
+        } else {
+            header('Location: index.php?action=admin&error=Seleccione+un+destino+y+un+archivo+de+imagen');
+        }
+        exit();
+        break;
+
     // ------------------------------------------------------------------------------------------
     // ACCIÓN POR DEFECTO SI LA RUTA NO EXISTE
     // ------------------------------------------------------------------------------------------
