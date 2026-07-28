@@ -102,7 +102,7 @@
                                 <tr>
                                     <td class="table-label">Extra</td>
                                     <td>S/. 80</td>
-                                    <td class="text-success font-bold">✅ Gratis</td>
+                                    <td class="text-emerald-400 font-light">✅ Gratis</td>
                                 </tr>
                             </tbody>
                         </table>

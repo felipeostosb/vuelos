@@ -72,8 +72,8 @@
                             <!-- Etiqueta del trayecto -->
                             <div style="display:flex; align-items:center; gap:0.5rem; padding: 0.65rem 1.25rem; background: <?php echo $leg_color; ?>18; border-bottom: 1px solid <?php echo $leg_color; ?>30;">
                                 <i class="fa-solid <?php echo $leg_icon; ?>" style="color:<?php echo $leg_color; ?>; font-size:0.85rem;"></i>
-                                <span style="font-size:0.78rem; font-weight:800; color:<?php echo $leg_color; ?>; text-transform:uppercase; letter-spacing:0.06em;"><?php echo $leg_label; ?></span>
-                                <span style="margin-left:auto; font-size:0.7rem; font-weight:600; color:#64748b; background:#f1f5f9; padding:2px 8px; border-radius:99px;">PNR: <strong style="color:#0070F3;"><?php echo htmlspecialchars($pnr); ?></strong></span>
+                                <span style="font-size:0.78rem; font-weight:300; color:<?php echo $leg_color; ?>; text-transform:uppercase; letter-spacing:0.1em;"><?php echo $leg_label; ?></span>
+                                <span style="margin-left:auto; font-size:0.7rem; font-weight:300; color:#94a3b8; background:rgba(10,22,40,0.6); padding:2px 10px; border-radius:99px; border:1px solid rgba(197,168,128,0.2);">PNR: <strong style="color:#C5A880; font-weight:300;"><?php echo htmlspecialchars($pnr); ?></strong></span>
                             </div>
 
                             <div class="flex flex-col md:flex-row" style="width:100%;">
@@ -102,8 +102,8 @@
                                         <div class="ticket-time-block">
                                             <p class="ticket-time"><?php echo $dep_time; ?></p>
                                             <p class="ticket-airport"><?php echo $dep_airport; ?></p>
-                                            <?php if ($dep_city): ?><p style="font-size:0.72rem;color:#6b7280;margin-top:2px;"><?php echo $dep_city; ?></p><?php endif; ?>
-                                            <?php if ($dep_date): ?><p style="font-size:0.72rem;color:#6b7280;"><?php echo $dep_date; ?></p><?php endif; ?>
+                                            <?php if ($dep_city): ?><p style="font-size:0.72rem;color:#94a3b8;margin-top:2px;"><?php echo $dep_city; ?></p><?php endif; ?>
+                                            <?php if ($dep_date): ?><p style="font-size:0.72rem;color:#94a3b8;"><?php echo $dep_date; ?></p><?php endif; ?>
                                         </div>
                                         <div class="ticket-duration-line">
                                             <i class="fa-solid fa-plane ticket-plane-icon" style="color:<?php echo $leg_color; ?>;"></i>
@@ -112,7 +112,7 @@
                                         <div class="ticket-time-block">
                                             <p class="ticket-time"><?php echo $arr_time; ?></p>
                                             <p class="ticket-airport"><?php echo $arr_airport; ?></p>
-                                            <?php if ($arr_city): ?><p style="font-size:0.72rem;color:#6b7280;margin-top:2px;"><?php echo $arr_city; ?></p><?php endif; ?>
+                                            <?php if ($arr_city): ?><p style="font-size:0.72rem;color:#94a3b8;margin-top:2px;"><?php echo $arr_city; ?></p><?php endif; ?>
                                         </div>
                                     </div>
                                 </div>
@@ -120,7 +120,7 @@
                                 <!-- Lado derecho: PNR, precio y acción -->
                                 <div class="ticket-side">
                                     <div style="margin-bottom:0.75rem;">
-                                        <span style="background:<?php echo $leg_color; ?>15; color:<?php echo $leg_color; ?>; font-size:0.75rem; font-weight:700; padding:3px 12px; border-radius:99px; border:1px solid <?php echo $leg_color; ?>40;">
+                                        <span style="background:<?php echo $leg_color; ?>15; color:<?php echo $leg_color; ?>; font-size:0.75rem; font-weight:300; padding:3px 12px; border-radius:99px; border:1px solid <?php echo $leg_color; ?>40;">
                                             <i class="fa-solid fa-ticket mr-1"></i> <?php echo $pax_count; ?> Boleto<?php echo $pax_count > 1 ? 's' : ''; ?>
                                         </span>
                                     </div>
@@ -129,8 +129,8 @@
                                     <p class="pnr-value"><?php echo htmlspecialchars($pnr); ?></p>
 
                                     <div style="margin-top:0.5rem; margin-bottom:1rem;">
-                                        <p class="text-xs text-slate-500 font-medium">Precio <?php echo $leg_label; ?></p>
-                                        <p class="text-lg font-extrabold text-[#0A192F]"><?php echo htmlspecialchars($currency); ?> <?php echo $precio_fmt; ?></p>
+                                        <p class="text-xs text-slate-400 font-light">Precio <?php echo $leg_label; ?></p>
+                                        <p class="text-lg font-light text-[#C5A880]"><?php echo htmlspecialchars($currency); ?> <?php echo $precio_fmt; ?></p>
                                     </div>
 
                                     <?php if ($isCheckedIn): ?>
@@ -147,7 +147,7 @@
                                         </form>
                                     <?php endif; ?>
 
-                                    <a href="index.php?action=generarBoleto&pnr=<?php echo htmlspecialchars($pnr); ?>" target="_blank" style="display:flex; align-items:center; justify-center:center; gap:0.4rem; margin-top:0.5rem; background:#dc2626; color:#ffffff; font-weight:700; font-size:0.75rem; padding:0.4rem 0.8rem; border-radius:8px; text-decoration:none; text-align:center;">
+                                    <a href="index.php?action=generarBoleto&pnr=<?php echo htmlspecialchars($pnr); ?>" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:0.4rem; margin-top:0.5rem; background:transparent; border: 1px solid rgba(197,168,128,0.4); color:#C5A880; font-weight:300; font-size:0.75rem; padding:0.45rem 0.8rem; border-radius:10px; text-decoration:none; text-align:center; transition: all 0.3s;" onmouseover="this.style.background='#C5A880'; this.style.color='#0A1628';" onmouseout="this.style.background='transparent'; this.style.color='#C5A880';">
                                         <i class="fa-solid fa-file-pdf"></i> Descargar Ticket (PDF)
                                     </a>
                                 </div>

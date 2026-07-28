@@ -283,7 +283,7 @@
                 <div class="popular-card-overlay"></div>
                 <div class="popular-card-content">
                     <h3 class="popular-card-title"><?php echo htmlspecialchars($destino_pop); ?></h3>
-                    <a href="?action=buscar&destino=<?php echo urlencode($destino_pop); ?>" class="text-white hover:underline text-sm font-medium mt-1 inline-block">Ver vuelos</a>
+                    <a href="?action=buscar&destino=<?php echo urlencode($destino_pop); ?>" class="text-[#C5A880] hover:underline text-xs font-light tracking-wider mt-1 inline-block">Ver vuelos <i class="fa-solid fa-arrow-right text-[10px] ml-1"></i></a>
                 </div>
             </div>
             <?php endforeach; ?>

@@ -251,9 +251,10 @@
 }
 
 .ticket-passenger-name {
-    font-weight: 700;
+    font-weight: 300;
     color: #FFFFFF;
     margin: 0;
+    letter-spacing: 0.03em;
 }
 
 .ticket-flight-times {
@@ -266,13 +267,14 @@
 
 .ticket-time {
     font-size: 1.6rem;
-    font-weight: 700;
+    font-weight: 300;
     color: #FFFFFF;
+    letter-spacing: 0.03em;
 }
 
 .ticket-airport {
     font-size: 0.875rem;
-    font-weight: 600;
+    font-weight: 300;
     color: var(--color-primary);
 }
 
@@ -289,7 +291,7 @@
     background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-accent) 100%);
     color: white;
     font-size: 0.65rem;
-    font-weight: 700;
+    font-weight: 300;
     padding: 0.2rem 0.6rem;
     border-radius: 9999px;
     position: absolute;
@@ -311,7 +313,7 @@
 
 .ticket-return-date {
     font-size: 0.7rem;
-    font-weight: 700;
+    font-weight: 300;
     color: var(--color-text-muted);
     margin-top: 0.25rem;
 }
@@ -346,7 +348,7 @@
 
 .pnr-value {
     font-size: 2rem;
-    font-weight: 800;
+    font-weight: 300;
     color: var(--color-primary);
     letter-spacing: 0.1em;
     margin-bottom: 1.5rem;
@@ -360,7 +362,7 @@
     color: #4ade80;
     padding: 0.65rem 0;
     border-radius: var(--radius-lg);
-    font-weight: 700;
+    font-weight: 300;
     text-align: center;
     display: flex;
     align-items: center;

@@ -248,7 +248,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
+    font-weight: 300;
     margin-bottom: 0.5rem;
     box-shadow: 0 2px 10px rgba(197, 168, 128, 0.2);
 }
@@ -256,6 +256,7 @@
 .process-step-text {
     font-size: 0.75rem;
     color: var(--color-text-muted);
+    font-weight: 300;
 }
 
 /* BAGGAGE TABLE */
@@ -277,7 +278,8 @@
     color: var(--color-primary);
     text-align: center;
     padding: 1rem;
-    font-weight: 700;
+    font-weight: 300;
+    letter-spacing: 0.05em;
     border-bottom: 1px solid rgba(197, 168, 128, 0.15);
 }
 
