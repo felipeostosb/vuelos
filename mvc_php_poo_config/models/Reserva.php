@@ -1,163 +1,358 @@
 <?php
+/**
+ * ==============================================================================================
+ * MÓDULO DE GESTIÓN DE RESERVAS (VERSIÓN PROCEDURAL SIMPLE)
+ * ==============================================================================================
+ * Este archivo contiene todas las funciones para crear, consultar y actualizar reservas
+ * y pasajeros en el sistema.
+ * ==============================================================================================
+ */
+
 require_once __DIR__ . '/../config/database.php';
 
-class Reserva {
-    private $conn;
+/**
+ * Registra una nueva reserva en la base de datos y retorna su ID generado.
+ */
+function crear_reserva($pnr, $usuario_id, $vuelo_id, $pasajeros_count, $precio_total, $duffel_order_id = null, $tipo_viaje = 'solo_ida', $vuelo_vuelta_data = null) {
+    $conexion = conectar_db();
+    if (!$conexion) return false;
 
-    public function __construct() {
-        $database = new Database();
-        $this->conn = $database->getConnection();
+    $sql = "INSERT INTO reservas (pnr, usuario_id, vuelo_id, duffel_order_id, tipo_viaje, precio_total, pasajeros_count, vuelo_vuelta_data, estado) 
+            VALUES (:pnr, :usuario_id, :vuelo_id, :duffel_order_id, :tipo_viaje, :precio_total, :pasajeros_count, :vuelo_vuelta_data, 'Confirmada')";
+    
+    $consulta = $conexion->prepare($sql);
+    $consulta->bindParam(':pnr', $pnr);
+    $consulta->bindParam(':usuario_id', $usuario_id);
+    $consulta->bindParam(':vuelo_id', $vuelo_id);
+    $consulta->bindParam(':duffel_order_id', $duffel_order_id);
+    $consulta->bindParam(':tipo_viaje', $tipo_viaje);
+    $consulta->bindParam(':precio_total', $precio_total);
+    $consulta->bindParam(':pasajeros_count', $pasajeros_count);
+    
+    $vuelo_vuelta_json = $vuelo_vuelta_data ? json_encode($vuelo_vuelta_data) : null;
+    $consulta->bindParam(':vuelo_vuelta_data', $vuelo_vuelta_json);
+    
+    if ($consulta->execute()) {
+        return $conexion->lastInsertId();
     }
+    return false;
+}
 
-    public function crearReserva($pnr, $usuario_id, $vuelo_id, $pasajeros_count, $precio_total, $duffel_order_id = null, $tipo_viaje = 'solo_ida', $vuelo_vuelta_data = null) {
-        $query = "INSERT INTO reservas (pnr, usuario_id, vuelo_id, duffel_order_id, tipo_viaje, precio_total, pasajeros_count, vuelo_vuelta_data, estado) 
-                  VALUES (:pnr, :usuario_id, :vuelo_id, :duffel_order_id, :tipo_viaje, :precio_total, :pasajeros_count, :vuelo_vuelta_data, 'Confirmada')";
-        
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':pnr', $pnr);
-        $stmt->bindParam(':usuario_id', $usuario_id);
-        $stmt->bindParam(':vuelo_id', $vuelo_id);
-        $stmt->bindParam(':duffel_order_id', $duffel_order_id);
-        $stmt->bindParam(':tipo_viaje', $tipo_viaje);
-        $stmt->bindParam(':precio_total', $precio_total);
-        $stmt->bindParam(':pasajeros_count', $pasajeros_count);
-        $vuelo_vuelta_json = $vuelo_vuelta_data ? json_encode($vuelo_vuelta_data) : null;
-        $stmt->bindParam(':vuelo_vuelta_data', $vuelo_vuelta_json);
-        
-        if($stmt->execute()) {
-            return $this->conn->lastInsertId();
+/**
+ * Asocia un pasajero a una reserva existente con sus datos completos.
+ */
+function agregar_pasajero($reserva_id, $nombre, $apellido = '', $email = null, $tipo_documento = 'DNI', $numero_documento = null) {
+    $conexion = conectar_db();
+    if (!$conexion) return false;
+
+    $sql = "INSERT INTO pasajeros (reserva_id, nombre, apellido, email, tipo_documento, numero_documento) 
+            VALUES (:reserva_id, :nombre, :apellido, :email, :tipo_documento, :numero_documento)";
+    $consulta = $conexion->prepare($sql);
+    $consulta->bindParam(':reserva_id', $reserva_id);
+    $consulta->bindParam(':nombre', $nombre);
+    $consulta->bindParam(':apellido', $apellido);
+    $consulta->bindParam(':email', $email);
+    $consulta->bindParam(':tipo_documento', $tipo_documento);
+    $consulta->bindParam(':numero_documento', $numero_documento);
+    
+    return $consulta->execute();
+}
+
+/**
+ * Obtiene la lista de pasajeros pertenecientes a una reserva.
+ */
+function obtener_pasajeros($reserva_id) {
+    $conexion = conectar_db();
+    if (!$conexion) return [];
+
+    $sql = "SELECT * FROM pasajeros WHERE reserva_id = :reserva_id";
+    $consulta = $conexion->prepare($sql);
+    $consulta->bindParam(':reserva_id', $reserva_id);
+    $consulta->execute();
+    
+    return $consulta->fetchAll(PDO::FETCH_ASSOC);
+}
+
+/**
+ * Busca los detalles de una reserva utilizando su código PNR (ej: X7Y8Z9).
+ */
+function obtener_reserva_por_pnr($pnr) {
+    $conexion = conectar_db();
+    if (!$conexion) return null;
+
+    $sql = "SELECT r.*, v.numero_vuelo, al.nombre as aerolinea_nombre, 
+                   a_origen.codigo_iata as origen_iata, a_origen.ciudad as origen_ciudad, a_origen.nombre as origen_nombre,
+                   a_destino.codigo_iata as destino_iata, a_destino.ciudad as destino_ciudad, a_destino.nombre as destino_nombre,
+                   v.hora_salida, v.hora_llegada, v.duracion, v.escalas, v.precio as precio_unitario_vuelo
+            FROM reservas r
+            LEFT JOIN vuelos v ON r.vuelo_id = v.id
+            LEFT JOIN aerolineas al ON v.aerolinea_id = al.id
+            LEFT JOIN aeropuertos a_origen ON v.origen_aeropuerto_id = a_origen.id
+            LEFT JOIN aeropuertos a_destino ON v.destino_aeropuerto_id = a_destino.id
+            WHERE r.pnr = :pnr LIMIT 1";
+              
+    $consulta = $conexion->prepare($sql);
+    $consulta->bindParam(':pnr', $pnr);
+    $consulta->execute();
+    
+    if ($fila = $consulta->fetch(PDO::FETCH_ASSOC)) {
+        $lista_pasajeros = obtener_pasajeros($fila['id']);
+        $pasajero_principal = !empty($lista_pasajeros) ? trim($lista_pasajeros[0]['nombre'] . ' ' . $lista_pasajeros[0]['apellido']) : 'Pasajero';
+
+        return [
+            'id' => $fila['id'],
+            'pnr' => $fila['pnr'],
+            'estado' => $fila['estado'],
+            'fecha_reserva' => $fila['fecha_reserva'],
+            'precio_total' => (float)$fila['precio_total'],
+            'pasajeros_count' => (int)$fila['pasajeros_count'],
+            'tipo_viaje' => $fila['tipo_viaje'] ?? 'solo_ida',
+            'duffel_order_id' => $fila['duffel_order_id'],
+            'pasajeros' => $lista_pasajeros,
+            'pasajero_nombre' => $pasajero_principal,
+            'vuelo' => [
+                'flight_number' => $fila['numero_vuelo'] ?? 'N/A',
+                'airline' => $fila['aerolinea_nombre'] ?? 'Aerolínea',
+                'departure_airport' => $fila['origen_iata'] ?? 'LIM',
+                'departure_city' => $fila['origen_ciudad'] ?? 'Lima',
+                'arrival_airport' => $fila['destino_iata'] ?? $fila['destino_ciudad'] ?? 'DEST',
+                'arrival_city' => $fila['destino_ciudad'] ?? 'Destino',
+                'departure_time' => !empty($fila['hora_salida']) ? date('H:i', strtotime($fila['hora_salida'])) : '08:00',
+                'arrival_time' => !empty($fila['hora_llegada']) ? date('H:i', strtotime($fila['hora_llegada'])) : '12:00',
+                'duration' => $fila['duracion'] ?? '2h 00m',
+                'stops' => $fila['escalas'] ?? 0,
+                'date' => date('d M Y', strtotime($fila['fecha_reserva']))
+            ]
+        ];
+    }
+    return null;
+}
+
+/**
+ * Obtiene todas las reservas pertenecientes a un usuario registrado.
+ */
+function obtener_reservas_usuario($usuario_id) {
+    $conexion = conectar_db();
+    if (!$conexion) return [];
+
+    $sql = "SELECT r.*, v.numero_vuelo, al.nombre as aerolinea_nombre, 
+                   a_origen.codigo_iata as origen_iata, a_origen.ciudad as origen_ciudad,
+                   a_destino.codigo_iata as destino_iata, a_destino.ciudad as destino_ciudad,
+                   v.hora_salida, v.hora_llegada
+            FROM reservas r
+            LEFT JOIN vuelos v ON r.vuelo_id = v.id
+            LEFT JOIN aerolineas al ON v.aerolinea_id = al.id
+            LEFT JOIN aeropuertos a_origen ON v.origen_aeropuerto_id = a_origen.id
+            LEFT JOIN aeropuertos a_destino ON v.destino_aeropuerto_id = a_destino.id
+            WHERE r.usuario_id = :usuario_id
+            ORDER BY r.fecha_reserva DESC";
+              
+    $consulta = $conexion->prepare($sql);
+    $consulta->bindParam(':usuario_id', $usuario_id);
+    $consulta->execute();
+    
+    $resultados = [];
+    while ($fila = $consulta->fetch(PDO::FETCH_ASSOC)) {
+        $lista_pasajeros = obtener_pasajeros($fila['id']);
+        $pasajero_principal = !empty($lista_pasajeros) ? trim($lista_pasajeros[0]['nombre'] . ' ' . $lista_pasajeros[0]['apellido']) : 'Pasajero';
+
+        $vuelo_vuelta = null;
+        if (!empty($fila['vuelo_vuelta_data'])) {
+            $vuelo_vuelta = json_decode($fila['vuelo_vuelta_data'], true);
         }
-        return false;
+
+        $resultados[] = [
+            'id' => $fila['id'],
+            'pnr' => $fila['pnr'],
+            'estado' => $fila['estado'],
+            'fecha_reserva' => $fila['fecha_reserva'],
+            'precio_total' => (float)$fila['precio_total'],
+            'pasajeros_count' => (int)$fila['pasajeros_count'],
+            'tipo_viaje' => $fila['tipo_viaje'] ?? 'solo_ida',
+            'pasajero_nombre' => $pasajero_principal,
+            'pasajeros' => $lista_pasajeros,
+            'fecha_retorno' => '',
+            'vuelo_vuelta' => $vuelo_vuelta,
+            'vuelo' => [
+                'flight_number' => $fila['numero_vuelo'] ?? 'N/A',
+                'airline' => $fila['aerolinea_nombre'] ?? 'Aerolínea',
+                'departure_airport' => $fila['origen_iata'] ?? 'LIM',
+                'arrival_airport' => $fila['destino_iata'] ?? $fila['destino_ciudad'] ?? 'DEST',
+                'departure_time' => !empty($fila['hora_salida']) ? date('H:i', strtotime($fila['hora_salida'])) : '08:00',
+                'arrival_time' => !empty($fila['hora_llegada']) ? date('H:i', strtotime($fila['hora_llegada'])) : '12:00',
+                'date' => date('d M Y', strtotime($fila['fecha_reserva']))
+            ]
+        ];
+    }
+    return $resultados;
+}
+
+/**
+ * Actualiza el estado de la reserva a "Checked-in" dado su PNR.
+ */
+function realizar_checkin($pnr, $usuario_id) {
+    $conexion = conectar_db();
+    if (!$conexion) return false;
+
+    $sql = "UPDATE reservas SET estado = 'Checked-in' WHERE pnr = :pnr AND (usuario_id = :usuario_id OR :usuario_id = 999)";
+    $consulta = $conexion->prepare($sql);
+    $consulta->bindParam(':pnr', $pnr);
+    $consulta->bindParam(':usuario_id', $usuario_id);
+    
+    return $consulta->execute() && $consulta->rowCount() > 0;
+}
+
+/**
+ * Genera y descarga el boleto electrónico (E-Ticket) en PDF utilizando la librería Dompdf.
+ */
+function generar_boleto_pdf($pnr) {
+    // 1. Cargamos el autoloader de Composer para la librería Dompdf
+    require_once __DIR__ . '/../vendor/autoload.php';
+    
+    // 2. Buscamos los datos de la reserva por su código PNR
+    $reserva = obtener_reserva_por_pnr($pnr);
+    if (!$reserva) {
+        echo "No se encontró ninguna reserva con el código PNR proporcionado.";
+        return;
     }
 
-    public function agregarPasajero($reserva_id, $nombre, $apellido = '') {
-        $query = "INSERT INTO pasajeros (reserva_id, nombre, apellido) VALUES (:reserva_id, :nombre, :apellido)";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':reserva_id', $reserva_id);
-        $stmt->bindParam(':nombre', $nombre);
-        $stmt->bindParam(':apellido', $apellido);
-        
-        return $stmt->execute();
-    }
+    $vuelo = $reserva['vuelo'] ?? [];
+    $pasajeros = $reserva['pasajeros'] ?? [];
+    $total_pagado = number_format($reserva['precio_total'], 2);
+    $cant_pasajeros = max(1, (int)$reserva['pasajeros_count']);
+    $precio_unitario = number_format($reserva['precio_total'] / $cant_pasajeros, 2);
+    $es_ida_vuelta = ($reserva['tipo_viaje'] === 'ida_vuelta');
+    $fecha_actual = date('d/m/Y H:i');
 
-    public function obtenerPasajeros($reserva_id) {
-        $query = "SELECT * FROM pasajeros WHERE reserva_id = :reserva_id";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':reserva_id', $reserva_id);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    public function obtenerReservaPorPnr($pnr) {
-        $query = "SELECT r.*, v.numero_vuelo, al.nombre as aerolinea_nombre, 
-                         a_origen.codigo_iata as origen_iata, a_origen.ciudad as origen_ciudad, a_origen.nombre as origen_nombre,
-                         a_destino.codigo_iata as destino_iata, a_destino.ciudad as destino_ciudad, a_destino.nombre as destino_nombre,
-                         v.hora_salida, v.hora_llegada, v.duracion, v.escalas, v.precio as precio_unitario_vuelo
-                  FROM reservas r
-                  LEFT JOIN vuelos v ON r.vuelo_id = v.id
-                  LEFT JOIN aerolineas al ON v.aerolinea_id = al.id
-                  LEFT JOIN aeropuertos a_origen ON v.origen_aeropuerto_id = a_origen.id
-                  LEFT JOIN aeropuertos a_destino ON v.destino_aeropuerto_id = a_destino.id
-                  WHERE r.pnr = :pnr LIMIT 1";
-                  
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':pnr', $pnr);
-        $stmt->execute();
-        
-        if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $pasajeros = $this->obtenerPasajeros($row['id']);
-            $pasajero_principal = !empty($pasajeros) ? trim($pasajeros[0]['nombre'] . ' ' . $pasajeros[0]['apellido']) : 'Pasajero';
-
-            return [
-                'id' => $row['id'],
-                'pnr' => $row['pnr'],
-                'estado' => $row['estado'],
-                'fecha_reserva' => $row['fecha_reserva'],
-                'precio_total' => (float)$row['precio_total'],
-                'pasajeros_count' => (int)$row['pasajeros_count'],
-                'tipo_viaje' => $row['tipo_viaje'] ?? 'solo_ida',
-                'duffel_order_id' => $row['duffel_order_id'],
-                'pasajeros' => $pasajeros,
-                'pasajero_nombre' => $pasajero_principal,
-                'vuelo' => [
-                    'flight_number' => $row['numero_vuelo'] ?? 'N/A',
-                    'airline' => $row['aerolinea_nombre'] ?? 'Aerolínea',
-                    'departure_airport' => $row['origen_iata'] ?? 'LIM',
-                    'departure_city' => $row['origen_ciudad'] ?? 'Lima',
-                    'arrival_airport' => $row['destino_iata'] ?? $row['destino_ciudad'] ?? 'DEST',
-                    'arrival_city' => $row['destino_ciudad'] ?? 'Destino',
-                    'departure_time' => !empty($row['hora_salida']) ? date('H:i', strtotime($row['hora_salida'])) : '08:00',
-                    'arrival_time' => !empty($row['hora_llegada']) ? date('H:i', strtotime($row['hora_llegada'])) : '12:00',
-                    'duration' => $row['duracion'] ?? '2h 00m',
-                    'stops' => $row['escalas'] ?? 0,
-                    'date' => date('d M Y', strtotime($row['fecha_reserva']))
-                ]
-            ];
+    // 3. Armamos la lista HTML de pasajeros
+    $html_pasajeros = '';
+    if (!empty($pasajeros)) {
+        foreach ($pasajeros as $pas) {
+            $nombre_completo = trim($pas['nombre'] . ' ' . $pas['apellido']);
+            if (empty($nombre_completo)) continue;
+            
+            $doc_info = !empty($pas['numero_documento']) ? ' &nbsp;<span style="color:#64748b; font-size:11px;">(' . htmlspecialchars($pas['tipo_documento'] ?? 'DNI') . ': ' . htmlspecialchars($pas['numero_documento']) . ')</span>' : '';
+            $html_pasajeros .= '<li style="margin-bottom: 6px;"><strong>' . htmlspecialchars($nombre_completo) . '</strong>' . $doc_info . '</li>';
         }
-        return null;
+    }
+    if (empty($html_pasajeros)) {
+        $nombre_fallback = !empty(trim($reserva['pasajero_nombre'] ?? '')) ? $reserva['pasajero_nombre'] : 'Pasajero Registrado';
+        $html_pasajeros = '<li><strong>' . htmlspecialchars($nombre_fallback) . '</strong></li>';
     }
 
-    public function obtenerReservasUsuario($usuario_id) {
-        $query = "SELECT r.*, v.numero_vuelo, al.nombre as aerolinea_nombre, 
-                         a_origen.codigo_iata as origen_iata, a_origen.ciudad as origen_ciudad,
-                         a_destino.codigo_iata as destino_iata, a_destino.ciudad as destino_ciudad,
-                         v.hora_salida, v.hora_llegada
-                  FROM reservas r
-                  LEFT JOIN vuelos v ON r.vuelo_id = v.id
-                  LEFT JOIN aerolineas al ON v.aerolinea_id = al.id
-                  LEFT JOIN aeropuertos a_origen ON v.origen_aeropuerto_id = a_origen.id
-                  LEFT JOIN aeropuertos a_destino ON v.destino_aeropuerto_id = a_destino.id
-                  WHERE r.usuario_id = :usuario_id
-                  ORDER BY r.fecha_reserva DESC";
-                  
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':usuario_id', $usuario_id);
-        $stmt->execute();
-        
-        $resultados = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $pasajeros = $this->obtenerPasajeros($row['id']);
-            $pasajero_principal = !empty($pasajeros) ? trim($pasajeros[0]['nombre'] . ' ' . $pasajeros[0]['apellido']) : 'Pasajero';
+    // 4. Construimos el diseño HTML estilizado para el ticket en PDF
+    $html = '
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <title>Boleto de Avión - ' . htmlspecialchars($pnr) . '</title>
+        <style>
+            body { font-family: "Helvetica", "Arial", sans-serif; color: #1e293b; margin: 0; padding: 25px; font-size: 13px; line-height: 1.5; }
+            .header { background-color: #0A1628; color: #ffffff; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: center; }
+            .logo-title { font-size: 26px; font-weight: bold; color: #C5A880; letter-spacing: 3px; margin: 0; }
+            .subtitle { font-size: 11px; color: #94a3b8; text-transform: uppercase; margin-top: 4px; letter-spacing: 1px; }
+            
+            .pnr-box { background-color: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 10px; padding: 15px; text-align: center; margin-bottom: 20px; }
+            .pnr-label { font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; }
+            .pnr-code { font-size: 34px; font-weight: bold; color: #0070F3; letter-spacing: 6px; font-family: monospace; }
+            
+            .card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px; margin-bottom: 18px; }
+            .card-title { font-size: 13px; font-weight: bold; color: #0A1628; border-bottom: 2px solid #0070F3; padding-bottom: 6px; margin-bottom: 14px; text-transform: uppercase; }
+            
+            table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+            th { text-align: left; font-size: 10px; color: #64748b; text-transform: uppercase; padding-bottom: 6px; border-bottom: 1px solid #f1f5f9; }
+            td { font-size: 13px; font-weight: bold; color: #0f172a; padding-top: 8px; padding-bottom: 8px; }
+            
+            .price-row { display: table; width: 100%; margin-top: 6px; padding-top: 6px; border-top: 1px solid #f1f5f9; }
+            .price-label { display: table-cell; font-size: 12px; color: #475569; }
+            .price-val { display: table-cell; text-align: right; font-size: 12px; font-weight: bold; color: #0f172a; }
+            
+            .total-box { background-color: #eff6ff; border: 1px solid #bfdbfe; padding: 14px; border-radius: 8px; margin-top: 12px; text-align: right; }
+            .total-label { font-size: 13px; font-weight: bold; color: #1e3a8a; }
+            .total-amount { font-size: 24px; font-weight: bold; color: #0070F3; }
+            
+            .notice-box { background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 12px 16px; margin-top: 20px; font-size: 11px; color: #14532d; border-radius: 4px; }
+            .footer { text-align: center; margin-top: 30px; font-size: 10px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 12px; }
+            .barcode { font-family: monospace; font-size: 22px; letter-spacing: 5px; text-align: center; color: #475569; margin-top: 15px; }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1 class="logo-title">NOVAIRLINES</h1>
+            <div class="subtitle">Boleto Electrónico de Viaje / E-Ticket</div>
+        </div>
 
-            // Parsear datos del vuelo de vuelta si existen
-            $vuelo_vuelta = null;
-            if (!empty($row['vuelo_vuelta_data'])) {
-                $vuelo_vuelta = json_decode($row['vuelo_vuelta_data'], true);
-            }
+        <div class="pnr-box">
+            <div class="pnr-label">Código de Reserva (PNR)</div>
+            <div class="pnr-code">' . htmlspecialchars($pnr) . '</div>
+        </div>
 
-            $resultados[] = [
-                'id' => $row['id'],
-                'pnr' => $row['pnr'],
-                'estado' => $row['estado'],
-                'fecha_reserva' => $row['fecha_reserva'],
-                'precio_total' => (float)$row['precio_total'],
-                'pasajeros_count' => (int)$row['pasajeros_count'],
-                'tipo_viaje' => $row['tipo_viaje'] ?? 'solo_ida',
-                'pasajero_nombre' => $pasajero_principal,
-                'pasajeros' => $pasajeros,
-                'fecha_retorno' => '',
-                'vuelo_vuelta' => $vuelo_vuelta,
-                'vuelo' => [
-                    'flight_number' => $row['numero_vuelo'] ?? 'N/A',
-                    'airline' => $row['aerolinea_nombre'] ?? 'Aerolínea',
-                    'departure_airport' => $row['origen_iata'] ?? 'LIM',
-                    'arrival_airport' => $row['destino_iata'] ?? $row['destino_ciudad'] ?? 'DEST',
-                    'departure_time' => !empty($row['hora_salida']) ? date('H:i', strtotime($row['hora_salida'])) : '08:00',
-                    'arrival_time' => !empty($row['hora_llegada']) ? date('H:i', strtotime($row['hora_llegada'])) : '12:00',
-                    'date' => date('d M Y', strtotime($row['fecha_reserva']))
-                ]
-            ];
-        }
-        return $resultados;
-    }
+        <div class="card">
+            <div class="card-title">1. Detalles del Vuelo</div>
+            <table>
+                <tr>
+                    <th>Aerolínea / Vuelo</th>
+                    <th>Ruta</th>
+                    <th>Horarios</th>
+                    <th>Tipo de Viaje</th>
+                </tr>
+                <tr>
+                    <td>' . htmlspecialchars($vuelo['airline'] ?? 'NovAirlines') . ' (' . htmlspecialchars($vuelo['flight_number'] ?? 'N/A') . ')</td>
+                    <td>' . htmlspecialchars($vuelo['departure_airport'] ?? 'LIM') . ' &rarr; ' . htmlspecialchars($vuelo['arrival_airport'] ?? 'DEST') . '</td>
+                    <td>' . htmlspecialchars($vuelo['departure_time'] ?? '08:00') . ' - ' . htmlspecialchars($vuelo['arrival_time'] ?? '10:00') . '</td>
+                    <td>' . ($es_ida_vuelta ? 'Ida y Vuelta' : 'Solo Ida') . '</td>
+                </tr>
+            </table>
+        </div>
 
-    public function hacerCheckin($pnr, $usuario_id) {
-        $query = "UPDATE reservas SET estado = 'Checked-in' WHERE pnr = :pnr AND (usuario_id = :usuario_id OR :usuario_id = 999)";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':pnr', $pnr);
-        $stmt->bindParam(':usuario_id', $usuario_id);
-        
-        return $stmt->execute() && $stmt->rowCount() > 0;
-    }
+        <div class="card">
+            <div class="card-title">2. Pasajero(s) Registrado(s)</div>
+            <ul style="margin: 0; padding-left: 20px; color: #1e293b;">
+                ' . $html_pasajeros . '
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">3. Resumen del Pago</div>
+            <div class="price-row">
+                <div class="price-label">Cantidad de Pasajeros:</div>
+                <div class="price-val">' . $cant_pasajeros . ' boleto(s)</div>
+            </div>
+            <div class="price-row">
+                <div class="price-label">Precio Unitario por Boleto:</div>
+                <div class="price-val">S/. ' . $precio_unitario . '</div>
+            </div>
+            <div class="total-box">
+                <span class="total-label">TOTAL PAGADO: </span>
+                <span class="total-amount">S/. ' . $total_pagado . '</span>
+            </div>
+        </div>
+
+        <div class="notice-box">
+            <strong>Información Importante:</strong>
+            <br>&bull; Presente este boleto electrónico junto con su documento de identidad (DNI o Pasaporte) en el mostrador del aeropuerto.
+            <br>&bull; El Check-in online estará disponible 24 horas antes de su vuelo utilizando su código PNR: <strong>' . htmlspecialchars($pnr) . '</strong>.
+            <br>&bull; Preséntese en el aeropuerto con 2 horas de anticipación para vuelos nacionales y 3 horas para vuelos internacionales.
+        </div>
+
+        <div class="barcode">||| | |||| | ||||| ||| |||| | ||| | |||</div>
+
+        <div class="footer">
+            NovAirlines S.A. &bull; Tu viaje con Inteligencia Artificial &bull; Emitido el ' . $fecha_actual . ' &bull; Soporte: +51 1 234 5678
+        </div>
+    </body>
+    </html>
+    ';
+
+    // 5. Instanciamos la clase Dompdf exactamente como en el ejemplo del alumno
+    $dompdf = new \Dompdf\Dompdf();
+    $dompdf->loadHtml($html);
+    $dompdf->setPaper('A4', 'portrait');
+    $dompdf->render();
+
+    // 6. Enviamos el PDF generado al navegador para la descarga del usuario
+    $dompdf->stream("Boleto_NovAirlines_" . $pnr . ".pdf", ["Attachment" => true]);
+    exit();
 }
 ?>

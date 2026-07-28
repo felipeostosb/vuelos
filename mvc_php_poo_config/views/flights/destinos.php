@@ -10,8 +10,7 @@
     <section class="max-w-[1560px] mx-auto px-12 mt-12">
         <?php
             require_once 'config/database.php';
-            $db = new Database();
-            $conn = $db->getConnection();
+            $conn = conectar_db();
             $aeropuertos = [];
             
             if ($conn) {

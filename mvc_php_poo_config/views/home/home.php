@@ -56,8 +56,7 @@
                     <div class="search-fields-container">
                         <?php
                             require_once 'models/Vuelo.php';
-                            $vueloModel = new Vuelo();
-                            $opciones = $vueloModel->obtenerFiltrosDestinos();
+                            $opciones = obtener_filtros_destinos();
                         ?>
                         <div class="search-grid">
                             <div class="input-container">
@@ -236,10 +235,8 @@
         <p class="section-subtitle">Precios actualizados por IA cada hora</p>
         
         <?php
-            if (!isset($vueloModel)) {
-                $vueloModel = new Vuelo();
-            }
-            $todos = $vueloModel->obtenerTodos();
+            require_once 'models/Vuelo.php';
+            $todos = obtener_todos_los_vuelos();
             $ofertas_home = array_filter($todos, function($v) {
                 return (bool)$v['es_mejor_precio'];
             });

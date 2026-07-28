@@ -27,3 +27,5 @@ fix_*.php
 
 # Dependencias (si usas composer más adelante)
 /vendor/
+composer.phar
+

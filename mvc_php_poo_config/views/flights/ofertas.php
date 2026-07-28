@@ -11,8 +11,7 @@
         
         <?php
             require_once 'models/Vuelo.php';
-            $vueloModel = new Vuelo();
-            $todos = $vueloModel->obtenerTodos();
+            $todos = obtener_todos_los_vuelos();
             $mejores_ofertas = array_filter($todos, function($v) {
                 return (bool)$v['es_mejor_precio'];
             });

@@ -1,32 +1,45 @@
 <?php
+/**
+ * ==============================================================================================
+ * ARCHIVO DE CONEXIÓN A LA BASE DE DATOS (VERSIÓN PROCEDURAL SIMPLE)
+ * ==============================================================================================
+ * Este archivo establece la conexión entre PHP y la base de datos MySQL.
+ * Está diseñado sin clases ni POO para que los estudiantes de nivel básico 
+ * entiendan y puedan explicar fácilmente cada línea durante su sustentación.
+ * ==============================================================================================
+ */
+
+// Cargamos la función para leer el archivo de configuración .env
 require_once __DIR__ . '/env.php';
 
-class Database {
-    private $host;
-    private $db_name;
-    private $username;
-    private $password;
-    public $conn;
+/**
+ * Función principal para obtener una conexión activa a MySQL.
+ * Retorna un objeto de conexión PDO o null si falla.
+ */
+function conectar_db() {
+    // 1. Leemos las variables de configuración del entorno (o usamos valores por defecto)
+    $servidor = $_ENV['DB_HOST'] ?? 'localhost';
+    $base_datos = $_ENV['DB_NAME'] ?? 'novairlines_db';
+    $usuario = $_ENV['DB_USER'] ?? 'root';
+    $password = $_ENV['DB_PASS'] ?? '';
 
-    public function __construct() {
-        // Obtenemos los valores desde las variables de entorno
-        $this->host = $_ENV['DB_HOST'] ?? 'localhost';
-        $this->db_name = $_ENV['DB_NAME'] ?? 'novairlines_db';
-        $this->username = $_ENV['DB_USER'] ?? 'root';
-        $this->password = $_ENV['DB_PASS'] ?? '';
-    }
+    try {
+        // 2. Creamos la cadena de conexión PDO especificando el servidor y la base de datos
+        $cadena_conexion = "mysql:host=" . $servidor . ";dbname=" . $base_datos . ";charset=utf8";
 
-    public function getConnection() {
-        $this->conn = null;
+        // 3. Intentamos conectar a la base de datos
+        $conexion = new PDO($cadena_conexion, $usuario, $password);
 
-        try {
-            $this->conn = new PDO("mysql:host=" . $this->host . ";dbname=" . $this->db_name, $this->username, $this->password);
-            $this->conn->exec("set names utf8");
-        } catch(PDOException $exception) {
-            echo "Error de conexión: " . $exception->getMessage();
-        }
+        // 4. Configuramos el modo de errores para que lance excepciones claras si hay fallos
+        $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        return $this->conn;
+        // 5. Retornamos la conexión lista para ser usada en las consultas
+        return $conexion;
+
+    } catch (PDOException $error) {
+        // En caso de error de conexión, mostramos un mensaje explicativo y retornamos null
+        echo "Error al conectar con la Base de Datos: " . $error->getMessage();
+        return null;
     }
 }
 ?>

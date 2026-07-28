@@ -53,16 +53,38 @@
                     <?php endif; ?>
 
                     <!-- Pasajeros -->
-                    <?php if (!empty($reserva['pasajeros'])): ?>
                     <div class="pt-4 border-t border-slate-200 mb-4">
-                        <p class="text-xs text-slate-500 mb-2 font-semibold">Pasajero(s) Registrado(s):</p>
-                        <ul class="list-disc list-inside text-sm text-slate-700 font-medium">
-                            <?php foreach ($reserva['pasajeros'] as $pas): ?>
-                                <li><?php echo htmlspecialchars(trim($pas['nombre'] . ' ' . $pas['apellido'])); ?></li>
-                            <?php endforeach; ?>
-                        </ul>
+                        <p class="text-xs text-slate-500 mb-2 font-bold uppercase tracking-wider">Pasajero(s) Registrado(s):</p>
+                        <div class="space-y-2">
+                            <?php 
+                            $hay_pax = false;
+                            if (!empty($reserva['pasajeros'])) {
+                                foreach ($reserva['pasajeros'] as $idx => $pas) {
+                                    $nombre_p = trim(($pas['nombre'] ?? '') . ' ' . ($pas['apellido'] ?? ''));
+                                    if (empty($nombre_p)) continue;
+                                    $hay_pax = true;
+                                    $doc_p = !empty($pas['numero_documento']) ? ' <span class="text-xs text-slate-500 font-normal">(' . htmlspecialchars($pas['tipo_documento'] ?? 'DNI') . ': ' . htmlspecialchars($pas['numero_documento']) . ')</span>' : '';
+                            ?>
+                                    <div class="flex items-center justify-between bg-white border border-slate-200 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-800 shadow-sm">
+                                        <div class="flex items-center gap-2">
+                                            <i class="fa-solid fa-user-check text-[#0070F3]"></i>
+                                            <span><?php echo htmlspecialchars($nombre_p); ?><?php echo $doc_p; ?></span>
+                                        </div>
+                                        <span class="text-xs bg-slate-100 text-slate-600 font-bold px-2.5 py-1 rounded-md">Boleto #<?php echo ($idx + 1); ?></span>
+                                    </div>
+                            <?php 
+                                }
+                            }
+                            if (!$hay_pax):
+                                $nombre_p = !empty(trim($reserva['pasajero_nombre'] ?? '')) ? $reserva['pasajero_nombre'] : 'Pasajero Titular';
+                            ?>
+                                <div class="flex items-center gap-2 bg-white border border-slate-200 px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-800 shadow-sm">
+                                    <i class="fa-solid fa-user-check text-[#0070F3]"></i>
+                                    <span><?php echo htmlspecialchars($nombre_p); ?></span>
+                                </div>
+                            <?php endif; ?>
+                        </div>
                     </div>
-                    <?php endif; ?>
 
                     <!-- Desglose de Precios -->
                     <?php 
@@ -115,12 +137,15 @@
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="index.php?action=generarBoleto&pnr=<?php echo urlencode($_GET['pnr'] ?? ''); ?>" target="_blank" class="btn bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-bold py-3 px-8 rounded-xl transition-all text-center shadow-lg flex items-center justify-center gap-2 transform hover:-translate-y-0.5">
+                        <i class="fa-solid fa-file-pdf text-xl"></i> Descargar Ticket (PDF)
+                    </a>
                     <?php if(isset($_SESSION['user_id'])): ?>
-                        <a href="?action=panel" class="btn btn--primary bg-[#0070F3] hover:bg-[#0051CC] text-white font-bold py-3 px-8 rounded-xl transition-colors text-center shadow-lg">
-                            Ver Mis Viajes
+                        <a href="?action=panel" class="btn btn--primary bg-[#0070F3] hover:bg-[#0051CC] text-white font-bold py-3 px-8 rounded-xl transition-colors text-center shadow-lg flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-plane"></i> Ver Mis Viajes
                         </a>
                     <?php endif; ?>
-                    <a href="?action=home" class="btn border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold py-3 px-8 rounded-xl transition-colors text-center">
+                    <a href="?action=home" class="btn border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold py-3 px-8 rounded-xl transition-colors text-center flex items-center justify-center">
                         Volver al Inicio
                     </a>
                 </div>

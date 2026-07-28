@@ -122,19 +122,40 @@
             </div>
         </div>
 
-        <?php if (!isset($_SESSION['user_id'])): ?>
-        <div class="guest-notice" style="background-color: rgba(10,22,40,0.8); border: 1px solid rgba(34,197,94,0.3); padding: 1rem; border-radius: 0.75rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
-            <div>
-                <h3 style="font-weight: 600; color: #4ade80; font-size: 0.875rem;"><i class="fa-solid fa-circle-info" style="margin-right: 0.5rem;"></i> ¿Ya tienes una cuenta?</h3>
-                <p style="color: rgba(255,255,255,0.7); font-size: 0.875rem; margin-top: 0.25rem;">Estás comprando como invitado. Inicia sesión si deseas autocompletar tus datos y guardar tu vuelo.</p>
+        <?php if (isset($_SESSION['user_id'])): ?>
+        <div class="guest-notice" style="background-color: rgba(0, 112, 243, 0.15); border: 1px solid rgba(0, 112, 243, 0.4); padding: 1rem 1.25rem; border-radius: 0.85rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; backdrop-filter: blur(8px);">
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+                <div style="background: #0070F3; color: #fff; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem;">
+                    <i class="fa-solid fa-user-check"></i>
+                </div>
+                <div>
+                    <h3 style="font-weight: 700; color: #ffffff; font-size: 0.95rem; margin: 0;">Sesión activa: <?php echo htmlspecialchars($_SESSION['user_name']); ?></h3>
+                    <p style="color: rgba(255,255,255,0.75); font-size: 0.825rem; margin-top: 0.15rem;">Hemos autocompletado tus datos en el Pasajero 1 (Titular). Tus boletos se guardarán en tu panel.</p>
+                </div>
             </div>
-            <a href="index.php?action=home&login=required" style="background-color: #16a34a; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 500; text-decoration: none; white-space: nowrap; margin-left: 1rem;">Iniciar Sesión</a>
+            <span style="background: rgba(0,112,243,0.3); color: #60a5fa; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 99px; border: 1px solid rgba(96,165,250,0.3);">Usuario Registrado</span>
+        </div>
+        <?php else: ?>
+        <div class="guest-notice" style="background-color: rgba(10,22,40,0.8); border: 1px solid rgba(34,197,94,0.4); padding: 1rem 1.25rem; border-radius: 0.85rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 0.85rem;">
+                <div style="background: #16a34a; color: #fff; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem;">
+                    <i class="fa-solid fa-user-clock"></i>
+                </div>
+                <div>
+                    <h3 style="font-weight: 700; color: #4ade80; font-size: 0.95rem; margin: 0;">Comprando como Invitado</h3>
+                    <p style="color: rgba(255,255,255,0.75); font-size: 0.825rem; margin-top: 0.15rem;">No necesitas una cuenta para comprar. Ingresa los datos completos de los pasajeros para emitir los boletos.</p>
+                </div>
+            </div>
+            <a href="index.php?action=home&login=required" style="background-color: #16a34a; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; font-size: 0.85rem; font-weight: 600; text-decoration: none; white-space: nowrap;">Iniciar Sesión</a>
         </div>
         <?php endif; ?>
 
         <div class="passenger-card">
             <div class="passenger-header">
-                <h2 class="passenger-header-title"><i class="fa-solid fa-users text-gray-400" style="margin-right: 0.5rem;"></i> Datos de los Pasajeros (<?php echo htmlspecialchars($pasajeros); ?> boleto<?php echo (int)$pasajeros > 1 ? 's' : ''; ?>)</h2>
+                <h2 class="passenger-header-title">
+                    <i class="fa-solid fa-id-card text-[#0070F3]" style="margin-right: 0.5rem;"></i> 
+                    Datos de los Pasajeros (<?php echo (int)$pasajeros; ?> boleto<?php echo (int)$pasajeros > 1 ? 's' : ''; ?>)
+                </h2>
             </div>
             <div class="passenger-content">
                 <form action="index.php" method="POST">
@@ -144,22 +165,55 @@
                     <input type="hidden" name="tipo_viaje" value="<?php echo htmlspecialchars($tipo_viaje ?? 'solo_ida'); ?>">
                     <input type="hidden" name="fecha_retorno" value="<?php echo htmlspecialchars($fecha_retorno ?? ''); ?>">
                     
-                    <div class="space-y-4 mb-6">
-                        <div class="form-group">
-                            <label class="form-label">Pasajero 1 (Titular de la Reserva)</label>
-                            <input type="text" name="nombre" id="pasajero_nombre_0" required placeholder="Ej: Ana María García" class="form-input" value="<?php echo isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : ''; ?>">
-                            <input type="hidden" name="pasajero_nombre_0" value="" id="hidden_p0">
-                        </div>
+                    <div style="display: flex; flex-direction: column; gap: 1.25rem; margin-bottom: 1.5rem;">
+                        <?php 
+                        $num_pax = max(1, (int)$pasajeros);
+                        for ($p = 0; $p < $num_pax; $p++): 
+                            $is_first = ($p === 0);
+                            $default_nombre = '';
+                            $default_apellido = '';
+                            
+                            if ($is_first && isset($_SESSION['user_name'])) {
+                                $partes_user = explode(' ', trim($_SESSION['user_name']), 2);
+                                $default_nombre = $partes_user[0] ?? '';
+                                $default_apellido = $partes_user[1] ?? '';
+                            }
+                        ?>
+                            <div style="background: rgba(15,23,42,0.6); border: 1px solid rgba(197,168,128,0.25); border-radius: 0.85rem; padding: 1.25rem;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px dashed rgba(197,168,128,0.2);">
+                                    <h4 style="font-size: 0.95rem; font-weight: 700; color: #C5A880; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                                        <i class="fa-solid fa-user-tag text-[#0070F3]"></i> Pasajero <?php echo ($p + 1); ?> <?php echo $is_first ? '<span style="font-size:0.75rem; color:#60a5fa; font-weight:600;">(Titular de la Reserva)</span>' : ''; ?>
+                                    </h4>
+                                    <span style="font-size: 0.75rem; background: rgba(0,112,243,0.15); color: #60a5fa; padding: 2px 8px; border-radius: 4px; font-weight: 600;">
+                                        Boleto #<?php echo ($p + 1); ?>
+                                    </span>
+                                </div>
 
-                        <?php for ($p = 1; $p < (int)$pasajeros; $p++): ?>
-                            <div class="form-group pt-4" style="border-top: 1px solid rgba(197,168,128,0.15);">
-                                <label class="form-label">Pasajero <?php echo ($p + 1); ?></label>
-                                <input type="text" name="pasajero_nombre_<?php echo $p; ?>" required placeholder="Nombre completo del Pasajero <?php echo ($p + 1); ?>" class="form-input">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                    <div class="form-group" style="margin:0;">
+                                        <label class="form-label" style="font-size:0.8rem; font-weight:600; color:rgba(255,255,255,0.85);">Nombre(s) *</label>
+                                        <input type="text" name="pasajero_nombre_<?php echo $p; ?>" required placeholder="Ej: Ana María" class="form-input" value="<?php echo htmlspecialchars($default_nombre); ?>">
+                                    </div>
+                                    <div class="form-group" style="margin:0;">
+                                        <label class="form-label" style="font-size:0.8rem; font-weight:600; color:rgba(255,255,255,0.85);">Apellido(s) *</label>
+                                        <input type="text" name="pasajero_apellido_<?php echo $p; ?>" required placeholder="Ej: García López" class="form-input" value="<?php echo htmlspecialchars($default_apellido); ?>">
+                                    </div>
+                                    <div class="form-group" style="margin:0;">
+                                        <label class="form-label" style="font-size:0.8rem; font-weight:600; color:rgba(255,255,255,0.85);">N° Documento (DNI / Pasaporte) *</label>
+                                        <div style="display: flex; gap: 0.5rem;">
+                                            <select name="pasajero_tipo_doc_<?php echo $p; ?>" class="form-input" style="width: auto; min-width: 80px; padding: 0.5rem;">
+                                                <option value="DNI">DNI</option>
+                                                <option value="Pasaporte">PAS</option>
+                                            </select>
+                                            <input type="text" name="pasajero_doc_<?php echo $p; ?>" required placeholder="Ej: 72819203" class="form-input" style="flex:1;">
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         <?php endfor; ?>
 
-                        <div class="form-group pt-4 border-t border-gray-100">
-                            <label class="form-label">Correo electrónico de contacto (para enviar comprobantes)</label>
+                        <div class="form-group pt-4" style="border-top: 1px solid rgba(197,168,128,0.2);">
+                            <label class="form-label" style="font-weight: 700; color: #ffffff;">Correo electrónico de contacto (para enviar comprobantes) *</label>
                             <input type="email" name="email" required placeholder="tu@email.com" class="form-input" value="<?php echo isset($_SESSION['user_email']) ? htmlspecialchars($_SESSION['user_email']) : ''; ?>">
                         </div>
                     </div>

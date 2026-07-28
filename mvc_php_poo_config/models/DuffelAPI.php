@@ -1,254 +1,283 @@
 <?php
+/**
+ * ==============================================================================================
+ * MÓDULO DE INTEGRACIÓN CON DUFFEL API (VERSIÓN PROCEDURAL SIMPLE)
+ * ==============================================================================================
+ * Este archivo contiene las funciones procedurales para comunicarse con la API de Duffel
+ * y buscar ofertas de vuelos en tiempo real.
+ * ==============================================================================================
+ */
+
 require_once __DIR__ . '/../config/env.php';
 
-class DuffelAPI {
-    private $token;
+/**
+ * Busca vuelos reales en la API de Duffel y retorna una lista de ofertas procesadas.
+ */
+function buscar_vuelos_duffel($origen_iata, $destino_iata, $fecha_salida, $fecha_vuelta = null, $pasajeros_count = 1) {
+    $token = $_ENV['DUFFEL_ACCESS_TOKEN'] ?? '';
+    if (empty($token)) return [];
 
-    public function __construct() {
-        $this->token = $_ENV['DUFFEL_ACCESS_TOKEN'] ?? '';
+    $url = "https://api.duffel.com/air/offer_requests";
+
+    // 1. Armamos la lista de pasajeros (adultos por defecto)
+    $pasajeros = [];
+    for ($i = 0; $i < $pasajeros_count; $i++) {
+        $pasajeros[] = ["type" => "adult"];
     }
 
-    public function buscarVuelosEnTiempoReal($origen_iata, $destino_iata, $fecha_salida, $fecha_vuelta = null, $pasajeros_count = 1) {
-        if (empty($this->token)) return [];
-        
-        $url = "https://api.duffel.com/air/offer_requests";
-        
-        $passengers = [];
-        for($i=0; $i<$pasajeros_count; $i++) {
-            $passengers[] = ["type" => "adult"];
-        }
+    // 2. Definimos los tramos del viaje (ida o ida y vuelta)
+    $tramos = [
+        [
+            "origin" => $origen_iata,
+            "destination" => $destino_iata,
+            "departure_date" => $fecha_salida
+        ]
+    ];
 
-        $slices = [
-            [
-                "origin" => $origen_iata,
-                "destination" => $destino_iata,
-                "departure_date" => $fecha_salida
-            ]
+    if (!empty($fecha_vuelta)) {
+        $tramos[] = [
+            "origin" => $destino_iata,
+            "destination" => $origen_iata,
+            "departure_date" => $fecha_vuelta
         ];
-        
-        if (!empty($fecha_vuelta)) {
-            $slices[] = [
-                "origin" => $destino_iata,
-                "destination" => $origen_iata,
-                "departure_date" => $fecha_vuelta
-            ];
-        }
+    }
 
-        $data = [
-            "data" => [
-                "slices" => $slices,
-                "passengers" => $passengers,
-                "cabin_class" => "economy",
-                "return_offers" => true
-            ]
-        ];
+    // 3. Preparamos el cuerpo de la solicitud JSON
+    $cuerpo_peticion = [
+        "data" => [
+            "slices" => $tramos,
+            "passengers" => $pasajeros,
+            "cabin_class" => "economy",
+            "return_offers" => true
+        ]
+    ];
 
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Duffel-Version: v2',
-            'Authorization: Bearer ' . $this->token,
-            'Content-Type: application/json'
-        ]);
-        
-        $response = curl_exec($ch);
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
+    // 4. Realizamos la petición HTTP POST vía cURL
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($cuerpo_peticion));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Duffel-Version: v2',
+        'Authorization: Bearer ' . $token,
+        'Content-Type: application/json'
+    ]);
 
-        $vuelos_formateados = [];
+    $respuesta = curl_exec($ch);
+    $codigo_http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
 
-        if ($http_code == 200 || $http_code == 201) {
-            $json = json_decode($response, true);
-            $offers = $json['data']['offers'] ?? [];
-            
-            foreach ($offers as $offer) {
-                $vuelo = $this->parseOffer($offer);
-                if ($vuelo) {
-                    $vuelos_formateados[] = $vuelo;
-                }
+    $vuelos_formateados = [];
+
+    // 5. Si la respuesta es exitosa (200 o 201), procesamos cada oferta
+    if ($codigo_http == 200 || $codigo_http == 201) {
+        $datos = json_decode($respuesta, true);
+        $ofertas = $datos['data']['offers'] ?? [];
+
+        foreach ($ofertas as $oferta) {
+            $vuelo_procesado = procesar_oferta_duffel($oferta);
+            if ($vuelo_procesado) {
+                $vuelos_formateados[] = $vuelo_procesado;
             }
         }
-        
-        return $vuelos_formateados;
     }
 
-    public function obtenerOfertaPorId($offer_id) {
-        if (empty($this->token)) return null;
-        
-        $url = "https://api.duffel.com/air/offers/" . $offer_id;
-        
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Duffel-Version: v2',
-            'Authorization: Bearer ' . $this->token
-        ]);
-        
-        $response = curl_exec($ch);
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
+    return $vuelos_formateados;
+}
 
-        if ($http_code == 200) {
-            $json = json_decode($response, true);
-            $offer = $json['data'] ?? null;
-            if ($offer) {
-                return $this->parseOffer($offer);
-            }
+/**
+ * Obtiene los detalles de una oferta específica de Duffel a partir de su ID de oferta.
+ */
+function obtener_oferta_duffel($offer_id) {
+    $token = $_ENV['DUFFEL_ACCESS_TOKEN'] ?? '';
+    if (empty($token)) return null;
+
+    $url = "https://api.duffel.com/air/offers/" . $offer_id;
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Duffel-Version: v2',
+        'Authorization: Bearer ' . $token
+    ]);
+
+    $respuesta = curl_exec($ch);
+    $codigo_http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($codigo_http == 200) {
+        $datos = json_decode($respuesta, true);
+        $oferta = $datos['data'] ?? null;
+        if ($oferta) {
+            return procesar_oferta_duffel($oferta);
         }
-        return null;
     }
-    
-    public function crearOrdenDuffel($offer_id, $passengers_data, $total_amount, $currency) {
-        if (empty($this->token)) return null;
-        
-        $url = "https://api.duffel.com/air/orders";
-        
-        $data = [
-            "data" => [
-                "type" => "instant",
-                "selected_offers" => [$offer_id],
-                "passengers" => $passengers_data,
-                "payments" => [
-                    [
-                        "type" => "balance",
-                        "amount" => (string)$total_amount,
-                        "currency" => $currency
-                    ]
+    return null;
+}
+
+/**
+ * Crea la orden final de compra en la API de Duffel.
+ */
+function crear_orden_duffel($offer_id, $passengers_data, $total_amount, $currency) {
+    $token = $_ENV['DUFFEL_ACCESS_TOKEN'] ?? '';
+    if (empty($token)) return null;
+
+    $url = "https://api.duffel.com/air/orders";
+
+    $cuerpo_peticion = [
+        "data" => [
+            "type" => "instant",
+            "selected_offers" => [$offer_id],
+            "passengers" => $passengers_data,
+            "payments" => [
+                [
+                    "type" => "balance",
+                    "amount" => (string)$total_amount,
+                    "currency" => $currency
                 ]
             ]
-        ];
+        ]
+    ];
 
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Duffel-Version: v2',
-            'Authorization: Bearer ' . $this->token,
-            'Content-Type: application/json'
-        ]);
-        
-        $response = curl_exec($ch);
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($cuerpo_peticion));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Duffel-Version: v2',
+        'Authorization: Bearer ' . $token,
+        'Content-Type: application/json'
+    ]);
 
-        if ($http_code == 201) {
-            $json = json_decode($response, true);
-            return $json['data'] ?? null;
-        }
-        
-        return null;
+    $respuesta = curl_exec($ch);
+    $codigo_http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($codigo_http == 201) {
+        $datos = json_decode($respuesta, true);
+        return $datos['data'] ?? null;
     }
 
-    public function sugerirIata($query) {
-        if (empty($this->token) || empty(trim($query))) return null;
-        
-        $iata = $this->realizarPeticionSugerencia(trim($query));
-        
-        // Si no encuentra nada, intentar limpiar el query (ej: "Roma italia" -> "Roma")
-        if (!$iata) {
-            $palabras = explode(' ', trim($query));
-            if (count($palabras) > 1) {
-                // Intentamos solo con la primera palabra, que suele ser la ciudad
-                $iata = $this->realizarPeticionSugerencia($palabras[0]);
-            }
-        }
-        
-        return $iata;
-    }
-    
-    private function realizarPeticionSugerencia($query) {
-        $url = "https://api.duffel.com/places/suggestions?query=" . urlencode($query);
-        
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Duffel-Version: v2',
-            'Authorization: Bearer ' . $this->token
-        ]);
-        
-        $response = curl_exec($ch);
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
+    return null;
+}
 
-        if ($http_code == 200) {
-            $json = json_decode($response, true);
-            if (!empty($json['data']) && isset($json['data'][0]['iata_code'])) {
-                foreach ($json['data'] as $place) {
-                    if (isset($place['iata_code']) && !empty($place['iata_code'])) {
-                        return $place['iata_code'];
-                    }
+/**
+ * Sugiere el código IATA para una ciudad mediante la API de Duffel Places.
+ */
+function sugerir_iata_duffel($query) {
+    $token = $_ENV['DUFFEL_ACCESS_TOKEN'] ?? '';
+    if (empty($token) || empty(trim($query))) return null;
+
+    $codigo_iata = realizar_peticion_sugerencia_duffel(trim($query));
+
+    // Si no encuentra nada, probar limpiando la consulta (usar solo la primera palabra)
+    if (!$codigo_iata) {
+        $palabras = explode(' ', trim($query));
+        if (count($palabras) > 1) {
+            $codigo_iata = realizar_peticion_sugerencia_duffel($palabras[0]);
+        }
+    }
+
+    return $codigo_iata;
+}
+
+/**
+ * Función auxiliar para consultar lugares sugeridos en Duffel.
+ */
+function realizar_peticion_sugerencia_duffel($query) {
+    $token = $_ENV['DUFFEL_ACCESS_TOKEN'] ?? '';
+    $url = "https://api.duffel.com/places/suggestions?query=" . urlencode($query);
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Duffel-Version: v2',
+        'Authorization: Bearer ' . $token
+    ]);
+
+    $respuesta = curl_exec($ch);
+    $codigo_http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($codigo_http == 200) {
+        $datos = json_decode($respuesta, true);
+        if (!empty($datos['data'])) {
+            foreach ($datos['data'] as $lugar) {
+                if (isset($lugar['iata_code']) && !empty($lugar['iata_code'])) {
+                    return $lugar['iata_code'];
                 }
             }
         }
-        return null;
     }
-    
-    private function parseOffer($offer) {
-        if (empty($offer['slices'])) return null;
-        
-        $outbound_slice = $offer['slices'][0];
-        $outbound_segment = $outbound_slice['segments'][0];
-        
-        $vuelo = [
-            'id' => $offer['id'], // 'off_xyz...'
-            'offer_id' => $offer['id'],
-            'price' => $offer['total_amount'],
-            'currency' => $offer['total_currency'],
-            'passengers' => $offer['passengers'] ?? [],
-            'best_price' => false,
-            'is_round_trip' => count($offer['slices']) > 1,
-            'outbound' => [
-                'slice_id' => $outbound_slice['id'] ?? '',
-                'airline' => $outbound_segment['operating_carrier']['name'] ?? $offer['owner']['name'] ?? 'Aerolínea',
-                'flight_number' => ($outbound_segment['operating_carrier']['iata_code'] ?? '') . ' ' . ($outbound_segment['operating_carrier_flight_number'] ?? ''),
-                'departure_time' => date('H:i', strtotime($outbound_segment['departing_at'])),
-                'departure_date' => date('d/m/Y', strtotime($outbound_segment['departing_at'])),
-                
-                'departure_airport' => $outbound_segment['origin']['iata_code'],
-                'departure_airport_name' => $outbound_segment['origin']['name'] ?? $outbound_segment['origin']['iata_code'],
-                'departure_city' => $outbound_segment['origin']['city_name'] ?? $outbound_segment['origin']['iata_code'],
-                'departure_country' => $outbound_segment['origin']['iata_country_code'] ?? '',
-                
-                'arrival_time' => date('H:i', strtotime($outbound_slice['segments'][count($outbound_slice['segments'])-1]['arriving_at'])),
-                'arrival_date' => date('d/m/Y', strtotime($outbound_slice['segments'][count($outbound_slice['segments'])-1]['arriving_at'])),
-                'arrival_next_day' => (date('Y-m-d', strtotime($outbound_segment['departing_at'])) != date('Y-m-d', strtotime($outbound_slice['segments'][count($outbound_slice['segments'])-1]['arriving_at']))),
-                
-                'arrival_airport' => $outbound_slice['segments'][count($outbound_slice['segments'])-1]['destination']['iata_code'],
-                'arrival_airport_name' => $outbound_slice['segments'][count($outbound_slice['segments'])-1]['destination']['name'] ?? $outbound_slice['segments'][count($outbound_slice['segments'])-1]['destination']['iata_code'],
-                'arrival_city' => $outbound_slice['segments'][count($outbound_slice['segments'])-1]['destination']['city_name'] ?? $outbound_slice['segments'][count($outbound_slice['segments'])-1]['destination']['iata_code'],
-                'arrival_country' => $outbound_slice['segments'][count($outbound_slice['segments'])-1]['destination']['iata_country_code'] ?? '',
-                
-                'duration' => $outbound_slice['duration'] ?? 'N/A',
-                'stops' => count($outbound_slice['segments']) - 1,
-            ]
+    return null;
+}
+
+/**
+ * Convierte una estructura de oferta cruda de Duffel a un arreglo uniforme para la aplicación.
+ */
+function procesar_oferta_duffel($oferta) {
+    if (empty($oferta['slices'])) return null;
+
+    $tramo_ida = $oferta['slices'][0];
+    $segmento_ida = $tramo_ida['segments'][0];
+    $ultimo_segmento_ida = $tramo_ida['segments'][count($tramo_ida['segments']) - 1];
+
+    $vuelo = [
+        'id' => $oferta['id'],
+        'offer_id' => $oferta['id'],
+        'price' => $oferta['total_amount'],
+        'currency' => $oferta['total_currency'],
+        'passengers' => $oferta['passengers'] ?? [],
+        'best_price' => false,
+        'is_round_trip' => count($oferta['slices']) > 1,
+        'outbound' => [
+            'slice_id' => $tramo_ida['id'] ?? '',
+            'airline' => $segmento_ida['operating_carrier']['name'] ?? $oferta['owner']['name'] ?? 'Aerolínea',
+            'flight_number' => ($segmento_ida['operating_carrier']['iata_code'] ?? '') . ' ' . ($segmento_ida['operating_carrier_flight_number'] ?? ''),
+            'departure_time' => date('H:i', strtotime($segmento_ida['departing_at'])),
+            'departure_date' => date('d/m/Y', strtotime($segmento_ida['departing_at'])),
+            
+            'departure_airport' => $segmento_ida['origin']['iata_code'],
+            'departure_airport_name' => $segmento_ida['origin']['name'] ?? $segmento_ida['origin']['iata_code'],
+            'departure_city' => $segmento_ida['origin']['city_name'] ?? $segmento_ida['origin']['iata_code'],
+            'departure_country' => $segmento_ida['origin']['iata_country_code'] ?? '',
+            
+            'arrival_time' => date('H:i', strtotime($ultimo_segmento_ida['arriving_at'])),
+            'arrival_date' => date('d/m/Y', strtotime($ultimo_segmento_ida['arriving_at'])),
+            'arrival_next_day' => (date('Y-m-d', strtotime($segmento_ida['departing_at'])) != date('Y-m-d', strtotime($ultimo_segmento_ida['arriving_at']))),
+            
+            'arrival_airport' => $ultimo_segmento_ida['destination']['iata_code'],
+            'arrival_airport_name' => $ultimo_segmento_ida['destination']['name'] ?? $ultimo_segmento_ida['destination']['iata_code'],
+            'arrival_city' => $ultimo_segmento_ida['destination']['city_name'] ?? $ultimo_segmento_ida['destination']['iata_code'],
+            'arrival_country' => $ultimo_segmento_ida['destination']['iata_country_code'] ?? '',
+            
+            'duration' => $tramo_ida['duration'] ?? 'N/A',
+            'stops' => count($tramo_ida['segments']) - 1,
+        ]
+    ];
+
+    if ($vuelo['is_round_trip']) {
+        $tramo_vuelta = $oferta['slices'][1];
+        $segmento_vuelta = $tramo_vuelta['segments'][0];
+        $ultimo_segmento_vuelta = $tramo_vuelta['segments'][count($tramo_vuelta['segments']) - 1];
+
+        $vuelo['inbound'] = [
+            'slice_id' => $tramo_vuelta['id'] ?? '',
+            'airline' => $segmento_vuelta['operating_carrier']['name'] ?? $oferta['owner']['name'] ?? 'Aerolínea',
+            'flight_number' => ($segmento_vuelta['operating_carrier']['iata_code'] ?? '') . ' ' . ($segmento_vuelta['operating_carrier_flight_number'] ?? ''),
+            'departure_time' => date('H:i', strtotime($segmento_vuelta['departing_at'])),
+            'departure_date' => date('d/m/Y', strtotime($segmento_vuelta['departing_at'])),
+            'departure_airport' => $segmento_vuelta['origin']['iata_code'],
+            'arrival_time' => date('H:i', strtotime($ultimo_segmento_vuelta['arriving_at'])),
+            'arrival_date' => date('d/m/Y', strtotime($ultimo_segmento_vuelta['arriving_at'])),
+            'arrival_next_day' => (date('Y-m-d', strtotime($segmento_vuelta['departing_at'])) != date('Y-m-d', strtotime($ultimo_segmento_vuelta['arriving_at']))),
+            'arrival_airport' => $ultimo_segmento_vuelta['destination']['iata_code'],
+            'duration' => $tramo_vuelta['duration'] ?? 'N/A',
+            'stops' => count($tramo_vuelta['segments']) - 1,
         ];
-        
-        if ($vuelo['is_round_trip']) {
-            $inbound_slice = $offer['slices'][1];
-            $inbound_segment = $inbound_slice['segments'][0];
-            $vuelo['inbound'] = [
-                'slice_id' => $inbound_slice['id'] ?? '',
-                'airline' => $inbound_segment['operating_carrier']['name'] ?? $offer['owner']['name'] ?? 'Aerolínea',
-                'flight_number' => ($inbound_segment['operating_carrier']['iata_code'] ?? '') . ' ' . ($inbound_segment['operating_carrier_flight_number'] ?? ''),
-                'departure_time' => date('H:i', strtotime($inbound_segment['departing_at'])),
-                'departure_date' => date('d/m/Y', strtotime($inbound_segment['departing_at'])),
-                'departure_airport' => $inbound_segment['origin']['iata_code'],
-                'arrival_time' => date('H:i', strtotime($inbound_slice['segments'][count($inbound_slice['segments'])-1]['arriving_at'])),
-                'arrival_date' => date('d/m/Y', strtotime($inbound_slice['segments'][count($inbound_slice['segments'])-1]['arriving_at'])),
-                'arrival_next_day' => (date('Y-m-d', strtotime($inbound_segment['departing_at'])) != date('Y-m-d', strtotime($inbound_slice['segments'][count($inbound_slice['segments'])-1]['arriving_at']))),
-                'arrival_airport' => $inbound_slice['segments'][count($inbound_slice['segments'])-1]['destination']['iata_code'],
-                'duration' => $inbound_slice['duration'] ?? 'N/A',
-                'stops' => count($inbound_slice['segments']) - 1,
-            ];
-        }
-        
-        // Compatibilidad hacia atrás:
-        $vuelo = array_merge($vuelo, $vuelo['outbound']);
-        
-        return $vuelo;
     }
+
+    $vuelo = array_merge($vuelo, $vuelo['outbound']);
+    return $vuelo;
 }
 ?>

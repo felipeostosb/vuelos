@@ -1,37 +1,39 @@
 <?php
-session_start();
-
 /**
- * 👨‍🍳 ============================================================================================== 👨‍🍳
- * EL MOSTRADOR PRINCIPAL: index.php (VERSIÓN BASE DE DATOS)
- * 👨‍🍳 ============================================================================================== 👨‍🍳
- * 
- * Ahora nuestro restaurante tiene un sistema de inventario real (Base de Datos) 
- * y usa "Modelos" (POO) para acceder a los datos.
+ * ==============================================================================================
+ * ENRUTADOR PRINCIPAL DEL PROYECTO NOVAIRLINES (VERSIÓN PROCEDURAL ELEMENTAL)
+ * ==============================================================================================
+ * Este archivo actúa como el controlador central. Recibe las peticiones del usuario
+ * mediante el parámetro 'action' en la URL o formulario, ejecuta la lógica necesaria
+ * invocando funciones procedurales sencillas y carga las vistas correspondientes.
  * ==============================================================================================
  */
 
-// 📋 Cargamos nuestros Modelos
+// Iniciamos o reanudamos la sesión PHP para manejar usuarios e intenciones de búsqueda
+session_start();
+
+// 1. Cargamos las librerías de funciones procedurales del proyecto
 require_once 'models/Usuario.php';
 require_once 'models/Vuelo.php';
 require_once 'models/Reserva.php';
 require_once 'models/GeminiAPI.php';
 require_once 'models/DuffelAPI.php';
 
-// 🗣️ ESCUCHAR LO QUE QUIERE EL CLIENTE
+// 2. Leemos la acción solicitada por el usuario (GET o POST)
 if (isset($_GET['action'])) {
-    $peticion = $_GET['action'];
+    $accion = $_GET['action'];
 } elseif (isset($_POST['action'])) {
-    $peticion = $_POST['action'];
+    $accion = $_POST['action'];
 } else {
-    $peticion = 'home'; // Valor por defecto
+    $accion = 'home'; // Acción por defecto si no se especifica ninguna
 }
 
-// 🚦 EL HOST DIRIGE AL CLIENTE (EL ENRUTADOR)
-switch ($peticion) {
-    // ---------------------------------------------------------
-    // ZONA PÚBLICA
-    // ---------------------------------------------------------
+// 3. Evaluamos la acción mediante una estructura switch limpia y directa
+switch ($accion) {
+
+    // ------------------------------------------------------------------------------------------
+    // SECCIÓN 1: VISTAS PÚBLICAS Y NAVEGACIÓN
+    // ------------------------------------------------------------------------------------------
     case 'home':
         include 'views/layout/header.php';
         include 'views/home/home.php';
@@ -68,17 +70,24 @@ switch ($peticion) {
         include 'views/layout/footer.php';
         break;
 
+    // ------------------------------------------------------------------------------------------
+    // SECCIÓN 2: AUTENTICACIÓN Y REGISTRO DE USUARIOS
+    // ------------------------------------------------------------------------------------------
     case 'procesarRegistro':
         $nombre = $_POST['nombre'] ?? '';
         $email = $_POST['email'] ?? '';
         $password = $_POST['password'] ?? '';
         
-        $usuarioModel = new Usuario();
-        if ($usuarioModel->registrar($nombre, $email, $password)) {
-            // Auto login after registration
-            $_SESSION['user_id'] = $usuarioModel->login($email, $password)['id'] ?? null;
+        // Llamada a la función procedural de registro
+        $registro_exitoso = registrar_usuario($nombre, $email, $password);
+
+        if ($registro_exitoso) {
+            // Iniciar sesión automáticamente al registrarse exitosamente
+            $datos_usuario = login_usuario($email, $password);
+            $_SESSION['user_id'] = $datos_usuario['id'] ?? null;
             $_SESSION['user_name'] = $nombre;
             $_SESSION['user_email'] = $email;
+            
             header('Location: index.php?action=home&registro=success');
         } else {
             header('Location: index.php?action=registro&registro=error');
@@ -86,50 +95,60 @@ switch ($peticion) {
         exit();
         break;
 
-    // ---------------------------------------------------------
-    // ZONA DE RESERVAS
-    // ---------------------------------------------------------
-    case 'buscar':
-        $origen = $_GET['origen'] ?? '';
-        $destino = $_GET['destino'] ?? '';
-        $query_ia = $_GET['query'] ?? '';
+    case 'login':
+        $email_ingresado = $_POST['email'] ?? '';
+        $password_ingresada = $_POST['password'] ?? '';
         
-        $vueloModel = new Vuelo();
-        $duffelAPI = new DuffelAPI();
+        // Llamada a la función procedural de login
+        $cliente = login_usuario($email_ingresado, $password_ingresada);
         
-        // Traducimos ciudad a IATA para Duffel
-        $origen_iata = $vueloModel->obtenerIataPorCiudad($origen);
-        $destino_iata = $vueloModel->obtenerIataPorCiudad($destino);
-        
-        $rango_fechas = $_GET['rango_fechas'] ?? '';
-        $fecha_partes = explode(' to ', $rango_fechas);
-        if(count($fecha_partes) == 1) {
-            $fecha_partes = explode(' a ', $rango_fechas); // flatpickr es locale
+        if ($cliente) {
+            // Guardamos los datos principales en la sesión
+            $_SESSION['user_id'] = $cliente['id'];
+            $_SESSION['user_name'] = $cliente['nombre'];
+            $_SESSION['user_email'] = $cliente['email'];
+            header('Location: index.php?action=home&login=success');
+        } else {
+            header('Location: index.php?action=home&login=error');
         }
-        
+        exit();
+        break;
+
+    case 'logout':
+        session_destroy();
+        header('Location: index.php?action=home');
+        exit();
+        break;
+
+    // ------------------------------------------------------------------------------------------
+    // SECCIÓN 3: BÚSQUEDA Y SELECCIÓN DE VUELOS (CON IA Y FILTROS)
+    // ------------------------------------------------------------------------------------------
+    case 'buscar':
+        $origen_ciudad = $_GET['origen'] ?? '';
+        $destino_ciudad = $_GET['destino'] ?? '';
+        $query_ia = $_GET['query'] ?? '';
         $tipo_busqueda = $_GET['tipo_busqueda'] ?? 'normal';
         
+        // Si el usuario usó el buscador inteligente con Inteligencia Artificial
         if ($tipo_busqueda === 'ia' || !empty($query_ia)) {
-            $prompt = $query_ia;
+            $usuario_actual_id = $_SESSION['user_id'] ?? null;
             
-            $geminiAPI = new GeminiAPI();
-            $datos_extraidos = $geminiAPI->interpretarBusqueda($prompt, $_SESSION['user_id'] ?? null);
+            // Función procedural que procesa la frase con Gemini AI
+            $datos_extraidos = interpretar_busqueda_ia($query_ia, $usuario_actual_id);
             
             $origen_ciudad = $datos_extraidos['origen'] ?? 'Lima';
             $destino_ciudad = $datos_extraidos['destino'] ?? '';
             
-            $vueloModel = new Vuelo();
-            $origen = $vueloModel->obtenerIataPorCiudad($origen_ciudad);
-            $destino = $vueloModel->obtenerIataPorCiudad($destino_ciudad);
+            $origen = obtener_iata_por_ciudad($origen_ciudad);
+            $destino = obtener_iata_por_ciudad($destino_ciudad);
             
             $fecha_salida = $datos_extraidos['fecha_salida'] ?? date('Y-m-d', strtotime('+1 day'));
             $fecha_vuelta = $datos_extraidos['fecha_vuelta'] ?? '';
             $tipo_viaje = $datos_extraidos['tipo_viaje'] ?? 'solo_ida';
             $pasajeros = $datos_extraidos['pasajeros'] ?? 1;
             
-            $use_cache = false; // Las búsquedas IA siempre fuerzan recarga por seguridad y precisión
+            $usar_cache = false; // Búsquedas IA siempre fuerzan recarga
 
-            // Guardamos en sesión los parámetros interpretados para mostrarlos
             $_SESSION['datos_busqueda'] = [
                 'origen' => $origen,
                 'destino' => $destino,
@@ -142,12 +161,9 @@ switch ($peticion) {
             ];
             
         } else {
-            $origen_ciudad = $_GET['origen'] ?? '';
-            $destino_ciudad = $_GET['destino'] ?? '';
-            
-            $vueloModel = new Vuelo();
-            $origen = $vueloModel->obtenerIataPorCiudad($origen_ciudad);
-            $destino = $vueloModel->obtenerIataPorCiudad($destino_ciudad);
+            // Búsqueda Clásica (Formulario Manual)
+            $origen = obtener_iata_por_ciudad($origen_ciudad);
+            $destino = obtener_iata_por_ciudad($destino_ciudad);
             
             $rango_fechas = $_GET['rango_fechas'] ?? date('Y-m-d');
             $partes_fecha = explode(' to ', $rango_fechas);
@@ -160,20 +176,19 @@ switch ($peticion) {
             $pasajeros = $_GET['pasajeros'] ?? 1;
             $tipo_viaje = $_GET['tipo_viaje'] ?? 'solo_ida';
             
-            // Verificamos si podemos usar la caché ANTES de sobreescribir la sesión
-            $use_cache = false;
+            // Comprobamos si podemos reutilizar ofertas en caché de sesión
+            $usar_cache = false;
             if (isset($_SESSION['datos_busqueda']) && isset($_SESSION['ofertas_actuales'])) {
-                $sess = $_SESSION['datos_busqueda'];
-                if ($sess['origen'] === $origen && 
-                    $sess['destino'] === $destino && 
-                    $sess['fecha_salida'] === $fecha_salida && 
-                    $sess['fecha_vuelta'] === $fecha_vuelta && 
-                    $sess['pasajeros'] == $pasajeros) { 
-                    $use_cache = true;
+                $sesion_actual = $_SESSION['datos_busqueda'];
+                if ($sesion_actual['origen'] === $origen && 
+                    $sesion_actual['destino'] === $destino && 
+                    $sesion_actual['fecha_salida'] === $fecha_salida && 
+                    $sesion_actual['fecha_vuelta'] === $fecha_vuelta && 
+                    $sesion_actual['pasajeros'] == $pasajeros) { 
+                    $usar_cache = true;
                 }
             }
 
-            // AHORA sí podemos sobreescribir la sesión con los nuevos parámetros
             $_SESSION['datos_busqueda'] = [
                 'origen' => $origen,
                 'destino' => $destino,
@@ -186,45 +201,42 @@ switch ($peticion) {
             ];
         }
 
-        if ($use_cache) {
+        // Obtener vuelos reales mediante la función de Duffel API
+        if ($usar_cache) {
             $ofertas_completas = $_SESSION['ofertas_actuales'];
         } else {
-            // Buscar vuelos SOLO en Duffel
-            $ofertas_completas = $duffelAPI->buscarVuelosEnTiempoReal($origen, $destino, $fecha_salida, $fecha_vuelta, $pasajeros);
+            $ofertas_completas = buscar_vuelos_duffel($origen, $destino, $fecha_salida, $fecha_vuelta, $pasajeros);
             $_SESSION['ofertas_actuales'] = $ofertas_completas;
         }
 
-        // Filtros adicionales (precio, escalas, aerolíneas)
-        $max_price = isset($_GET['max_price']) ? (float)$_GET['max_price'] : 999999;
-        $stops_filter = isset($_GET['stops']) ? (array)$_GET['stops'] : null;
-        $airlines_filter = isset($_GET['airlines']) ? (array)$_GET['airlines'] : null;
+        // Aplicar filtros de precio, escalas y aerolíneas
+        $precio_maximo = isset($_GET['max_price']) ? (float)$_GET['max_price'] : 999999;
+        $filtro_escalas = isset($_GET['stops']) ? (array)$_GET['stops'] : null;
+        $filtro_aerolineas = isset($_GET['airlines']) ? (array)$_GET['airlines'] : null;
 
-        // Agrupar por el trayecto de ida para mostrar únicas (por aerolínea y horario)
-        $idas_unicas = [];
+        $firmas_idas_unicas = [];
         $vuelos_encontrados = [];
         
-        foreach ($ofertas_completas as $vuelo) {
-            // Aplicar filtros
-            if ((float)$vuelo['price'] > $max_price) {
+        foreach ($ofertas_completas as $vuelo_item) {
+            if ((float)$vuelo_item['price'] > $precio_maximo) {
                 continue;
             }
-            if ($stops_filter !== null && !in_array((string)$vuelo['outbound']['stops'], $stops_filter)) {
+            if ($filtro_escalas !== null && !in_array((string)$vuelo_item['outbound']['stops'], $filtro_escalas)) {
                 continue;
             }
-            if ($airlines_filter !== null && !in_array($vuelo['airline'], $airlines_filter)) {
+            if ($filtro_aerolineas !== null && !in_array($vuelo_item['airline'], $filtro_aerolineas)) {
                 continue;
             }
 
-            $signature = $vuelo['outbound']['flight_number'] . '_' . $vuelo['outbound']['departure_time'];
-            if (!in_array($signature, $idas_unicas)) {
-                // Guardamos la firma en el array original para usarla en el HTML
-                $vuelo['outbound']['signature'] = $signature;
-                $idas_unicas[] = $signature;
-                $vuelos_encontrados[] = $vuelo;
+            $firma_vuelo = $vuelo_item['outbound']['flight_number'] . '_' . $vuelo_item['outbound']['departure_time'];
+            if (!in_array($firma_vuelo, $firmas_idas_unicas)) {
+                $vuelo_item['outbound']['signature'] = $firma_vuelo;
+                $firmas_idas_unicas[] = $firma_vuelo;
+                $vuelos_encontrados[] = $vuelo_item;
             }
         }
         
-        // Ordenar las idas por precio (de más barato a más caro)
+        // Ordenar vuelos del menor al mayor precio
         usort($vuelos_encontrados, function($a, $b) {
             return $a['price'] <=> $b['price'];
         });
@@ -247,10 +259,9 @@ switch ($peticion) {
         $vuelos_encontrados = [];
         $vueltas_unicas = [];
 
-        // Filtros adicionales (precio, escalas, aerolíneas)
-        $max_price = isset($_GET['max_price']) ? (float)$_GET['max_price'] : 999999;
-        $stops_filter = isset($_GET['stops']) ? (array)$_GET['stops'] : null;
-        $airlines_filter = isset($_GET['airlines']) ? (array)$_GET['airlines'] : null;
+        $precio_maximo = isset($_GET['max_price']) ? (float)$_GET['max_price'] : 999999;
+        $filtro_escalas = isset($_GET['stops']) ? (array)$_GET['stops'] : null;
+        $filtro_aerolineas = isset($_GET['airlines']) ? (array)$_GET['airlines'] : null;
         
         foreach ($ofertas as $oferta) {
             $sig_ida = $oferta['outbound']['flight_number'] . '_' . $oferta['outbound']['departure_time'];
@@ -261,14 +272,13 @@ switch ($peticion) {
                 }
                 
                 if (isset($oferta['inbound'])) {
-                    // Aplicar filtros
-                    if ((float)$oferta['price'] > $max_price) {
+                    if ((float)$oferta['price'] > $precio_maximo) {
                         continue;
                     }
-                    if ($stops_filter !== null && !in_array((string)$oferta['inbound']['stops'], $stops_filter)) {
+                    if ($filtro_escalas !== null && !in_array((string)$oferta['inbound']['stops'], $filtro_escalas)) {
                         continue;
                     }
-                    if ($airlines_filter !== null && !in_array($oferta['airline'], $airlines_filter)) {
+                    if ($filtro_aerolineas !== null && !in_array($oferta['airline'], $filtro_aerolineas)) {
                         continue;
                     }
 
@@ -281,7 +291,6 @@ switch ($peticion) {
             }
         }
 
-        // Ordenar los regresos por precio (de más barato a más caro)
         usort($vuelos_encontrados, function($a, $b) {
             return $a['price'] <=> $b['price'];
         });
@@ -297,15 +306,16 @@ switch ($peticion) {
         include 'views/layout/footer.php';
         break;
 
+    // ------------------------------------------------------------------------------------------
+    // SECCIÓN 4: PROCESO DE CHECKOUT Y CONFIRMACIÓN DE RESERVAS
+    // ------------------------------------------------------------------------------------------
     case 'checkout':
         $offer_id = $_POST['flight_id'] ?? '';
         $pasajeros = max(1, (int)($_POST['pasajeros'] ?? 1));
         $tipo_viaje = $_POST['tipo_viaje'] ?? 'solo_ida';
         
-        $duffelAPI = new DuffelAPI();
-        $vueloModel = new Vuelo();
-        
-        $vuelo = $duffelAPI->obtenerOfertaPorId($offer_id);
+        // Obtener datos del vuelo en Duffel o en la BD local
+        $vuelo = obtener_oferta_duffel($offer_id);
         
         if ($vuelo) {
             $vuelo['unit_price'] = (float)$vuelo['price'] / $pasajeros;
@@ -317,8 +327,8 @@ switch ($peticion) {
             $vuelo['hora_salida'] = date('H:i:s', strtotime($vuelo['departure_time']));
             $vuelo['hora_llegada'] = date('H:i:s', strtotime($vuelo['arrival_time']));
         } else {
-            // Fallback a vuelo en base de datos local
-            $vuelo = $vueloModel->obtenerPorId($offer_id);
+            // Fallback a base de datos local
+            $vuelo = obtener_vuelo_por_id($offer_id);
             if ($vuelo) {
                 $vuelo['currency'] = 'S/.';
                 $vuelo['unit_price'] = (float)$vuelo['price'];
@@ -345,10 +355,7 @@ switch ($peticion) {
         $pasajeros_count = max(1, (int)($_POST['pasajeros'] ?? 1));
         $tipo_viaje = $_POST['tipo_viaje'] ?? 'solo_ida';
         
-        $duffelAPI = new DuffelAPI();
-        $vueloModel = new Vuelo();
-        
-        $offer_data = $duffelAPI->obtenerOfertaPorId($offer_id);
+        $offer_data = obtener_oferta_duffel($offer_id);
         $duffel_order_id = null;
         
         if ($offer_data) {
@@ -376,16 +383,16 @@ switch ($peticion) {
                 }
             }
             
-            $orden = $duffelAPI->crearOrdenDuffel($offer_id, $passengers_payload, $precio_total, $offer_data['currency']);
+            $orden = crear_orden_duffel($offer_id, $passengers_payload, $precio_total, $offer_data['currency']);
             
             if ($orden && isset($orden['id'])) {
                 $duffel_order_id = $orden['id'];
             }
 
-            $id_vuelo = $vueloModel->guardarVueloDuffel($offer_data);
+            $id_vuelo = guardar_vuelo_duffel($offer_data);
         } else {
-            // Vuelo local de BD
-            $vuelo_db = $vueloModel->obtenerPorId($offer_id);
+            // Vuelo proveniente de BD local
+            $vuelo_db = obtener_vuelo_por_id($offer_id);
             if ($vuelo_db) {
                 $id_vuelo = $vuelo_db['id'];
                 $precio_unitario = (float)$vuelo_db['price'];
@@ -396,10 +403,10 @@ switch ($peticion) {
             }
         }
         
+        // Generar código PNR aleatorio único de 6 caracteres
         $pnr = substr(str_shuffle("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"), 0, 6);
         $usuario_id = $_SESSION['user_id'] ?? null;
         
-        // Preparar datos del trayecto de vuelta si es ida y vuelta
         $vuelo_vuelta_data = null;
         if ($tipo_viaje === 'ida_vuelta' && isset($offer_data['inbound']) && !empty($offer_data['inbound'])) {
             $inbound = $offer_data['inbound'];
@@ -421,14 +428,31 @@ switch ($peticion) {
             ];
         }
         
-        $reservaModel = new Reserva();
-        $reserva_id = $reservaModel->crearReserva($pnr, $usuario_id, $id_vuelo, $pasajeros_count, $precio_total, $duffel_order_id, $tipo_viaje, $vuelo_vuelta_data);
+        // Crear el registro de la reserva mediante la función procedural
+        $reserva_id = crear_reserva($pnr, $usuario_id, $id_vuelo, $pasajeros_count, $precio_total, $duffel_order_id, $tipo_viaje, $vuelo_vuelta_data);
         
         if ($reserva_id) {
             for ($i = 0; $i < $pasajeros_count; $i++) {
-                $p_nombre_input = $_POST['pasajero_nombre_' . $i] ?? ($i === 0 ? $nombre_pasajero : "Pasajero " . ($i + 1));
-                $partes = explode(' ', trim($p_nombre_input), 2);
-                $reservaModel->agregarPasajero($reserva_id, $partes[0], $partes[1] ?? '');
+                $p_nombre = trim($_POST['pasajero_nombre_' . $i] ?? '');
+                $p_apellido = trim($_POST['pasajero_apellido_' . $i] ?? '');
+                $p_tipo_doc = $_POST['pasajero_tipo_doc_' . $i] ?? 'DNI';
+                $p_doc = trim($_POST['pasajero_doc_' . $i] ?? '');
+                $p_email = ($i === 0) ? $email_pasajero : null;
+
+                // Fallback por si vinieron campos combinados o vacíos
+                if (empty($p_nombre) && empty($p_apellido)) {
+                    $fallback = trim($_POST['nombre'] ?? '');
+                    if (!empty($fallback)) {
+                        $partes = explode(' ', $fallback, 2);
+                        $p_nombre = $partes[0];
+                        $p_apellido = $partes[1] ?? '';
+                    } else {
+                        $p_nombre = "Pasajero";
+                        $p_apellido = (string)($i + 1);
+                    }
+                }
+
+                agregar_pasajero($reserva_id, $p_nombre, $p_apellido, $p_email, $p_tipo_doc, $p_doc);
             }
         }
         
@@ -438,50 +462,33 @@ switch ($peticion) {
 
     case 'confirmacion':
         $pnr = $_GET['pnr'] ?? '';
-        $reservaModel = new Reserva();
-        $reserva = $reservaModel->obtenerReservaPorPnr($pnr);
+        $reserva = obtener_reserva_por_pnr($pnr);
         
         include 'views/layout/header.php';
         include 'views/flights/confirmacion.php';
         include 'views/layout/footer.php';
         break;
 
-    // ---------------------------------------------------------
-    // ZONA PRIVADA
-    // ---------------------------------------------------------
-    case 'login':
-        $email_ingresado = $_POST['email'] ?? '';
-        $password_ingresada = $_POST['password'] ?? '';
-        
-        $usuarioModel = new Usuario();
-        $cliente = $usuarioModel->login($email_ingresado, $password_ingresada);
-        
-        if ($cliente) {
-            // ¡Coincide! Le damos su pulsera VIP
-            $_SESSION['user_id'] = $cliente['id'];
-            $_SESSION['user_name'] = $cliente['nombre'];
-            $_SESSION['user_email'] = $cliente['email'];
-            header('Location: index.php?action=home&login=success');
+    case 'generarBoleto':
+        $pnr_descarga = $_GET['pnr'] ?? '';
+        if (!empty($pnr_descarga)) {
+            generar_boleto_pdf($pnr_descarga);
         } else {
-            header('Location: index.php?action=home&login=error');
+            header('Location: index.php?action=home');
         }
         exit();
         break;
 
-    case 'logout':
-        session_destroy();
-        header('Location: index.php?action=home');
-        exit();
-        break;
-
+    // ------------------------------------------------------------------------------------------
+    // SECCIÓN 5: ZONA PRIVADA Y CHECK-IN
+    // ------------------------------------------------------------------------------------------
     case 'panel':
         if (!isset($_SESSION['user_id'])) {
             header('Location: index.php?action=home');
             exit();
         }
         
-        $reservaModel = new Reserva();
-        $misReservas = $reservaModel->obtenerReservasUsuario($_SESSION['user_id']);
+        $misReservas = obtener_reservas_usuario($_SESSION['user_id']);
         
         include 'views/layout/header.php';
         include 'views/user/panel.php';
@@ -490,16 +497,11 @@ switch ($peticion) {
 
     case 'procesarCheckin':
         $pnr_buscado = $_POST['pnr'] ?? '';
-        
-        $reservaModel = new Reserva();
-        // Allow checkin without user_id if they have the PNR (common in airlines)
-        // We pass 999 or handle it differently. The model currently accepts 999.
         $usuario_id = $_SESSION['user_id'] ?? 999; 
         
-        $resultado = $reservaModel->hacerCheckin($pnr_buscado, $usuario_id);
+        $resultado = realizar_checkin($pnr_buscado, $usuario_id);
         
         if (isset($_SESSION['user_id'])) {
-            // If they are logged in, usually they check in from panel
             header('Location: index.php?action=panel');
         } else {
             if ($resultado) {
@@ -511,9 +513,9 @@ switch ($peticion) {
         exit();
         break;
 
-    // ---------------------------------------------------------
-    // RUTA POR DEFECTO
-    // ---------------------------------------------------------
+    // ------------------------------------------------------------------------------------------
+    // ACCIÓN POR DEFECTO SI LA RUTA NO EXISTE
+    // ------------------------------------------------------------------------------------------
     default:
         header('Location: index.php?action=home');
         exit();

@@ -1,173 +1,237 @@
 <?php
+/**
+ * ==============================================================================================
+ * MÓDULO DE INTELIGENCIA ARTIFICIAL GEMINI (VERSIÓN PROCEDURAL SIMPLE)
+ * ==============================================================================================
+ * Este archivo contiene las funciones para procesar peticiones en lenguaje natural del usuario
+ * mediante el modelo Google Gemini AI.
+ * ==============================================================================================
+ */
+
 require_once __DIR__ . '/../config/database.php';
 
-class GeminiAPI {
-    private $apiKeys = [];
-    private $conn;
+/**
+ * Función auxiliar para extraer el número de pasajeros mediante expresiones regulares.
+ */
+function extraer_pasajeros_regex($prompt) {
+    $prompt_low = mb_strtolower($prompt, 'UTF-8');
 
-    public function __construct() {
-        // Obtenemos la key directamente de las variables de entorno
-        $keys = $_ENV['GEMINI_API_KEY'] ?? '';
-        // Permitir múltiples llaves separadas por coma
-        $this->apiKeys = array_filter(array_map('trim', explode(',', $keys)));
-        
-        $database = new Database();
-        $this->conn = $database->getConnection();
+    // 1. Números explícitos seguidos de términos de pasaje/pasajeros/personas
+    if (preg_match('/(\d+)\s*(?:personas?|pasajeros?|pasajes?|boletos?|adultos?|viajeros?)/i', $prompt_low, $matches)) {
+        return (int)$matches[1];
+    }
+    // 2. Patrón "para X personas" o "para X"
+    if (preg_match('/para\s+(\d+)/i', $prompt_low, $matches)) {
+        return (int)$matches[1];
+    }
+    // 3. Patrón "somos X"
+    if (preg_match('/somos\s+(\d+)/i', $prompt_low, $matches)) {
+        return (int)$matches[1];
+    }
+    // 4. Expresiones relacionales ("con mi esposa", "con mi pareja", "con mi esposa y 2 hijos")
+    if (preg_match('/con\s+mi\s+(?:esposa|esposo|pareja|novia|novio|mama|mamá|papa|papá|hijo|hija|amigo|amiga)\b/i', $prompt_low)) {
+        if (preg_match('/y\s+(\d+)\s+hijos?/i', $prompt_low, $m_hijos)) {
+            return 2 + (int)$m_hijos[1];
+        }
+        return 2;
+    }
+    // 5. "familia de X" o "nosotros X"
+    if (preg_match('/familia\s+de\s+(\d+)/i', $prompt_low, $matches)) {
+        return (int)$matches[1];
+    }
+    if (preg_match('/nosotros\s+(\d+)/i', $prompt_low, $matches)) {
+        return (int)$matches[1];
+    }
+    return 1;
+}
+
+/**
+ * Función que envía el texto en lenguaje natural ingresado por el usuario a Google Gemini AI
+ * para extraer parámetros estructurados (origen, destino, fechas, pasajeros, etc.).
+ */
+function interpretar_busqueda_ia($prompt, $usuario_id = null) {
+    // 1. Obtenemos las claves de API de las variables de entorno
+    $keys_cadena = $_ENV['GEMINI_API_KEY'] ?? '';
+    $lista_keys = array_filter(array_map('trim', explode(',', $keys_cadena)));
+
+    // Si no hay llaves configuradas, usamos el modo de simulación local
+    if (empty($lista_keys)) {
+        return simular_busqueda_ia($prompt, $usuario_id);
     }
 
-    public function interpretarBusqueda($prompt, $usuario_id = null) {
-        // En caso de no tener API key o si está vacía, no fallamos
-        if (empty($this->apiKeys)) {
-            return $this->simularBusqueda($prompt, $usuario_id);
-        }
-
-        $fecha_actual = date('Y-m-d');
-        $system_instruction = "Eres un asistente experto de reservas de la aerolínea NovAirlines. Tu tarea es extraer la intención de búsqueda de vuelos del usuario y devolver un JSON puro (sin formato markdown ni bloques de código).
+    $fecha_actual = date('Y-m-d');
+    
+    // Instrucción del sistema para forzar a la IA a responder un JSON limpio
+    $instruccion_sistema = "Eres un asistente experto de reservas de la aerolínea NovAirlines. Tu tarea es extraer la intención de búsqueda de vuelos del usuario y devolver un JSON puro (sin formato markdown ni bloques de código).
 Hoy es $fecha_actual.
 Extrae los siguientes campos:
 - origen (ciudad, por defecto 'Lima' si no se menciona)
 - destino (ciudad)
 - fecha_salida (en formato YYYY-MM-DD, asume una fecha futura razonable si usa palabras como 'mañana', 'próximo mes', o usa mañana si no dice nada)
 - fecha_vuelta (en formato YYYY-MM-DD, déjalo vacío si es solo ida)
-- tipo_viaje (debe ser estrictamente 'solo_ida' o 'ida_vuelta')
-- pasajeros (número entero, por defecto 1)
+- tipo_viaje (debe ser strictly 'solo_ida' o 'ida_vuelta')
+- pasajeros (número entero positivo total de personas viajando, ej: 'con 3 personas' => 3, 'con mi esposa' => 2, '4 pasajes' => 4, por defecto 1)
 
 Ejemplo de salida:
 {\"origen\": \"Lima\", \"destino\": \"Miami\", \"fecha_salida\": \"2026-08-10\", \"fecha_vuelta\": \"2026-08-20\", \"tipo_viaje\": \"ida_vuelta\", \"pasajeros\": 2}";
 
-        $data = [
-            "contents" => [
-                [
-                    "role" => "user",
-                    "parts" => [
-                        ["text" => $system_instruction . "\nFrase del usuario: " . $prompt]
-                    ]
+    $datos_peticion = [
+        "contents" => [
+            [
+                "role" => "user",
+                "parts" => [
+                    ["text" => $instruccion_sistema . "\nFrase del usuario: " . $prompt]
                 ]
-            ],
-            "generationConfig" => [
-                "temperature" => 0.1,
-                "responseMimeType" => "application/json"
             ]
-        ];
+        ],
+        "generationConfig" => [
+            "temperature" => 0.1,
+            "responseMimeType" => "application/json"
+        ]
+    ];
 
-        $http_code = 0;
-        $response = null;
+    $codigo_http = 0;
+    $respuesta_raw = null;
 
-        // Intentar con cada llave hasta que una funcione
-        foreach ($this->apiKeys as $key) {
-            $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=" . $key;
+    // Modelos Gemini estables a probar en caso de falla o alta demanda
+    $modelos_gemini = ['gemini-3.5-flash-lite', 'gemini-2.0-flash-lite', 'gemini-2.0-flash','gemini-flash-latest'];
+
+    // 2. Probamos con cada API key y modelo disponible hasta recibir respuesta exitosa (200)
+    foreach ($lista_keys as $key) {
+        foreach ($modelos_gemini as $modelo) {
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/" . $modelo . ":generateContent?key=" . $key;
             
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
             curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // En local a veces falla el certificado
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($datos_peticion));
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             
-            $response = curl_exec($ch);
-            $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $respuesta_raw = curl_exec($ch);
+            $codigo_http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
             
-            // Si la llamada es exitosa, salimos del bucle para no usar las otras llaves
-            if ($http_code == 200 && $response) {
-                break;
+            if ($codigo_http == 200 && $respuesta_raw) {
+                break 2;
+            }
+        }
+    }
+
+    // Estructura por defecto con extracción inteligente de pasajeros vía regex
+    $pasajeros_detectados = extraer_pasajeros_regex($prompt);
+
+    $datos_extraidos = [
+        'origen' => 'Lima',
+        'destino' => '',
+        'fecha_salida' => date('Y-m-d', strtotime('+1 day')),
+        'fecha_vuelta' => '',
+        'tipo_viaje' => 'solo_ida',
+        'pasajeros' => $pasajeros_detectados
+    ];
+    
+    $parametros_json = json_encode($datos_extraidos);
+    $respuesta_historial = json_encode(['error' => 'No response']);
+
+    // 3. Procesamos la respuesta de la IA si fue exitosa
+    if ($codigo_http == 200 && $respuesta_raw) {
+        $json_respuesta = json_decode($respuesta_raw, true);
+        $texto_ia = $json_respuesta['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
+        
+        $datos_ia = json_decode(trim($texto_ia), true);
+        if (is_array($datos_ia)) {
+            // Aseguramos que la cantidad de pasajeros sea un entero válido >= 1
+            if (isset($datos_ia['pasajeros']) && (int)$datos_ia['pasajeros'] > 0) {
+                $datos_ia['pasajeros'] = (int)$datos_ia['pasajeros'];
+            } else {
+                $datos_ia['pasajeros'] = $pasajeros_detectados;
+            }
+            $datos_extraidos = array_merge($datos_extraidos, array_filter($datos_ia));
+            $parametros_json = json_encode($datos_extraidos);
+        }
+        $respuesta_historial = $respuesta_raw;
+    } else {
+        // 4. Fallback manual por expresiones regulares en caso la API falle
+        $respuesta_historial = json_encode(['error' => 'API falló', 'code' => $codigo_http, 'raw' => $respuesta_raw]);
+        
+        if (preg_match('/(?:desde|de)\s+([a-zA-Z\s]+?)\s+(?:a|hacia|para)/i', $prompt, $coincidencias)) {
+            $datos_extraidos['origen'] = trim($coincidencias[1]);
+        } elseif (stripos($prompt, 'new york') !== false || stripos($prompt, 'nueva york') !== false) {
+            if (stripos($prompt, 'a new york') !== false || stripos($prompt, 'para new york') !== false) {
+                $datos_extraidos['destino'] = 'New York';
+            } else {
+                $datos_extraidos['origen'] = 'New York';
             }
         }
 
-        $datos_extraidos = [
-            'origen' => 'Lima',
-            'destino' => '',
-            'fecha_salida' => date('Y-m-d', strtotime('+1 day')),
-            'fecha_vuelta' => '',
-            'tipo_viaje' => 'solo_ida',
-            'pasajeros' => 1
-        ];
-        
-        $parametros = json_encode($datos_extraidos);
-        $respuesta_raw = json_encode(['error' => 'No response']);
-
-        if ($http_code == 200 && $response) {
-            $json_response = json_decode($response, true);
-            $texto_ia = $json_response['candidates'][0]['content']['parts'][0]['text'] ?? '{}';
-            
-            // Convertimos el JSON de Gemini a array PHP
-            $datos_ia = json_decode(trim($texto_ia), true);
-            if (is_array($datos_ia)) {
-                $datos_extraidos = array_merge($datos_extraidos, array_filter($datos_ia));
-                $parametros = json_encode($datos_extraidos);
-            }
-            $respuesta_raw = $response; // Guardamos todo el JSON original de Google
-        } else {
-            $respuesta_raw = json_encode(['error' => 'API falló', 'code' => $http_code, 'raw' => $response]);
-            
-            // Fallback manual de emergencia por si la API falla (ej. error 429 por falta de créditos)
-            // Extraer posible origen si dice "desde X" o "de X"
-            if (preg_match('/(?:desde|de)\s+([a-zA-Z\s]+?)\s+(?:a|hacia|para)/i', $prompt, $matches)) {
-                $datos_extraidos['origen'] = trim($matches[1]);
-            } elseif (stripos($prompt, 'new york') !== false || stripos($prompt, 'nueva york') !== false) {
-                // Si menciona new york pero no capturó el regex, asumimos origen o destino según contexto (por defecto origen si no hay otro)
-                if (stripos($prompt, 'a new york') !== false || stripos($prompt, 'para new york') !== false) {
-                    $datos_extraidos['destino'] = 'New York';
-                } else {
-                    $datos_extraidos['origen'] = 'New York';
-                }
-            }
-
-            // Extraer posible destino
-            if (stripos($prompt, 'Miami') !== false) {
-                $datos_extraidos['destino'] = 'Miami';
-            } elseif (stripos($prompt, 'París') !== false || stripos($prompt, 'Paris') !== false) {
-                $datos_extraidos['destino'] = 'París';
-            } elseif (stripos($prompt, 'Madrid') !== false) {
-                $datos_extraidos['destino'] = 'Madrid';
-            } elseif (stripos($prompt, 'Cusco') !== false || stripos($prompt, 'Cuzco') !== false) {
-                $datos_extraidos['destino'] = 'Cusco';
-            } elseif (stripos($prompt, 'Corea') !== false || stripos($prompt, 'Seoul') !== false || stripos($prompt, 'Seul') !== false) {
-                $datos_extraidos['destino'] = 'Seúl';
-            } elseif (stripos($prompt, 'Roma') !== false || stripos($prompt, 'Rome') !== false) {
-                $datos_extraidos['destino'] = 'Roma';
-            } elseif (stripos($prompt, 'Buenos Aires') !== false || stripos($prompt, 'Argentina') !== false) {
-                $datos_extraidos['destino'] = 'Buenos Aires';
-            }
-            
-            // Si encontró algo en el fallback, actualizamos los parámetros que se guardarán
-            if (!empty($datos_extraidos['destino']) || $datos_extraidos['origen'] !== 'Lima') {
-                $parametros = json_encode($datos_extraidos);
-            }
+        if (stripos($prompt, 'Miami') !== false) {
+            $datos_extraidos['destino'] = 'Miami';
+        } elseif (stripos($prompt, 'París') !== false || stripos($prompt, 'Paris') !== false) {
+            $datos_extraidos['destino'] = 'París';
+        } elseif (stripos($prompt, 'Madrid') !== false) {
+            $datos_extraidos['destino'] = 'Madrid';
+        } elseif (stripos($prompt, 'Cusco') !== false || stripos($prompt, 'Cuzco') !== false) {
+            $datos_extraidos['destino'] = 'Cusco';
+        } elseif (stripos($prompt, 'Corea') !== false || stripos($prompt, 'Seoul') !== false || stripos($prompt, 'Seul') !== false) {
+            $datos_extraidos['destino'] = 'Seúl';
+        } elseif (stripos($prompt, 'Roma') !== false || stripos($prompt, 'Rome') !== false) {
+            $datos_extraidos['destino'] = 'Roma';
+        } elseif (stripos($prompt, 'Buenos Aires') !== false || stripos($prompt, 'Argentina') !== false) {
+            $datos_extraidos['destino'] = 'Buenos Aires';
         }
-
-        // Guardar el historial en la BD
-        $query = "INSERT INTO consultas_ia (usuario_id, prompt_original, parametros_extraidos, respuesta_raw) 
-                  VALUES (:usuario_id, :prompt, :parametros, :respuesta_raw)";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':usuario_id', $usuario_id);
-        $stmt->bindParam(':prompt', $prompt);
-        $stmt->bindParam(':parametros', $parametros);
-        $stmt->bindParam(':respuesta_raw', $respuesta_raw);
-        $stmt->execute();
-
-        return $datos_extraidos;
+        
+        $datos_extraidos['pasajeros'] = $pasajeros_detectados;
+        $parametros_json = json_encode($datos_extraidos);
     }
 
-    private function simularBusqueda($prompt, $usuario_id) {
-        $destino = '';
-        if (stripos($prompt, 'París') !== false) $destino = 'París';
-        elseif (stripos($prompt, 'Madrid') !== false) $destino = 'Madrid';
-        
-        $parametros = json_encode(['destino' => $destino]);
-        $respuesta_raw = json_encode(["mensaje" => "Simulación de respuesta Gemini sin API key"]);
-        
-        $query = "INSERT INTO consultas_ia (usuario_id, prompt_original, parametros_extraidos, respuesta_raw) 
-                  VALUES (:usuario_id, :prompt, :parametros, :respuesta_raw)";
-                  
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':usuario_id', $usuario_id);
-        $stmt->bindParam(':prompt', $prompt);
-        $stmt->bindParam(':parametros', $parametros);
-        $stmt->bindParam(':respuesta_raw', $respuesta_raw);
-        $stmt->execute();
-        
-        return $destino;
+    // 5. Guardamos la consulta en el historial de la base de datos
+    $conexion = conectar_db();
+    if ($conexion) {
+        $sql = "INSERT INTO consultas_ia (usuario_id, prompt_original, parametros_extraidos, respuesta_raw) 
+                VALUES (:usuario_id, :prompt, :parametros, :respuesta_raw)";
+        $consulta = $conexion->prepare($sql);
+        $consulta->bindParam(':usuario_id', $usuario_id);
+        $consulta->bindParam(':prompt', $prompt);
+        $consulta->bindParam(':parametros', $parametros_json);
+        $consulta->bindParam(':respuesta_raw', $respuesta_historial);
+        $consulta->execute();
     }
+
+    return $datos_extraidos;
+}
+
+/**
+ * Función alternativa para simular la búsqueda con IA si no hay claves API disponibles.
+ */
+function simular_busqueda_ia($prompt, $usuario_id) {
+    $destino = '';
+    if (stripos($prompt, 'París') !== false) $destino = 'París';
+    elseif (stripos($prompt, 'Madrid') !== false) $destino = 'Madrid';
+    
+    $datos_simulados = [
+        'origen' => 'Lima',
+        'destino' => $destino,
+        'fecha_salida' => date('Y-m-d', strtotime('+1 day')),
+        'fecha_vuelta' => '',
+        'tipo_viaje' => 'solo_ida',
+        'pasajeros' => 1
+    ];
+
+    $parametros_json = json_encode($datos_simulados);
+    $respuesta_raw = json_encode(["mensaje" => "Simulación de respuesta Gemini sin API key"]);
+    
+    $conexion = conectar_db();
+    if ($conexion) {
+        $sql = "INSERT INTO consultas_ia (usuario_id, prompt_original, parametros_extraidos, respuesta_raw) 
+                VALUES (:usuario_id, :prompt, :parametros, :respuesta_raw)";
+        $consulta = $conexion->prepare($sql);
+        $consulta->bindParam(':usuario_id', $usuario_id);
+        $consulta->bindParam(':prompt', $prompt);
+        $consulta->bindParam(':parametros', $parametros_json);
+        $consulta->bindParam(':respuesta_raw', $respuesta_raw);
+        $consulta->execute();
+    }
+    
+    return $datos_simulados;
 }
 ?>

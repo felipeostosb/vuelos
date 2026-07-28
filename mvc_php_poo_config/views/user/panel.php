@@ -146,6 +146,10 @@
                                             </button>
                                         </form>
                                     <?php endif; ?>
+
+                                    <a href="index.php?action=generarBoleto&pnr=<?php echo htmlspecialchars($pnr); ?>" target="_blank" style="display:flex; align-items:center; justify-center:center; gap:0.4rem; margin-top:0.5rem; background:#dc2626; color:#ffffff; font-weight:700; font-size:0.75rem; padding:0.4rem 0.8rem; border-radius:8px; text-decoration:none; text-align:center;">
+                                        <i class="fa-solid fa-file-pdf"></i> Descargar Ticket (PDF)
+                                    </a>
                                 </div>
                             </div>
                         </div>
