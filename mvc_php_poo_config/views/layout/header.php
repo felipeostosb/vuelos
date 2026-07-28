@@ -5,6 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NOVAIRLINES - Tu viaje con Inteligencia Artificial</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            gold: '#C5A880',
+                            purple: '#48324F',
+                            rose: '#9C694C',
+                            blue: '#0A1628',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <link class="refe" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="assets/css/style.css">
     
@@ -31,8 +50,10 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
     
-    <!-- Open Sauce Font -->
-    <link href="https://fonts.cdnfonts.com/css/open-sauce-one" rel="stylesheet">
+    <!-- Google Fonts Montserrat -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
     <!-- mapa de calor -->
     <script type="text/javascript">
@@ -43,7 +64,7 @@
     })(window, document, "clarity", "script", "xaoq8ifwa3");
 </script>
 </head>
-<body class="bg-gray-50 text-gray-800 font-sans">
+<body class="bg-brand-blue text-white font-sans min-h-screen">
 
     <header class="site-header">
         <div class="header__container">

@@ -125,24 +125,24 @@
                             formIa.style.display = 'flex';
                             formClasica.style.display = 'none';
                             
-                            tabIa.classList.add('text-[#0070F3]', 'border-b-2', 'border-[#0070F3]', 'font-bold');
+                            tabIa.classList.add('text-brand-gold', 'border-b-2', 'border-brand-gold', 'font-bold');
                             tabIa.classList.remove('text-gray-400', 'font-medium');
                             
-                            tabClasica.classList.remove('text-[#0070F3]', 'border-b-2', 'border-[#0070F3]', 'font-bold');
+                            tabClasica.classList.remove('text-brand-gold', 'border-b-2', 'border-brand-gold', 'font-bold');
                             tabClasica.classList.add('text-gray-400', 'font-medium');
                             
-                            tipText.innerHTML = '<i class="fa-regular fa-lightbulb text-yellow-500"></i> Tip: dile a la IA tu destino, fechas y número de personas';
+                            tipText.innerHTML = '<i class="fa-regular fa-lightbulb text-brand-gold"></i> Tip: dile a la IA tu destino, fechas y número de personas';
                         } else {
                             formIa.style.display = 'none';
                             formClasica.style.display = 'flex';
                             
-                            tabClasica.classList.add('text-[#0070F3]', 'border-b-2', 'border-[#0070F3]', 'font-bold');
+                            tabClasica.classList.add('text-brand-gold', 'border-b-2', 'border-brand-gold', 'font-bold');
                             tabClasica.classList.remove('text-gray-400', 'font-medium');
                             
-                            tabIa.classList.remove('text-[#0070F3]', 'border-b-2', 'border-[#0070F3]', 'font-bold');
+                            tabIa.classList.remove('text-brand-gold', 'border-b-2', 'border-brand-gold', 'font-bold');
                             tabIa.classList.add('text-gray-400', 'font-medium');
                             
-                            tipText.innerHTML = '<i class="fa-regular fa-lightbulb text-yellow-500"></i> Tip: Selecciona tus fechas y origen/destino manualmente';
+                            tipText.innerHTML = '<i class="fa-regular fa-lightbulb text-brand-gold"></i> Tip: Selecciona tus fechas y origen/destino manualmente';
                         }
                     }
 
@@ -231,7 +231,7 @@
         </div>
     </section>
 
-    <section class="section-container" style="background-color: white;">
+    <section class="section-container" style="background-color: rgba(72, 50, 79, 0.15); border-top: 1px solid rgba(197, 168, 128, 0.15); border-bottom: 1px solid rgba(197, 168, 128, 0.15);">
         <h2 class="section-title" style="margin-bottom: 0.5rem;">Ofertas y promociones</h2>
         <p class="section-subtitle">Precios actualizados por IA cada hora</p>
         
@@ -249,8 +249,8 @@
             <?php foreach ($ofertas_home as $oferta): ?>
             <div class="card group">
                 <a href="?action=buscar&destino=<?php echo urlencode($oferta['destino_ciudad']); ?>" class="card-image-wrapper">
-                    <div class="h-full w-full bg-blue-50 flex items-center justify-center">
-                        <i class="fa-solid fa-fire text-5xl text-blue-300"></i>
+                    <div class="h-full w-full bg-brand-purple/40 flex items-center justify-center">
+                        <i class="fa-solid fa-fire text-5xl text-brand-gold"></i>
                     </div>
                     <span class="card-badge"><i class="fa-solid fa-fire"></i> HOT</span>
                 </a>
@@ -280,8 +280,8 @@
         <div class="cards-grid cards-grid--4">
             <?php foreach ($destinos_populares as $destino_pop): ?>
             <div class="popular-card group">
-                <div class="h-full w-full bg-gray-200 flex items-center justify-center card-image">
-                    <i class="fa-solid fa-map-location-dot text-6xl text-gray-400 group-hover:scale-110 transition-transform duration-500"></i>
+                <div class="h-full w-full bg-brand-blue/50 flex items-center justify-center card-image">
+                    <i class="fa-solid fa-map-location-dot text-6xl text-brand-gold/40 group-hover:scale-110 transition-transform duration-500"></i>
                 </div>
                 <div class="popular-card-overlay"></div>
                 <div class="popular-card-content">
