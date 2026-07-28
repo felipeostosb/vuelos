@@ -70,9 +70,12 @@
         <div class="header__container">
             
             <a href="?action=home" class="header__logo-link">
-                <i class="fa-solid fa-paper-plane header__logo-icon"></i>
+                <!-- <i class="fa-solid fa-paper-plane header__logo-icon"></i>
                 <span class="header__logo-text">NOVA <span class="header__logo-highlight">AI</span>RLINES</span>
-            </a>
+                <span class="header__logo-text">NOVA AIRLINES</span> -->
+                <img src="assets/img/logonovairlines.png" alt="NOVAIRLINES" class="w-40 md:w-[250px] h-auto object-contain px-3 md:px-3"> 
+                
+            </a> 
 
             <nav class="header__nav">
                 <a href="?action=home" class="nav__link">Inicio</a>
