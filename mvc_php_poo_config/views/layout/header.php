@@ -83,6 +83,11 @@
                 <a href="?action=ofertas" class="nav__link">Ofertas</a>
                 <a href="?action=checkin" class="nav__link">Check-in</a>
                 <a href="?action=ayuda" class="nav__link">Ayuda</a>
+                <?php if (($_SESSION['usuario']['rol'] ?? '') === 'admin'): ?>
+                    <a href="?action=admin" class="nav__link text-amber-400 font-bold hover:text-amber-300">
+                        <i class="fa-solid fa-shield-halved text-amber-400 mr-1"></i> Admin
+                    </a>
+                <?php endif; ?>
             </nav>
 
             <div class="header__actions">
@@ -103,6 +108,9 @@
                         <!-- Menú Desplegable Oculto -->
                         <div class="user-menu__dropdown">
                             <div class="dropdown__content">
+                                <?php if (($_SESSION['usuario']['rol'] ?? '') === 'admin'): ?>
+                                    <a href="?action=admin" class="dropdown__item text-amber-400 font-bold"><i class="fa-solid fa-shield-halved w-5"></i> Panel Administrador</a>
+                                <?php endif; ?>
                                 <a href="?action=panel" class="dropdown__item"><i class="fa-solid fa-suitcase-rolling w-5"></i> Mis Viajes</a>
                                 <a href="#" class="dropdown__item"><i class="fa-solid fa-user w-5"></i> Mi Perfil</a>
                                 <div class="dropdown__divider"></div>

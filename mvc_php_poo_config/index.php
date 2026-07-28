@@ -18,6 +18,7 @@ require_once 'models/Vuelo.php';
 require_once 'models/Reserva.php';
 require_once 'models/GeminiAPI.php';
 require_once 'models/DuffelAPI.php';
+require_once 'models/Admin.php';
 
 // 2. Leemos la acción solicitada por el usuario (GET o POST)
 if (isset($_GET['action'])) {
@@ -107,7 +108,13 @@ switch ($accion) {
             $_SESSION['user_id'] = $cliente['id'];
             $_SESSION['user_name'] = $cliente['nombre'];
             $_SESSION['user_email'] = $cliente['email'];
-            header('Location: index.php?action=home&login=success');
+            $_SESSION['usuario'] = $cliente;
+
+            if (($cliente['rol'] ?? '') === 'admin') {
+                header('Location: index.php?action=admin');
+            } else {
+                header('Location: index.php?action=home&login=success');
+            }
         } else {
             header('Location: index.php?action=home&login=error');
         }
@@ -509,6 +516,110 @@ switch ($accion) {
             } else {
                  header('Location: index.php?action=checkin&error=1');
             }
+        }
+        exit();
+        break;
+
+    // ------------------------------------------------------------------------------------------
+    // SECCIÓN 6: PANEL DE ADMINISTRACIÓN Y CONTROL DE GESTIÓN (SOLO ROL ADMIN)
+    // ------------------------------------------------------------------------------------------
+    case 'admin':
+        // Verificación de seguridad: Solo usuarios autenticados con rol 'admin'
+        $rol_actual = $_SESSION['usuario']['rol'] ?? '';
+        if ($rol_actual !== 'admin') {
+            header('Location: index.php?action=home&error=Acceso+denegado+Solo+administradores');
+            exit();
+        }
+
+        $stats = obtener_estadisticas_admin();
+        $reservas = obtener_todas_reservas_admin();
+        $usuarios = obtener_todos_usuarios_admin();
+        $consultas_ia = obtener_consultas_ia_admin();
+
+        include 'views/admin/panel.php';
+        break;
+
+    case 'admin_cambiar_estado':
+        $rol_actual = $_SESSION['usuario']['rol'] ?? '';
+        if ($rol_actual !== 'admin') {
+            header('Location: index.php?action=home');
+            exit();
+        }
+
+        $pnr = $_POST['pnr'] ?? '';
+        $estado = $_POST['estado'] ?? '';
+        
+        if (!empty($pnr) && !empty($estado)) {
+            actualizar_estado_reserva_admin($pnr, $estado);
+            header('Location: index.php?action=admin&mensaje=Estado+de+reserva+' . urlencode($pnr) . '+actualizado+a+' . urlencode($estado));
+        } else {
+            header('Location: index.php?action=admin&error=Datos+incompletos');
+        }
+        exit();
+        break;
+
+    case 'admin_cambiar_rol':
+        $rol_actual = $_SESSION['usuario']['rol'] ?? '';
+        if ($rol_actual !== 'admin') {
+            header('Location: index.php?action=home');
+            exit();
+        }
+
+        $usuario_id = $_POST['usuario_id'] ?? '';
+        $rol = $_POST['rol'] ?? '';
+
+        if (!empty($usuario_id) && !empty($rol)) {
+            actualizar_rol_usuario_admin($usuario_id, $rol);
+            header('Location: index.php?action=admin&mensaje=Rol+de+usuario+actualizado+exitosamente');
+        } else {
+            header('Location: index.php?action=admin&error=Error+al+cambiar+rol');
+        }
+        exit();
+        break;
+
+    case 'admin_eliminar_usuario':
+        $rol_actual = $_SESSION['usuario']['rol'] ?? '';
+        $admin_id = $_SESSION['usuario']['id'] ?? 0;
+        if ($rol_actual !== 'admin') {
+            header('Location: index.php?action=home');
+            exit();
+        }
+
+        $usuario_id_del = $_GET['id'] ?? '';
+        if (!empty($usuario_id_del)) {
+            $exito = eliminar_usuario_seguro_admin($usuario_id_del, $admin_id);
+            if ($exito) {
+                header('Location: index.php?action=admin&mensaje=Usuario+eliminado+de+forma+segura');
+            } else {
+                header('Location: index.php?action=admin&error=No+se+pudo+eliminar+el+usuario+o+intento+de+autoeliminacion');
+            }
+        } else {
+            header('Location: index.php?action=admin&error=ID+de+usuario+invalido');
+        }
+        exit();
+        break;
+
+    case 'admin_crear_usuario':
+        $rol_actual = $_SESSION['usuario']['rol'] ?? '';
+        if ($rol_actual !== 'admin') {
+            header('Location: index.php?action=home');
+            exit();
+        }
+
+        $nombre = $_POST['nombre'] ?? '';
+        $email = $_POST['email'] ?? '';
+        $password = $_POST['password'] ?? '';
+        $rol = $_POST['rol'] ?? 'cliente';
+
+        if (!empty($nombre) && !empty($email) && !empty($password)) {
+            $creado = crear_usuario_admin($nombre, $email, $password, $rol);
+            if ($creado) {
+                header('Location: index.php?action=admin&mensaje=Nuevo+usuario+creado+exitosamente');
+            } else {
+                header('Location: index.php?action=admin&error=El+correo+ya+se+encuentra+registrado');
+            }
+        } else {
+            header('Location: index.php?action=admin&error=Complete+todos+los+campos');
         }
         exit();
         break;
