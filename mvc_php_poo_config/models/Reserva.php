@@ -240,7 +240,7 @@ function generar_boleto_pdf($pnr) {
         $html_pasajeros = '<li><strong>' . htmlspecialchars($nombre_fallback) . '</strong></li>';
     }
 
-    // 4. Construimos el diseño HTML estilizado para el ticket en PDF
+    // 4. Construimos el diseño HTML estilizado para el ticket en PDF (Optimizado para 1 página A4)
     $html = '
     <!DOCTYPE html>
     <html lang="es">
@@ -248,33 +248,34 @@ function generar_boleto_pdf($pnr) {
         <meta charset="UTF-8">
         <title>Boleto de Avión - ' . htmlspecialchars($pnr) . '</title>
         <style>
-            body { font-family: "Helvetica", "Arial", sans-serif; color: #1e293b; margin: 0; padding: 25px; font-size: 13px; line-height: 1.5; }
-            .header { background-color: #0A1628; color: #ffffff; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: center; }
-            .logo-title { font-size: 26px; font-weight: bold; color: #C5A880; letter-spacing: 3px; margin: 0; }
-            .subtitle { font-size: 11px; color: #94a3b8; text-transform: uppercase; margin-top: 4px; letter-spacing: 1px; }
+            @page { margin: 10mm 12mm; }
+            body { font-family: "Helvetica", "Arial", sans-serif; color: #1e293b; margin: 0; padding: 0; font-size: 11.5px; line-height: 1.35; }
+            .header { background-color: #0A1628; color: #ffffff; padding: 12px; border-radius: 8px; margin-bottom: 10px; text-align: center; }
+            .logo-title { font-size: 22px; font-weight: bold; color: #C5A880; letter-spacing: 2px; margin: 0; }
+            .subtitle { font-size: 9.5px; color: #94a3b8; text-transform: uppercase; margin-top: 2px; letter-spacing: 1px; }
             
-            .pnr-box { background-color: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 10px; padding: 15px; text-align: center; margin-bottom: 20px; }
-            .pnr-label { font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; }
-            .pnr-code { font-size: 34px; font-weight: bold; color: #0070F3; letter-spacing: 6px; font-family: monospace; }
+            .pnr-box { background-color: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 8px; padding: 8px 12px; text-align: center; margin-bottom: 10px; }
+            .pnr-label { font-size: 9.5px; color: #64748b; font-weight: bold; text-transform: uppercase; margin-bottom: 2px; }
+            .pnr-code { font-size: 26px; font-weight: bold; color: #0070F3; letter-spacing: 5px; font-family: monospace; }
             
-            .card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px; margin-bottom: 18px; }
-            .card-title { font-size: 13px; font-weight: bold; color: #0A1628; border-bottom: 2px solid #0070F3; padding-bottom: 6px; margin-bottom: 14px; text-transform: uppercase; }
+            .card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; margin-bottom: 10px; page-break-inside: avoid; }
+            .card-title { font-size: 11.5px; font-weight: bold; color: #0A1628; border-bottom: 2px solid #0070F3; padding-bottom: 4px; margin-bottom: 8px; text-transform: uppercase; }
             
-            table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
-            th { text-align: left; font-size: 10px; color: #64748b; text-transform: uppercase; padding-bottom: 6px; border-bottom: 1px solid #f1f5f9; }
-            td { font-size: 13px; font-weight: bold; color: #0f172a; padding-top: 8px; padding-bottom: 8px; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+            th { text-align: left; font-size: 9px; color: #64748b; text-transform: uppercase; padding-bottom: 4px; border-bottom: 1px solid #f1f5f9; }
+            td { font-size: 11.5px; font-weight: bold; color: #0f172a; padding-top: 5px; padding-bottom: 5px; }
             
-            .price-row { display: table; width: 100%; margin-top: 6px; padding-top: 6px; border-top: 1px solid #f1f5f9; }
-            .price-label { display: table-cell; font-size: 12px; color: #475569; }
-            .price-val { display: table-cell; text-align: right; font-size: 12px; font-weight: bold; color: #0f172a; }
+            .price-row { display: table; width: 100%; margin-top: 4px; padding-top: 4px; border-top: 1px solid #f1f5f9; }
+            .price-label { display: table-cell; font-size: 11px; color: #475569; }
+            .price-val { display: table-cell; text-align: right; font-size: 11px; font-weight: bold; color: #0f172a; }
             
-            .total-box { background-color: #eff6ff; border: 1px solid #bfdbfe; padding: 14px; border-radius: 8px; margin-top: 12px; text-align: right; }
-            .total-label { font-size: 13px; font-weight: bold; color: #1e3a8a; }
-            .total-amount { font-size: 24px; font-weight: bold; color: #0070F3; }
+            .total-box { background-color: #eff6ff; border: 1px solid #bfdbfe; padding: 8px 12px; border-radius: 6px; margin-top: 8px; text-align: right; }
+            .total-label { font-size: 11.5px; font-weight: bold; color: #1e3a8a; }
+            .total-amount { font-size: 20px; font-weight: bold; color: #0070F3; }
             
-            .notice-box { background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 12px 16px; margin-top: 20px; font-size: 11px; color: #14532d; border-radius: 4px; }
-            .footer { text-align: center; margin-top: 30px; font-size: 10px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 12px; }
-            .barcode { font-family: monospace; font-size: 22px; letter-spacing: 5px; text-align: center; color: #475569; margin-top: 15px; }
+            .notice-box { background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 8px 12px; margin-top: 10px; font-size: 10px; color: #14532d; border-radius: 4px; page-break-inside: avoid; }
+            .footer { text-align: center; margin-top: 10px; font-size: 9px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 6px; page-break-inside: avoid; }
+            .barcode { font-family: monospace; font-size: 16px; letter-spacing: 4px; text-align: center; color: #475569; margin-top: 8px; }
         </style>
     </head>
     <body>
