@@ -55,7 +55,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
-    <!-- mapa de calor -->
+    <!-- Mapa de Calor -->
     <script type="text/javascript">
     (function(c,l,a,r,i,t,y){
         c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
@@ -64,62 +64,72 @@
     })(window, document, "clarity", "script", "xaoq8ifwa3");
 </script>
 </head>
-<body class="bg-brand-blue text-white font-sans min-h-screen">
+<body class="bg-[#0A1628] text-white font-sans font-light min-h-screen">
 
-    <header class="site-header">
-        <div class="header__container">
+    <header class="site-header sticky top-0 z-50 bg-[#0A1628]/90 backdrop-blur-md border-b border-[#C5A880]/20 shadow-xl transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             
-            <a href="?action=home" class="header__logo-link">
-                <!-- <i class="fa-solid fa-paper-plane header__logo-icon"></i>
-                <span class="header__logo-text">NOVA <span class="header__logo-highlight">AI</span>RLINES</span>
-                <span class="header__logo-text">NOVA AIRLINES</span> -->
-                <img src="assets/img/logonovairlines.png" alt="NOVAIRLINES" class="w-40 md:w-[250px] h-auto object-contain px-3 md:px-3"> 
-                
+            <!-- LOGO BOUTIQUE DE NOVAIRLINES -->
+            <a href="?action=home" class="flex items-center gap-3 group">
+                <img src="assets/img/logonovairlines.png" alt="NOVAIRLINES" class="w-44 md:w-[220px] h-auto object-contain transition-transform duration-300 group-hover:scale-105"> 
             </a> 
 
-            <nav class="header__nav">
-                <a href="?action=home" class="nav__link">Inicio</a>
-                <a href="?action=destinos" class="nav__link">Destinos</a>
-                <a href="?action=ofertas" class="nav__link">Ofertas</a>
-                <a href="?action=checkin" class="nav__link">Check-in</a>
-                <a href="?action=ayuda" class="nav__link">Ayuda</a>
+            <!-- NAVEGACIÓN PRINCIPAL MONTSERRAT 300 -->
+            <nav class="hidden md:flex items-center space-x-8 font-light text-xs uppercase tracking-[0.2em] text-slate-300">
+                <a href="?action=home" class="nav-link hover:text-[#C5A880] transition-colors py-1 border-b-2 border-transparent">Inicio</a>
+                <a href="?action=destinos" class="nav-link hover:text-[#C5A880] transition-colors py-1 border-b-2 border-transparent">Destinos</a>
+                <a href="?action=ofertas" class="nav-link hover:text-[#C5A880] transition-colors py-1 border-b-2 border-transparent">Ofertas</a>
+                <a href="?action=checkin" class="nav-link hover:text-[#C5A880] transition-colors py-1 border-b-2 border-transparent">Check-in</a>
+                <a href="?action=ayuda" class="nav-link hover:text-[#C5A880] transition-colors py-1 border-b-2 border-transparent">Ayuda</a>
+                
                 <?php if (($_SESSION['usuario']['rol'] ?? '') === 'admin'): ?>
-                    <a href="?action=admin" class="nav__link text-amber-400 font-bold hover:text-amber-300">
-                        <i class="fa-solid fa-shield-halved text-amber-400 mr-1"></i> Admin
+                    <a href="?action=admin" class="nav-link text-[#C5A880] hover:text-amber-300 transition-colors py-1 border-b-2 border-transparent flex items-center gap-1.5">
+                        <i class="fa-solid fa-shield-halved text-[#C5A880]"></i> Admin
                     </a>
                 <?php endif; ?>
             </nav>
 
-            <div class="header__actions">
-                <a href="tel:+5112345678" class="header__phone">
-                    <i class="fa-solid fa-phone text-[#0070F3]"></i> +51 1 234 5678
+            <!-- ACCIONES / BOTÓN LOGIN / USUARIO -->
+            <div class="flex items-center space-x-5">
+                <a href="tel:+5112345678" class="hidden lg:flex items-center gap-2 text-xs font-light text-slate-400 hover:text-[#C5A880] transition-colors tracking-wider">
+                    <i class="fa-solid fa-phone text-[#C5A880]"></i>
+                    <span>+51 1 700-NOVA</span>
                 </a>
                 
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <div class="user-menu">
-                        <div class="user-menu__trigger">
-                            <div class="user-menu__avatar">
-                                <?php echo substr($_SESSION['user_name'], 0, 1); ?>
+                    <div class="relative user-menu group">
+                        <div class="flex items-center gap-2.5 bg-[#132238] border border-[#C5A880]/30 hover:border-[#C5A880] px-4 py-2 rounded-xl cursor-pointer transition-all duration-300">
+                            <div class="w-7 h-7 rounded-full bg-[#C5A880]/20 border border-[#C5A880]/40 text-[#C5A880] flex items-center justify-center text-xs font-light">
+                                <?php echo strtoupper(substr($_SESSION['user_name'], 0, 1)); ?>
                             </div>
-                            <span class="user-menu__name">Hola, <?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
-                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                            <span class="text-xs font-light text-white tracking-wide">Hola, <?php echo htmlspecialchars(explode(' ', $_SESSION['user_name'])[0]); ?></span>
+                            <i class="fa-solid fa-chevron-down text-[10px] text-[#C5A880]"></i>
                         </div>
                         
-                        <!-- Menú Desplegable Oculto -->
-                        <div class="user-menu__dropdown">
-                            <div class="dropdown__content">
+                        <!-- MENÚ DESPLEGABLE BOUTIQUE -->
+                        <div class="absolute right-0 top-full pt-2 w-52 hidden group-hover:block z-50">
+                            <div class="bg-[#132238] border border-[#C5A880]/30 rounded-2xl shadow-2xl p-2 space-y-1 backdrop-blur-md text-xs font-light text-slate-300">
                                 <?php if (($_SESSION['usuario']['rol'] ?? '') === 'admin'): ?>
-                                    <a href="?action=admin" class="dropdown__item text-amber-400 font-bold"><i class="fa-solid fa-shield-halved w-5"></i> Panel Administrador</a>
+                                    <a href="?action=admin" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[#C5A880] hover:bg-[#C5A880]/15 transition">
+                                        <i class="fa-solid fa-shield-halved text-[#C5A880]"></i> Panel Admin
+                                    </a>
                                 <?php endif; ?>
-                                <a href="?action=panel" class="dropdown__item"><i class="fa-solid fa-suitcase-rolling w-5"></i> Mis Viajes</a>
-                                <a href="#" class="dropdown__item"><i class="fa-solid fa-user w-5"></i> Mi Perfil</a>
-                                <div class="dropdown__divider"></div>
-                                <a href="?action=logout" class="dropdown__item dropdown__item--danger"><i class="fa-solid fa-sign-out-alt w-5"></i> Cerrar sesión</a>
+                                <a href="?action=panel" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-white/5 hover:text-[#C5A880] transition">
+                                    <i class="fa-solid fa-suitcase-rolling text-[#C5A880]"></i> Mis Viajes
+                                </a>
+                                <a href="?action=panel" class="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-white/5 hover:text-[#C5A880] transition">
+                                    <i class="fa-solid fa-user text-[#C5A880]"></i> Mi Perfil
+                                </a>
+                                <div class="border-t border-[#C5A880]/15 my-1"></div>
+                                <a href="?action=logout" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-400 hover:bg-rose-500/10 transition">
+                                    <i class="fa-solid fa-sign-out-alt"></i> Cerrar sesión
+                                </a>
                             </div>
                         </div>
                     </div>
                 <?php else: ?>
-                    <button onclick="abrirLogin()" class="btn btn--primary">
+                    <button onclick="abrirLogin()" 
+                            class="px-5 py-2.5 bg-transparent border border-[#C5A880]/40 hover:bg-[#C5A880] text-[#C5A880] hover:text-[#0A1628] font-light text-xs uppercase tracking-widest rounded-xl transition duration-300 shadow-md">
                         Iniciar sesión
                     </button>
                 <?php endif; ?>
@@ -128,34 +138,34 @@
         </div>
     </header>
 
-    <!-- Notificaciones / Alertas Globales -->
-    <div id="toast-container" class="fixed top-24 right-5 z-[110] flex flex-col gap-2">
+    <!-- NOTIFICACIONES / ALERTAS GLOBALES -->
+    <div id="toast-container" class="fixed top-24 right-5 z-[110] flex flex-col gap-2 font-light text-xs">
         <?php if(isset($_GET['login']) && $_GET['login'] == 'error'): ?>
-            <div class="bg-red-500 text-white px-6 py-4 rounded-xl shadow-lg font-bold flex items-center gap-3 animate-[slideInRight_0.3s_ease-out]">
-                <i class="fa-solid fa-circle-exclamation text-xl"></i>
-                Credenciales incorrectas
+            <div class="bg-rose-500/90 backdrop-blur text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-rose-400/30 animate-[slideInRight_0.3s_ease-out]">
+                <i class="fa-solid fa-circle-exclamation text-base"></i>
+                <span>Credenciales incorrectas. Intenta de nuevo.</span>
             </div>
             <script>setTimeout(() => abrirLogin(), 500);</script>
         <?php endif; ?>
         
         <?php if(isset($_GET['registro']) && $_GET['registro'] == 'success'): ?>
-            <div class="bg-green-500 text-white px-6 py-4 rounded-xl shadow-lg font-bold flex items-center gap-3 animate-[slideInRight_0.3s_ease-out]">
-                <i class="fa-solid fa-check-circle text-xl"></i>
-                ¡Cuenta creada y sesión iniciada!
+            <div class="bg-emerald-500/90 backdrop-blur text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-emerald-400/30 animate-[slideInRight_0.3s_ease-out]">
+                <i class="fa-solid fa-check-circle text-base"></i>
+                <span>¡Cuenta creada con éxito! Sesión iniciada.</span>
             </div>
         <?php endif; ?>
 
         <?php if(isset($_GET['login']) && $_GET['login'] == 'success'): ?>
-            <div class="bg-blue-500 text-white px-6 py-4 rounded-xl shadow-lg font-bold flex items-center gap-3 animate-[slideInRight_0.3s_ease-out]">
-                <i class="fa-solid fa-check-circle text-xl"></i>
-                ¡Bienvenido de nuevo!
+            <div class="bg-[#132238] backdrop-blur text-[#C5A880] border border-[#C5A880]/40 px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 animate-[slideInRight_0.3s_ease-out]">
+                <i class="fa-solid fa-check-circle text-base text-[#C5A880]"></i>
+                <span>¡Bienvenido de nuevo a NovAirlines!</span>
             </div>
         <?php endif; ?>
 
         <?php if(isset($_GET['login']) && $_GET['login'] == 'required'): ?>
-            <div class="bg-yellow-500 text-white px-6 py-4 rounded-xl shadow-lg font-bold flex items-center gap-3 animate-[slideInRight_0.3s_ease-out]">
-                <i class="fa-solid fa-lock text-xl"></i>
-                Debes iniciar sesión para continuar
+            <div class="bg-amber-500/90 backdrop-blur text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-amber-400/30 animate-[slideInRight_0.3s_ease-out]">
+                <i class="fa-solid fa-lock text-base"></i>
+                <span>Inicia sesión para poder completar tu compra</span>
             </div>
             <script>setTimeout(() => abrirLogin(), 800);</script>
         <?php endif; ?>
@@ -170,18 +180,15 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            // 1. Obtenemos la acción de la URL (ej: ?action=destinos)
             const urlParams = new URLSearchParams(window.location.search);
-            // Si no hay acción en la URL, asumimos que estamos en 'home'
             const currentAction = urlParams.get('action') || 'home';
             
-            // 2. Buscamos el enlace que coincida con esa acción
-            const activeLink = document.querySelector(`.nav-link[href="?action=${currentAction}"]`);
-            
-            // 3. Si encontramos el enlace, le aplicamos los estilos de "pestaña activa"
-            if (activeLink) {
-                activeLink.classList.remove('text-gray-300', 'border-transparent');
-                activeLink.classList.add('text-white', 'border-white', 'scale-110', 'font-bold');
-            }
+            const links = document.querySelectorAll('.nav-link');
+            links.forEach(link => {
+                if (link.getAttribute('href') === `?action=${currentAction}`) {
+                    link.classList.remove('text-slate-300', 'border-transparent');
+                    link.classList.add('text-[#C5A880]', 'border-[#C5A880]');
+                }
+            });
         });
     </script>

@@ -1,103 +1,93 @@
-<main class="bg-brand-blue pb-20 text-white">
+<main class="bg-[#0A1628] pb-24 text-white font-sans min-h-screen">
     
-    <section class="bg-gradient-to-r from-brand-purple to-brand-rose border-b border-brand-gold/15 text-white py-20">
-        <div class="max-w-[1280px] mx-auto px-8 text-center">
-            <h1 class="text-4xl md:text-5xl font-bold mb-4 font-sans">Ayuda y soporte</h1>
-            <p class="text-lg md:text-xl text-brand-gold/80">Estamos aquí para ayudarte</p>
+    <section class="relative bg-gradient-to-b from-[#0A1628] via-[#132238] to-[#0A1628] border-b border-[#C5A880]/15 text-white py-20 px-6 overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-[#C5A880]/15 via-transparent to-transparent pointer-events-none"></div>
+        <div class="max-w-6xl mx-auto text-center relative z-10 space-y-4">
+            <span class="px-5 py-2 bg-[#C5A880]/10 text-[#C5A880] border border-[#C5A880]/30 text-xs font-light tracking-[0.25em] uppercase rounded-full inline-block">
+                Centro de Atención & Soporte
+            </span>
+            <h1 class="text-3xl md:text-5xl font-light tracking-[0.06em] text-white">Ayuda & Atención al Pasajero</h1>
+            <p class="text-[#C5A880]/80 text-sm md:text-base max-w-2xl mx-auto font-light tracking-wide">Estamos a su servicio para hacer de su experiencia aeronáutica un viaje impecable</p>
         </div>
     </section>
 
-    <div class="max-w-[1280px] mx-auto px-8 mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         
         <section class="lg:col-span-2 space-y-4">
-            <h2 class="text-2xl font-bold text-brand-gold mb-6 font-sans">Preguntas frecuentes</h2>
+            <h2 class="text-xl md:text-2xl font-light text-[#C5A880] tracking-wider mb-6 uppercase flex items-center gap-3">
+                <span>✦</span> Preguntas Frecuentes
+            </h2>
             
-            <div class="bg-[#132238]/70 backdrop-blur-md rounded-2xl shadow-lg border border-brand-gold/15 overflow-hidden">
+            <div class="bg-[#132238]/60 backdrop-blur-md rounded-2xl shadow-lg border border-[#C5A880]/20 overflow-hidden">
                 <button type="button" onclick="toggleAccordion('faq-1')" class="w-full p-6 text-left flex justify-between items-center hover:bg-white/5 transition-colors focus:outline-none">
-                    <span class="font-bold text-white text-base">¿Cómo funciona la búsqueda con IA?</span>
-                    <i id="icon-faq-1" class="fa-solid fa-chevron-down text-brand-gold transition-transform duration-300"></i>
+                    <span class="font-light text-white text-base tracking-wide">¿Cómo funciona la búsqueda con Inteligencia Artificial?</span>
+                    <i id="icon-faq-1" class="fa-solid fa-chevron-down text-[#C5A880] transition-transform duration-300"></i>
                 </button>
-                <div id="faq-1" class="hidden px-6 pb-6 text-brand-gold/80 text-sm leading-relaxed border-t border-brand-gold/10 pt-4 bg-[#0a1628]/30">
-                    Nuestra inteligencia artificial analiza miles de combinaciones de rutas, horarios y tarifas en tiempo real para ofrecerte las opciones más optimizadas, económicas y personalizadas según tus preferencias de viaje.
+                <div id="faq-1" class="hidden px-6 pb-6 text-slate-300 font-light text-xs leading-relaxed border-t border-[#C5A880]/15 pt-4 bg-[#0A1628]/40">
+                    Nuestra tecnología de IA analiza miles de combinaciones aeronáuticas en tiempo real para brindarle las tarifas más convenientes y personalizadas según sus preferencias.
                 </div>
             </div>
 
-            <div class="bg-[#132238]/70 backdrop-blur-md rounded-2xl shadow-lg border border-brand-gold/15 overflow-hidden">
+            <div class="bg-[#132238]/60 backdrop-blur-md rounded-2xl shadow-lg border border-[#C5A880]/20 overflow-hidden">
                 <button type="button" onclick="toggleAccordion('faq-2')" class="w-full p-6 text-left flex justify-between items-center hover:bg-white/5 transition-colors focus:outline-none">
-                    <span class="font-bold text-white text-base">¿Puedo cancelar mi reserva?</span>
-                    <i id="icon-faq-2" class="fa-solid fa-chevron-down text-brand-gold transition-transform duration-300"></i>
+                    <span class="font-light text-white text-base tracking-wide">¿Puedo gestionar o modificar mi reserva de vuelo?</span>
+                    <i id="icon-faq-2" class="fa-solid fa-chevron-down text-[#C5A880] transition-transform duration-300"></i>
                 </button>
-                <div id="faq-2" class="hidden px-6 pb-6 text-brand-gold/80 text-sm leading-relaxed border-t border-brand-gold/10 pt-4 bg-[#0a1628]/30">
-                    Sí, las cancelaciones se pueden gestionar directamente desde el panel de gestión. Los reembolsos o penalizaciones aplicables dependerán estrictamente de las condiciones y regulaciones de la tarifa que compraste.
+                <div id="faq-2" class="hidden px-6 pb-6 text-slate-300 font-light text-xs leading-relaxed border-t border-[#C5A880]/15 pt-4 bg-[#0A1628]/40">
+                    Sí, los cambios se pueden realizar directamente desde su panel "Mis Viajes" o contactando a nuestro centro de atención técnica con su código PNR.
                 </div>
             </div>
 
-            <div class="bg-[#132238]/70 backdrop-blur-md rounded-2xl shadow-lg border border-brand-gold/15 overflow-hidden">
+            <div class="bg-[#132238]/60 backdrop-blur-md rounded-2xl shadow-lg border border-[#C5A880]/20 overflow-hidden">
                 <button type="button" onclick="toggleAccordion('faq-3')" class="w-full p-6 text-left flex justify-between items-center hover:bg-white/5 transition-colors focus:outline-none">
-                    <span class="font-bold text-white text-base">¿Cómo hago el check-in?</span>
-                    <i id="icon-faq-3" class="fa-solid fa-chevron-down text-brand-gold transition-transform duration-300"></i>
+                    <span class="font-light text-white text-base tracking-wide">¿Cómo realizo mi Check-in digital?</span>
+                    <i id="icon-faq-3" class="fa-solid fa-chevron-down text-[#C5A880] transition-transform duration-300"></i>
                 </button>
-                <div id="faq-3" class="hidden px-6 pb-6 text-brand-gold/80 text-sm leading-relaxed border-t border-brand-gold/10 pt-4 bg-[#0a1628]/30">
-                    Puedes realizar tu Check-in digital de manera rápida accediendo a la pestaña dedicada en nuestro menú superior, introduciendo tu código de reserva y el apellido registrado 48 horas antes de tu vuelo.
+                <div id="faq-3" class="hidden px-6 pb-6 text-slate-300 font-light text-xs leading-relaxed border-t border-[#C5A880]/15 pt-4 bg-[#0A1628]/40">
+                    Acceda a la sección Check-in en la barra de navegación e ingrese su código de reserva PNR y su apellido desde 24 horas antes del despegue.
                 </div>
             </div>
 
-            <div class="bg-[#132238]/70 backdrop-blur-md rounded-2xl shadow-lg border border-brand-gold/15 overflow-hidden">
+            <div class="bg-[#132238]/60 backdrop-blur-md rounded-2xl shadow-lg border border-[#C5A880]/20 overflow-hidden">
                 <button type="button" onclick="toggleAccordion('faq-4')" class="w-full p-6 text-left flex justify-between items-center hover:bg-white/5 transition-colors focus:outline-none">
-                    <span class="font-bold text-white text-base">¿Qué formas de pago aceptan?</span>
-                    <i id="icon-faq-4" class="fa-solid fa-chevron-down text-brand-gold transition-transform duration-300"></i>
+                    <span class="font-light text-white text-base tracking-wide">¿Qué métodos de pago son aceptados?</span>
+                    <i id="icon-faq-4" class="fa-solid fa-chevron-down text-[#C5A880] transition-transform duration-300"></i>
                 </button>
-                <div id="faq-4" class="hidden px-6 pb-6 text-brand-gold/80 text-sm leading-relaxed border-t border-brand-gold/10 pt-4 bg-[#0a1628]/30">
-                    Aceptamos todas las principales tarjetas de crédito y débito (Visa, Mastercard, American Express), así como pagos digitales locales seguros y transferencias bancarias según tu país de residencia.
-                </div>
-            </div>
-
-            <div class="bg-[#132238]/70 backdrop-blur-md rounded-2xl shadow-lg border border-brand-gold/15 overflow-hidden">
-                <button type="button" onclick="toggleAccordion('faq-5')" class="w-full p-6 text-left flex justify-between items-center hover:bg-white/5 transition-colors focus:outline-none">
-                    <span class="font-bold text-white text-base">¿Hay cargos por equipaje?</span>
-                    <i id="icon-faq-5" class="fa-solid fa-chevron-down text-brand-gold transition-transform duration-300"></i>
-                </button>
-                <div id="faq-5" class="hidden px-6 pb-6 text-brand-gold/80 text-sm leading-relaxed border-t border-brand-gold/10 pt-4 bg-[#0a1628]/30">
-                    Cada tarifa incluye una franquicia de equipaje distinta (por ejemplo, bolso de mano o bodega). Puedes verificar el costo detallado por pieza adicional en nuestra tabla de políticas dentro de la sección Check-in.
-                </div>
-            </div>
-
-            <div class="bg-[#132238]/70 backdrop-blur-md rounded-2xl shadow-lg border border-brand-gold/15 overflow-hidden">
-                <button type="button" onclick="toggleAccordion('faq-6')" class="w-full p-6 text-left flex justify-between items-center hover:bg-white/5 transition-colors focus:outline-none">
-                    <span class="font-bold text-white text-base">¿Cómo contacto al soporte?</span>
-                    <i id="icon-faq-6" class="fa-solid fa-chevron-down text-brand-gold transition-transform duration-300"></i>
-                </button>
-                <div id="faq-6" class="hidden px-6 pb-6 text-brand-gold/80 text-sm leading-relaxed border-t border-brand-gold/10 pt-4 bg-[#0a1628]/30">
-                    Si necesitas atención inmediata, puedes usar el botón de chat rápido vía WhatsApp a la derecha, o rellenar el formulario de asistencia técnica para que un asesor especializado responda a tu correo electrónico.
+                <div id="faq-4" class="hidden px-6 pb-6 text-slate-300 font-light text-xs leading-relaxed border-t border-[#C5A880]/15 pt-4 bg-[#0A1628]/40">
+                    Aceptamos Visa, Mastercard, American Express y soluciones bancarias digitales locales con cifrado de seguridad bancario.
                 </div>
             </div>
         </section>
 
         <aside class="space-y-6">
-            
-            <div class="bg-[#132238]/70 backdrop-blur-md p-6 rounded-2xl shadow-lg border border-brand-gold/15 text-center flex flex-col items-center tarjeta-animada">
-                <h3 class="text-xl font-bold text-white mb-1 font-sans">WhatsApp</h3>
-                <p class="text-xs text-brand-gold/60 mb-6">Respuesta en 10 min</p>
-                <a href="https://wa.me/5112345678" target="_blank" class="w-full bg-[#15A850] hover:bg-[#118F43] text-white py-3 rounded-xl font-semibold transition-colors text-center block">
-                    Chatear ahora
+            <div class="bg-[#132238]/60 backdrop-blur-md p-6 rounded-2xl shadow-lg border border-[#C5A880]/20 text-center flex flex-col items-center">
+                <h3 class="text-lg font-light text-white mb-1 tracking-wide">Atención Vía WhatsApp</h3>
+                <p class="text-xs text-[#C5A880]/80 font-light mb-6">Respuesta personalizada en minutos</p>
+                <a href="https://wa.me/5112345678" target="_blank" 
+                   class="w-full bg-[#15A850] hover:bg-[#118F43] text-white py-3 rounded-xl font-light text-xs uppercase tracking-widest transition-colors text-center block">
+                    Chatear en Directo
                 </a>
             </div>
 
-            <div class="bg-[#132238]/70 backdrop-blur-md p-6 rounded-2xl shadow-lg border border-brand-gold/15 tarjeta-animada">
-                <h3 class="text-xl font-bold text-brand-gold text-center mb-6 font-sans">Asistencia</h3>
+            <div class="bg-[#132238]/60 backdrop-blur-md p-6 rounded-2xl shadow-lg border border-[#C5A880]/20">
+                <h3 class="text-lg font-light text-[#C5A880] text-center mb-6 tracking-wide uppercase">Asistencia Técnica</h3>
                 <form action="index.php" method="POST" class="space-y-4">
                     <input type="hidden" name="action" value="procesar_soporte">
                     <div>
-                        <input type="text" name="nombre" placeholder="Nombre" required class="w-full bg-[#0A1628]/80 border border-brand-gold/30 rounded-xl px-4 py-3 text-sm text-white placeholder-[#6E82A1] focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold transition-colors">
+                        <input type="text" name="nombre" placeholder="Nombre completo" required 
+                               class="w-full bg-[#0A1628]/90 border border-[#C5A880]/30 rounded-xl px-4 py-3 text-xs font-light text-white placeholder-slate-500 focus:outline-none focus:border-[#C5A880] transition-colors">
                     </div>
                     <div>
-                        <input type="email" name="email" placeholder="Email" required class="w-full bg-[#0A1628]/80 border border-brand-gold/30 rounded-xl px-4 py-3 text-sm text-white placeholder-[#6E82A1] focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold transition-colors">
+                        <input type="email" name="email" placeholder="Correo electrónico" required 
+                               class="w-full bg-[#0A1628]/90 border border-[#C5A880]/30 rounded-xl px-4 py-3 text-xs font-light text-white placeholder-slate-500 focus:outline-none focus:border-[#C5A880] transition-colors">
                     </div>
                     <div>
-                        <textarea name="mensaje" placeholder="Mensaje" rows="4" required class="w-full bg-[#0A1628]/80 border border-brand-gold/30 rounded-xl px-4 py-3 text-sm text-white placeholder-[#6E82A1] focus:outline-none focus:border-brand-gold focus:ring-1 focus:ring-brand-gold transition-colors resize-none"></textarea>
+                        <textarea name="mensaje" placeholder="Describa su consulta o requerimiento..." rows="4" required 
+                                  class="w-full bg-[#0A1628]/90 border border-[#C5A880]/30 rounded-xl px-4 py-3 text-xs font-light text-white placeholder-slate-500 focus:outline-none focus:border-[#C5A880] transition-colors resize-none"></textarea>
                     </div>
-                    <button type="submit" class="w-full bg-gradient-to-r from-brand-gold to-brand-rose hover:from-brand-gold/90 hover:to-brand-rose/90 text-brand-blue py-3 rounded-xl font-bold transition-all shadow-[0_2px_10px_rgba(197,168,128,0.15)] text-center">
-                        Enviar
+                    <button type="submit" 
+                            class="w-full bg-transparent border border-[#C5A880]/40 hover:bg-[#C5A880] text-[#C5A880] hover:text-[#0A1628] py-3 rounded-xl font-light text-xs uppercase tracking-widest transition-all duration-300 text-center">
+                        Enviar Consulta
                     </button>
                 </form>
             </div>

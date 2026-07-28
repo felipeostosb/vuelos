@@ -36,11 +36,11 @@
     <section class="ai-message-bar">
         <div class="ai-message-container">
             <?php if (isset($_GET['query']) && !empty($_GET['query'])): ?>
-                <i class="fa-solid fa-wand-magic-sparkles text-[#0070F3]"></i>
-                <p>La IA entendió tu solicitud y encontró <span class="font-bold text-[#0070F3]"><?php echo count($vuelos_encontrados); ?> vuelos</span>. El mejor precio sale los martes.</p>
+                <i class="fa-solid fa-wand-magic-sparkles text-[#C5A880]"></i>
+                <p>La IA entendió tu solicitud y encontró <span class="font-light text-[#C5A880]"><?php echo count($vuelos_encontrados); ?> vuelos</span>. El mejor precio sale los martes.</p>
             <?php else: ?>
-                <i class="fa-solid fa-plane text-[#0070F3]"></i>
-                <p>Hemos encontrado <span class="font-bold text-[#0070F3]"><?php echo count($vuelos_encontrados); ?> vuelos</span> para tu ruta.</p>
+                <i class="fa-solid fa-plane text-[#C5A880]"></i>
+                <p>Hemos encontrado <span class="font-light text-[#C5A880]"><?php echo count($vuelos_encontrados); ?> vuelos</span> para tu ruta.</p>
             <?php endif; ?>
         </div>
     </section>
@@ -103,7 +103,7 @@
                     
                     <div class="range-labels">
                         <span>S/. 500</span>
-                        <span id="precio-etiqueta" style="background: linear-gradient(135deg, #C5A880, #9C694C); color: #0A1628; font-weight: 700; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.8rem;">S/. <?php echo $currentPrice; ?></span>
+                        <span id="precio-etiqueta" style="background: rgba(197,168,128,0.15); color: #C5A880; border: 1px solid rgba(197,168,128,0.3); font-weight: 300; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.8rem;">S/. <?php echo $currentPrice; ?></span>
                         <span>S/. 4,000</span>
                     </div>
                 </div>
@@ -165,8 +165,8 @@
             </div>
 
             <?php if (isset($vuelo_ida_seleccionado)): ?>
-            <div class="flight-card" style="margin-bottom: 2rem; border: 2px solid rgba(197,168,128,0.5); background-color: rgba(19,34,56,0.9);">
-                <div style="font-size:0.875rem; font-weight:bold; color:#4ade80; margin-bottom: 1rem; border-bottom: 1px solid rgba(197,168,128,0.15); padding-bottom: 0.5rem;">
+            <div class="flight-card" style="margin-bottom: 2rem; border: 1px solid rgba(197,168,128,0.3); background-color: rgba(19,34,56,0.9);">
+                <div style="font-size:0.875rem; font-weight:300; color:#4ade80; margin-bottom: 1rem; border-bottom: 1px solid rgba(197,168,128,0.15); padding-bottom: 0.5rem;">
                     <i class="fa-solid fa-check-circle"></i> Vuelo de Ida Seleccionado
                 </div>
                 <div class="flight-times">
@@ -190,7 +190,7 @@
                 </div>
             </div>
             
-            <h3 style="font-size: 1.25rem; font-weight: bold; margin-bottom: 1rem; color: #C5A880;">Paso 2: Selecciona tu vuelo de regreso</h3>
+            <h3 style="font-size: 1.125rem; font-weight: 300; margin-bottom: 1rem; color: #C5A880; letter-spacing: 0.05em;">Paso 2: Selecciona tu vuelo de regreso</h3>
             <?php endif; ?>
 
             <div id="lista-vuelos" class="flight-list">

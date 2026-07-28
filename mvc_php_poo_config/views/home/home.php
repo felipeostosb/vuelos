@@ -124,24 +124,24 @@
                             formIa.style.display = 'flex';
                             formClasica.style.display = 'none';
                             
-                            tabIa.classList.add('text-brand-gold', 'border-b-2', 'border-brand-gold', 'font-bold');
-                            tabIa.classList.remove('text-gray-400', 'font-medium');
+                            tabIa.classList.add('text-[#C5A880]', 'border-b-2', 'border-[#C5A880]', 'font-light');
+                            tabIa.classList.remove('text-slate-400');
                             
-                            tabClasica.classList.remove('text-brand-gold', 'border-b-2', 'border-brand-gold', 'font-bold');
-                            tabClasica.classList.add('text-gray-400', 'font-medium');
+                            tabClasica.classList.remove('text-[#C5A880]', 'border-b-2', 'border-[#C5A880]', 'font-bold');
+                            tabClasica.classList.add('text-slate-400', 'font-light');
                             
-                            tipText.innerHTML = '<i class="fa-regular fa-lightbulb text-brand-gold"></i> Tip: dile a la IA tu destino, fechas y número de personas';
+                            tipText.innerHTML = '<i class="fa-regular fa-lightbulb text-[#C5A880]"></i> Tip: dile a la IA tu destino, fechas y número de personas';
                         } else {
                             formIa.style.display = 'none';
                             formClasica.style.display = 'flex';
                             
-                            tabClasica.classList.add('text-brand-gold', 'border-b-2', 'border-brand-gold', 'font-bold');
-                            tabClasica.classList.remove('text-gray-400', 'font-medium');
+                            tabClasica.classList.add('text-[#C5A880]', 'border-b-2', 'border-[#C5A880]', 'font-light');
+                            tabClasica.classList.remove('text-slate-400');
                             
-                            tabIa.classList.remove('text-brand-gold', 'border-b-2', 'border-brand-gold', 'font-bold');
-                            tabIa.classList.add('text-gray-400', 'font-medium');
+                            tabIa.classList.remove('text-[#C5A880]', 'border-b-2', 'border-[#C5A880]', 'font-bold');
+                            tabIa.classList.add('text-slate-400', 'font-light');
                             
-                            tipText.innerHTML = '<i class="fa-regular fa-lightbulb text-brand-gold"></i> Tip: Selecciona tus fechas y origen/destino manualmente';
+                            tipText.innerHTML = '<i class="fa-regular fa-lightbulb text-[#C5A880]"></i> Tip: Selecciona tus fechas y origen/destino manualmente';
                         }
                     }
 

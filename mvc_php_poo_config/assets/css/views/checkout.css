@@ -4,6 +4,7 @@
     min-height: 100vh;
     padding: 4rem 0;
     color: #FFFFFF;
+    font-weight: 300;
 }
 
 .checkout-container {
@@ -19,15 +20,16 @@
 
 .checkout-title {
     font-size: 2.25rem;
-    font-weight: 800;
+    font-weight: 300;
     color: #FFFFFF;
     margin-bottom: 0.5rem;
     font-family: var(--font-family-main);
-    letter-spacing: -0.5px;
+    letter-spacing: 0.05em;
 }
 
 .checkout-subtitle {
     color: var(--color-text-muted);
+    font-weight: 300;
 }
 
 /* CARDS */
@@ -51,17 +53,19 @@
 }
 
 .summary-header-title {
-    font-weight: 700;
+    font-weight: 300;
     color: #FFFFFF;
     margin: 0;
     font-family: var(--font-family-main);
+    letter-spacing: 0.03em;
 }
 
 .badge-roundtrip {
     background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
     color: var(--color-dark);
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 300;
+    letter-spacing: 0.05em;
     padding: 0.35rem 0.85rem;
     border-radius: 9999px;
 }
@@ -70,7 +74,8 @@
     background-color: rgba(255, 255, 255, 0.1);
     color: #FFFFFF;
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 300;
+    letter-spacing: 0.05em;
     padding: 0.35rem 0.85rem;
     border-radius: 9999px;
 }
@@ -98,7 +103,7 @@
     align-items: center;
     gap: 1rem;
     color: var(--color-primary);
-    font-weight: 600;
+    font-weight: 300;
 }
 
 .time-overview {
@@ -123,13 +128,14 @@
 
 .summary-passengers {
     color: var(--color-text-muted);
-    font-weight: 500;
+    font-weight: 300;
 }
 
 .summary-total {
     font-size: 1.6rem;
-    font-weight: 800;
+    font-weight: 300;
     color: var(--color-primary);
+    letter-spacing: 0.05em;
     text-shadow: 0 0 10px rgba(197, 168, 128, 0.2);
 }
 
@@ -141,10 +147,11 @@
 }
 
 .passenger-header-title {
-    font-weight: 700;
+    font-weight: 300;
     color: #FFFFFF;
     margin: 0;
     font-family: var(--font-family-main);
+    letter-spacing: 0.03em;
 }
 
 .passenger-content {
@@ -173,11 +180,11 @@
 .form-label {
     display: block;
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 300;
     color: var(--color-primary);
     margin-bottom: 0.5rem;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.1em;
 }
 
 .form-input {
@@ -187,6 +194,7 @@
     border: 1px solid rgba(197, 168, 128, 0.25);
     background-color: rgba(10, 22, 40, 0.7);
     color: #FFFFFF;
+    font-weight: 300;
     transition: all var(--transition-normal);
     outline: none;
 }
@@ -208,11 +216,14 @@
     align-items: center;
     gap: 0.75rem;
     width: 100%;
+    font-weight: 300;
+    letter-spacing: 0.1em;
 }
 
 .security-notice {
     text-align: center;
     font-size: 0.8rem;
     color: var(--color-text-muted);
+    font-weight: 300;
     margin-top: 1.25rem;
 }

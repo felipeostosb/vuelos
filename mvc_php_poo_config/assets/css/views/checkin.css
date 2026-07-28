@@ -22,10 +22,10 @@
 
 .checkin-hero-title {
     font-size: 2.25rem;
-    font-weight: 800;
+    font-weight: 300;
     margin-bottom: 1rem;
     font-family: var(--font-family-main);
-    letter-spacing: -0.5px;
+    letter-spacing: 0.05em;
 }
 
 @media (min-width: 768px) {
@@ -36,6 +36,7 @@
 
 .checkin-hero-subtitle {
     font-size: 1.125rem;
+    font-weight: 300;
     color: var(--color-text-muted);
 }
 
@@ -107,9 +108,10 @@
 
 .checkin-card-image-title {
     color: white;
-    font-weight: 700;
+    font-weight: 300;
     font-size: 1.25rem;
     margin: 0;
+    letter-spacing: 0.05em;
     font-family: var(--font-family-main);
 }
 
@@ -130,7 +132,7 @@
     border-radius: 0.75rem;
     margin-bottom: 1rem;
     font-size: 0.875rem;
-    font-weight: 700;
+    font-weight: 300;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -145,7 +147,7 @@
     border-radius: 0.75rem;
     margin-bottom: 1rem;
     font-size: 0.875rem;
-    font-weight: 700;
+    font-weight: 300;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -159,7 +161,7 @@
     padding: 0.75rem 1rem;
     border-radius: 0.75rem;
     font-size: 0.875rem;
-    font-weight: 500;
+    font-weight: 300;
 }
 
 /* FORM ELEMENTS */
@@ -172,6 +174,7 @@
 
 .checkin-instruction {
     font-size: 0.875rem;
+    font-weight: 300;
     color: var(--color-text-muted);
     margin-bottom: 1rem;
 }
@@ -187,8 +190,8 @@
     margin-bottom: 1.5rem;
     transition: all var(--transition-normal);
     text-transform: uppercase;
-    font-weight: 700;
-    letter-spacing: 0.1em;
+    font-weight: 300;
+    letter-spacing: 0.2em;
 }
 
 .checkin-input:focus {
@@ -201,11 +204,11 @@
 /* PROCESS STEPS */
 .process-title {
     font-size: 1.35rem;
-    font-weight: 700;
+    font-weight: 300;
     color: var(--color-primary);
     margin-bottom: 2rem;
     font-family: var(--font-family-main);
-    letter-spacing: 0.5px;
+    letter-spacing: 0.05em;
 }
 
 .process-steps {
