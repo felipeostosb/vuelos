@@ -1,7 +1,29 @@
 <?php
 // views/flights/resumen_autopilot.php
-$vuelo_ida = $vuelo_seleccionado;
-$vuelo_vuelta = $vuelo_vuelta_seleccionado ?? null;
+
+// Helper de normalización para soportar tanto vuelos locales como Duffel API / IA
+if (!function_exists('normalizar_vuelo_autopilot')) {
+    function normalizar_vuelo_autopilot($v) {
+        if (!$v) return null;
+        return [
+            'id'               => $v['id'] ?? 1,
+            'origen_ciudad'    => !empty($v['origen_ciudad']) ? $v['origen_ciudad'] : (!empty($v['departure_city']) ? $v['departure_city'] : (!empty($v['departure_airport_name']) ? $v['departure_airport_name'] : (!empty($v['departure_airport']) ? $v['departure_airport'] : 'Origen'))),
+            'origen_iata'      => !empty($v['origen_iata']) ? $v['origen_iata'] : (!empty($v['departure_airport']) ? $v['departure_airport'] : 'ORG'),
+            'destino_ciudad'   => !empty($v['destino_ciudad']) ? $v['destino_ciudad'] : (!empty($v['arrival_city']) ? $v['arrival_city'] : (!empty($v['arrival_airport_name']) ? $v['arrival_airport_name'] : (!empty($v['arrival_airport']) ? $v['arrival_airport'] : 'Destino'))),
+            'destino_iata'     => !empty($v['destino_iata']) ? $v['destino_iata'] : (!empty($v['arrival_airport']) ? $v['arrival_airport'] : 'DES'),
+            'aerolinea_nombre' => !empty($v['aerolinea_nombre']) ? $v['aerolinea_nombre'] : (!empty($v['airline']) ? $v['airline'] : 'NovAirlines'),
+            'numero_vuelo'     => !empty($v['numero_vuelo']) ? $v['numero_vuelo'] : (!empty($v['flight_number']) ? $v['flight_number'] : 'NV-101'),
+            'hora_salida'      => !empty($v['hora_salida']) ? $v['hora_salida'] : (!empty($v['departure_time']) ? $v['departure_time'] : '08:00'),
+            'hora_llegada'     => !empty($v['hora_llegada']) ? $v['hora_llegada'] : (!empty($v['arrival_time']) ? $v['arrival_time'] : '10:00'),
+            'duracion'         => !empty($v['duracion']) ? $v['duracion'] : (!empty($v['duration']) ? $v['duration'] : '2h 00m'),
+            'escalas'          => isset($v['escalas']) ? (int)$v['escalas'] : (isset($v['stops']) ? (int)$v['stops'] : 0),
+            'precio'           => (float)(!empty($v['precio']) ? $v['precio'] : (!empty($v['price']) ? $v['price'] : 120.00))
+        ];
+    }
+}
+
+$vuelo_ida = normalizar_vuelo_autopilot($vuelo_seleccionado);
+$vuelo_vuelta = normalizar_vuelo_autopilot($vuelo_vuelta_seleccionado ?? null);
 $es_ida_vuelta = !empty($vuelo_vuelta);
 
 // Datos del usuario titular

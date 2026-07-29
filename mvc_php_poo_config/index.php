@@ -262,7 +262,7 @@ switch ($accion) {
             $oferta_ganadora = $vuelos_encontrados[0];
             $_SESSION['oferta_autopilot_ganadora'] = $oferta_ganadora;
             
-            $vuelo_seleccionado = $oferta_ganadora['outbound'];
+            $vuelo_seleccionado = isset($oferta_ganadora['outbound']) ? array_merge($oferta_ganadora, $oferta_ganadora['outbound']) : $oferta_ganadora;
             if (!isset($vuelo_seleccionado['id'])) {
                 $vuelo_seleccionado['id'] = 1;
             }
