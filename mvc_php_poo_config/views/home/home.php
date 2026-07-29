@@ -11,7 +11,28 @@
             <p class="hero-subtitle">Dile a nuestra IA dónde y cuándo quieres ir.</p>
         </div>
 
+        <?php
+            $autopilot_activo = false;
+            if (isset($_SESSION['user_id'])) {
+                require_once 'models/Usuario.php';
+                $u_data = obtener_usuario_por_id($_SESSION['user_id']);
+                if ($u_data && (int)$u_data['modo_autopilot'] === 1) {
+                    $autopilot_activo = true;
+                }
+            }
+        ?>
+
         <div class="search-widget-wrapper">
+            <?php if ($autopilot_activo): ?>
+                <div class="mb-4 p-3.5 rounded-2xl bg-[#C5A880]/20 border border-[#C5A880]/40 text-[#C5A880] text-xs font-light tracking-wide flex items-center justify-between shadow-xl backdrop-blur-md max-w-4xl mx-auto">
+                    <span class="flex items-center gap-2">
+                        <i class="fa-solid fa-bolt text-sm text-[#C5A880] animate-pulse"></i>
+                        <span><strong class="font-normal text-white">Modo Auto-Pilot Activado:</strong> Su búsqueda seleccionará automáticamente la mejor opción y le presentará el Resumen Pre-Compra Exprés.</span>
+                    </span>
+                    <a href="index.php?action=panel" class="underline text-[11px] font-light hover:text-white ml-2 flex-shrink-0">Mi Perfil</a>
+                </div>
+            <?php endif; ?>
+
             <div class="search-widget">
                 <!-- Pestañas -->
                 <div class="search-tabs">
@@ -283,18 +304,23 @@
     <section class="section-container">
         <h2 class="section-title">Destinos populares</h2>
         <?php
-            $destinos_populares = array_slice($opciones, 0, 4); // Usar los 4 primeros de la BD
+            $destinos_populares = array_slice($opciones, 0, 4);
+            if (empty($destinos_populares)) {
+                $destinos_populares = ['Cusco', 'Tarapoto', 'Arequipa', 'París'];
+            }
         ?>
         <div class="cards-grid cards-grid--4">
             <?php foreach ($destinos_populares as $destino_pop): ?>
-            <div class="popular-card group">
-                <div class="h-full w-full bg-brand-blue/50 flex items-center justify-center card-image">
-                    <i class="fa-solid fa-map-location-dot text-6xl text-brand-gold/40 group-hover:scale-110 transition-transform duration-500"></i>
-                </div>
-                <div class="popular-card-overlay"></div>
-                <div class="popular-card-content">
-                    <h3 class="popular-card-title"><?php echo htmlspecialchars($destino_pop); ?></h3>
-                    <a href="?action=buscar&destino=<?php echo urlencode($destino_pop); ?>" class="text-[#C5A880] hover:underline text-xs font-light tracking-wider mt-1 inline-block">Ver vuelos <i class="fa-solid fa-arrow-right text-[10px] ml-1"></i></a>
+            <?php $img_pop = obtener_imagen_popular($destino_pop); ?>
+            <div class="popular-card group relative h-64 rounded-2xl overflow-hidden shadow-xl border border-[#C5A880]/20 hover:border-[#C5A880]/60 transition-all duration-500">
+                <img src="<?php echo htmlspecialchars($img_pop); ?>" alt="<?php echo htmlspecialchars($destino_pop); ?>" class="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700">
+                <div class="absolute inset-0 bg-gradient-to-t from-[#0A1628] via-[#0A1628]/30 to-transparent"></div>
+                <div class="absolute bottom-0 left-0 right-0 p-5 z-10">
+                    <span class="text-[10px] uppercase font-light tracking-widest text-[#C5A880] block mb-1">Destino Popular</span>
+                    <h3 class="text-lg font-light text-white tracking-wide group-hover:text-[#C5A880] transition-colors"><?php echo htmlspecialchars($destino_pop); ?></h3>
+                    <a href="?action=buscar&destino=<?php echo urlencode($destino_pop); ?>" class="text-xs text-slate-300 font-light tracking-wider hover:text-[#C5A880] mt-1 inline-flex items-center gap-1 transition-colors">
+                        Ver vuelos <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </a>
                 </div>
             </div>
             <?php endforeach; ?>

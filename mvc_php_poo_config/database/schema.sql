@@ -48,7 +48,25 @@ CREATE TABLE usuarios (
     email VARCHAR(150) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL COMMENT 'Hash seguro generado por password_hash() en PHP',
     rol ENUM('cliente', 'admin') DEFAULT 'cliente',
+    modo_autopilot TINYINT(1) DEFAULT 0,
+    tipo_documento_pref VARCHAR(20) DEFAULT 'DNI',
+    numero_documento_pref VARCHAR(50) DEFAULT NULL,
+    tarjeta_mascarada_pref VARCHAR(20) DEFAULT NULL,
     creado_en DATETIME DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------------------------------------------------------------------------
+-- 3.1. TABLA DE ACOMPAÑANTES HABITUALES DE USUARIO
+-- ----------------------------------------------------------------------------------------------
+CREATE TABLE usuario_acompanantes (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT(11) NOT NULL,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
+    tipo_documento VARCHAR(20) DEFAULT 'DNI',
+    numero_documento VARCHAR(50) DEFAULT NULL,
+    creado_en DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_acompanantes_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------------------------------------------------------------------------

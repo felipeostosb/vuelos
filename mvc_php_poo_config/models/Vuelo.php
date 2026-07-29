@@ -468,6 +468,29 @@ function obtener_imagen_destino($ciudad) {
 }
 
 /**
+ * Obtiene una imagen de alta resolución para la sección de Destinos Populares
+ */
+function obtener_imagen_popular($ciudad) {
+    $img_local = obtener_imagen_destino($ciudad);
+    if (!empty($img_local)) return $img_local;
+
+    $ciudad_norm = mb_strtolower(trim($ciudad), 'UTF-8');
+    if (strpos($ciudad_norm, 'miami') !== false) {
+        return 'https://images.unsplash.com/photo-1506966953377-3f925a26eedc?auto=format&fit=crop&w=600&q=80';
+    } elseif (strpos($ciudad_norm, 'madrid') !== false) {
+        return 'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?auto=format&fit=crop&w=600&q=80';
+    } elseif (strpos($ciudad_norm, 'bogota') !== false) {
+        return 'https://images.unsplash.com/photo-1599309329204-ed13cf3e3bdf?auto=format&fit=crop&w=600&q=80';
+    } elseif (strpos($ciudad_norm, 'buenos') !== false) {
+        return 'https://images.unsplash.com/photo-1589909202802-8f4aadce1849?auto=format&fit=crop&w=600&q=80';
+    } elseif (strpos($ciudad_norm, 'iquitos') !== false) {
+        return 'https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=600&q=80';
+    }
+    
+    return 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=600&q=80';
+}
+
+/**
  * Retorna las 3 ofertas exclusivas destacadas de Perú (Tarapoto, Cusco, Arequipa)
  */
 function obtener_ofertas_peru_destacadas() {

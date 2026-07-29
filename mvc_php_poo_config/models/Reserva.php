@@ -17,23 +17,33 @@ function crear_reserva($pnr, $usuario_id, $vuelo_id, $pasajeros_count, $precio_t
     $conexion = conectar_db();
     if (!$conexion) return false;
 
-    $sql = "INSERT INTO reservas (pnr, usuario_id, vuelo_id, duffel_order_id, tipo_viaje, precio_total, pasajeros_count, vuelo_vuelta_data, estado) 
-            VALUES (:pnr, :usuario_id, :vuelo_id, :duffel_order_id, :tipo_viaje, :precio_total, :pasajeros_count, :vuelo_vuelta_data, 'Confirmada')";
-    
-    $consulta = $conexion->prepare($sql);
-    $consulta->bindParam(':pnr', $pnr);
-    $consulta->bindParam(':usuario_id', $usuario_id);
-    $consulta->bindParam(':vuelo_id', $vuelo_id);
-    $consulta->bindParam(':duffel_order_id', $duffel_order_id);
-    $consulta->bindParam(':tipo_viaje', $tipo_viaje);
-    $consulta->bindParam(':precio_total', $precio_total);
-    $consulta->bindParam(':pasajeros_count', $pasajeros_count);
-    
-    $vuelo_vuelta_json = $vuelo_vuelta_data ? json_encode($vuelo_vuelta_data) : null;
-    $consulta->bindParam(':vuelo_vuelta_data', $vuelo_vuelta_json);
-    
-    if ($consulta->execute()) {
-        return $conexion->lastInsertId();
+    // Si vuelo_id es 0 o inválido, enviamos NULL para no violar la Foreign Key de vuelos
+    if (empty($vuelo_id) || (int)$vuelo_id <= 0) {
+        $vuelo_id = null;
+    }
+
+    try {
+        $sql = "INSERT INTO reservas (pnr, usuario_id, vuelo_id, duffel_order_id, tipo_viaje, precio_total, pasajeros_count, vuelo_vuelta_data, estado) 
+                VALUES (:pnr, :usuario_id, :vuelo_id, :duffel_order_id, :tipo_viaje, :precio_total, :pasajeros_count, :vuelo_vuelta_data, 'Confirmada')";
+        
+        $consulta = $conexion->prepare($sql);
+        $consulta->bindParam(':pnr', $pnr);
+        $consulta->bindParam(':usuario_id', $usuario_id);
+        $consulta->bindParam(':vuelo_id', $vuelo_id, $vuelo_id ? PDO::PARAM_INT : PDO::PARAM_NULL);
+        $consulta->bindParam(':duffel_order_id', $duffel_order_id);
+        $consulta->bindParam(':tipo_viaje', $tipo_viaje);
+        $consulta->bindParam(':precio_total', $precio_total);
+        $consulta->bindParam(':pasajeros_count', $pasajeros_count);
+        
+        $vuelo_vuelta_json = $vuelo_vuelta_data ? json_encode($vuelo_vuelta_data) : null;
+        $consulta->bindParam(':vuelo_vuelta_data', $vuelo_vuelta_json);
+        
+        if ($consulta->execute()) {
+            return $conexion->lastInsertId();
+        }
+    } catch (PDOException $e) {
+        error_log("Error en crear_reserva: " . $e->getMessage());
+        return false;
     }
     return false;
 }
@@ -47,15 +57,20 @@ function agregar_pasajero($reserva_id, $nombre, $apellido = '', $email = null, $
 
     $sql = "INSERT INTO pasajeros (reserva_id, nombre, apellido, email, tipo_documento, numero_documento) 
             VALUES (:reserva_id, :nombre, :apellido, :email, :tipo_documento, :numero_documento)";
-    $consulta = $conexion->prepare($sql);
-    $consulta->bindParam(':reserva_id', $reserva_id);
-    $consulta->bindParam(':nombre', $nombre);
-    $consulta->bindParam(':apellido', $apellido);
-    $consulta->bindParam(':email', $email);
-    $consulta->bindParam(':tipo_documento', $tipo_documento);
-    $consulta->bindParam(':numero_documento', $numero_documento);
-    
-    return $consulta->execute();
+    try {
+        $consulta = $conexion->prepare($sql);
+        $consulta->bindParam(':reserva_id', $reserva_id);
+        $consulta->bindParam(':nombre', $nombre);
+        $consulta->bindParam(':apellido', $apellido);
+        $consulta->bindParam(':email', $email);
+        $consulta->bindParam(':tipo_documento', $tipo_documento);
+        $consulta->bindParam(':numero_documento', $numero_documento);
+        
+        return $consulta->execute();
+    } catch (PDOException $e) {
+        error_log("Error en agregar_pasajero: " . $e->getMessage());
+        return false;
+    }
 }
 
 /**
@@ -254,12 +269,12 @@ function generar_boleto_pdf($pnr) {
             .logo-title { font-size: 22px; font-weight: bold; color: #C5A880; letter-spacing: 2px; margin: 0; }
             .subtitle { font-size: 9.5px; color: #94a3b8; text-transform: uppercase; margin-top: 2px; letter-spacing: 1px; }
             
-            .pnr-box { background-color: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 8px; padding: 8px 12px; text-align: center; margin-bottom: 10px; }
-            .pnr-label { font-size: 9.5px; color: #64748b; font-weight: bold; text-transform: uppercase; margin-bottom: 2px; }
-            .pnr-code { font-size: 26px; font-weight: bold; color: #0070F3; letter-spacing: 5px; font-family: monospace; }
+            .pnr-box { background-color: #0A1628; border: 2px dashed #C5A880; border-radius: 8px; padding: 10px 12px; text-align: center; margin-bottom: 10px; }
+            .pnr-label { font-size: 9.5px; color: #9C694C; font-weight: bold; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 1px; }
+            .pnr-code { font-size: 26px; font-weight: bold; color: #C5A880; letter-spacing: 5px; font-family: monospace; }
             
             .card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; margin-bottom: 10px; page-break-inside: avoid; }
-            .card-title { font-size: 11.5px; font-weight: bold; color: #0A1628; border-bottom: 2px solid #0070F3; padding-bottom: 4px; margin-bottom: 8px; text-transform: uppercase; }
+            .card-title { font-size: 11.5px; font-weight: bold; color: #0A1628; border-bottom: 2px solid #C5A880; padding-bottom: 4px; margin-bottom: 8px; text-transform: uppercase; }
             
             table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
             th { text-align: left; font-size: 9px; color: #64748b; text-transform: uppercase; padding-bottom: 4px; border-bottom: 1px solid #f1f5f9; }
@@ -269,11 +284,11 @@ function generar_boleto_pdf($pnr) {
             .price-label { display: table-cell; font-size: 11px; color: #475569; }
             .price-val { display: table-cell; text-align: right; font-size: 11px; font-weight: bold; color: #0f172a; }
             
-            .total-box { background-color: #eff6ff; border: 1px solid #bfdbfe; padding: 8px 12px; border-radius: 6px; margin-top: 8px; text-align: right; }
-            .total-label { font-size: 11.5px; font-weight: bold; color: #1e3a8a; }
-            .total-amount { font-size: 20px; font-weight: bold; color: #0070F3; }
+            .total-box { background-color: #0A1628; border: 1px solid #C5A880; padding: 8px 12px; border-radius: 6px; margin-top: 8px; text-align: right; }
+            .total-label { font-size: 11.5px; font-weight: bold; color: #ffffff; }
+            .total-amount { font-size: 20px; font-weight: bold; color: #C5A880; }
             
-            .notice-box { background-color: #f0fdf4; border-left: 4px solid #22c55e; padding: 8px 12px; margin-top: 10px; font-size: 10px; color: #14532d; border-radius: 4px; page-break-inside: avoid; }
+            .notice-box { background-color: #fdfbf7; border-left: 4px solid #C5A880; padding: 8px 12px; margin-top: 10px; font-size: 10px; color: #48324F; border-radius: 4px; page-break-inside: avoid; }
             .footer { text-align: center; margin-top: 10px; font-size: 9px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 6px; page-break-inside: avoid; }
             .barcode { font-family: monospace; font-size: 16px; letter-spacing: 4px; text-align: center; color: #475569; margin-top: 8px; }
         </style>
@@ -340,17 +355,22 @@ function generar_boleto_pdf($pnr) {
         <div class="barcode">||| | |||| | ||||| ||| |||| | ||| | |||</div>
 
         <div class="footer">
-            NovAirlines S.A. &bull; Tu viaje con Inteligencia Artificial &bull; Emitido el ' . $fecha_actual . ' &bull; Soporte: +51 1 234 5678
+            NovAirlines S.A. &bull; Tu viaje con Inteligencia Artificial &bull; Emitido el ' . $fecha_actual . ' &bull; Soporte: +51 1 700-NOVA
         </div>
     </body>
     </html>
     ';
 
-    // 5. Instanciamos la clase Dompdf exactamente como en el ejemplo del alumno
+    // 5. Instanciamos la clase Dompdf
     $dompdf = new \Dompdf\Dompdf();
     $dompdf->loadHtml($html);
     $dompdf->setPaper('A4', 'portrait');
     $dompdf->render();
+
+    // Limpiamos cualquier buffer activo para evitar corrupción de encabezados o descargas incompletas
+    if (ob_get_length()) {
+        ob_end_clean();
+    }
 
     // 6. Enviamos el PDF generado al navegador para la descarga del usuario
     $dompdf->stream("Boleto_NovAirlines_" . $pnr . ".pdf", ["Attachment" => true]);

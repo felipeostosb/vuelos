@@ -240,7 +240,7 @@ require_once __DIR__ . '/../layout/header.php';
                                             </form>
                                         </td>
                                         <td class="px-6 py-4 text-center">
-                                            <a href="index.php?action=descargar_boleto&pnr=<?= htmlspecialchars($res['pnr']) ?>" 
+                                            <a href="index.php?action=generarBoleto&pnr=<?= htmlspecialchars($res['pnr']) ?>" target="_blank"
                                                class="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-[#C5A880]/10 hover:bg-[#C5A880]/20 border border-[#C5A880]/30 text-[#C5A880] font-light text-xs uppercase tracking-wider rounded-xl transition">
                                                 <svg class="w-4 h-4 text-[#C5A880]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                                 <span>Descargar PDF</span>

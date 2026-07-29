@@ -260,7 +260,7 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="w-full bg-transparent border border-[#C5A880]/40 hover:bg-[#C5A880] text-[#C5A880] hover:text-[#0A1628] font-light text-xs uppercase tracking-widest py-4 rounded-xl transition-all duration-300 shadow-lg flex items-center justify-center gap-2">
+                    <button type="submit" class="w-full bg-[#C5A880] hover:bg-[#b4966e] text-[#0A1628] font-medium text-xs uppercase tracking-widest py-4 rounded-xl transition-all duration-300 shadow-xl hover:shadow-[#C5A880]/30 flex items-center justify-center gap-2">
                         <i class="fa-solid fa-lock text-sm"></i> Confirmar y Pagar <?php echo htmlspecialchars($vuelo['currency']); ?> <?php echo htmlspecialchars(number_format($vuelo['price'], 2)); ?>
                     </button>
                     <p class="text-center text-[11px] text-slate-400 font-light tracking-wide"><i class="fa-solid fa-shield-halved text-[#C5A880] mr-1"></i> Transacción 100% segura y encriptada bajo protocolo TLS</p>

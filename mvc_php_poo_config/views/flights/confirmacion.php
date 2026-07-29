@@ -103,16 +103,16 @@
                 </div>
 
                 <div class="flex flex-col sm:flex-row gap-4 justify-center pt-2">
-                    <a href="index.php?action=generarBoleto&pnr=<?php echo urlencode($_GET['pnr'] ?? ''); ?>" target="_blank" 
-                       class="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-light text-xs uppercase tracking-widest py-3 px-8 rounded-xl transition-all text-center shadow-lg flex items-center justify-center gap-2">
+                    <a href="index.php?action=generarBoleto&pnr=<?php echo urlencode($_GET['pnr'] ?? ''); ?>" 
+                       class="bg-[#C5A880] hover:bg-[#b4966e] text-[#0A1628] font-medium text-xs uppercase tracking-widest py-3.5 px-8 rounded-xl transition-all duration-300 text-center shadow-xl hover:shadow-[#C5A880]/30 flex items-center justify-center gap-2">
                         <i class="fa-solid fa-file-pdf text-base"></i> Descargar Ticket (PDF)
                     </a>
                     <?php if(isset($_SESSION['user_id'])): ?>
-                        <a href="?action=panel" class="bg-[#C5A880] hover:bg-[#b4966e] text-[#0A1628] font-light text-xs uppercase tracking-widest py-3 px-8 rounded-xl transition-all text-center shadow-lg flex items-center justify-center gap-2">
+                        <a href="?action=panel" class="bg-[#48324F] hover:bg-[#3b2841] text-[#C5A880] border border-[#C5A880]/40 font-light text-xs uppercase tracking-widest py-3.5 px-8 rounded-xl transition-all text-center shadow-lg flex items-center justify-center gap-2">
                             <i class="fa-solid fa-plane"></i> Mis Viajes
                         </a>
                     <?php endif; ?>
-                    <a href="?action=home" class="border border-[#C5A880]/40 hover:bg-[#C5A880]/10 text-[#C5A880] font-light text-xs uppercase tracking-widest py-3 px-8 rounded-xl transition-colors text-center flex items-center justify-center">
+                    <a href="?action=home" class="border border-[#C5A880]/40 hover:bg-[#C5A880]/10 text-[#C5A880] font-light text-xs uppercase tracking-widest py-3.5 px-8 rounded-xl transition-colors text-center flex items-center justify-center">
                         Inicio
                     </a>
                 </div>

@@ -248,6 +248,38 @@ switch ($accion) {
             return $a['price'] <=> $b['price'];
         });
         
+        // INTERCEPCIÓN PARA USUARIOS REGISTRADOS CON MODO AUTO-PILOT ACTIVADO
+        $modo_autopilot_activo = false;
+        if (isset($_SESSION['user_id'])) {
+            require_once 'models/Usuario.php';
+            $u_info = obtener_usuario_por_id($_SESSION['user_id']);
+            if ($u_info && (int)($u_info['modo_autopilot'] ?? 0) === 1) {
+                $modo_autopilot_activo = true;
+            }
+        }
+
+        if ($modo_autopilot_activo && !empty($vuelos_encontrados)) {
+            $oferta_ganadora = $vuelos_encontrados[0];
+            $_SESSION['oferta_autopilot_ganadora'] = $oferta_ganadora;
+            
+            $vuelo_seleccionado = $oferta_ganadora['outbound'];
+            if (!isset($vuelo_seleccionado['id'])) {
+                $vuelo_seleccionado['id'] = 1;
+            }
+            $vuelo_vuelta_seleccionado = $oferta_ganadora['inbound'] ?? null;
+            $usuario_perfil = $u_info;
+            $acompanantes_registrados = obtener_acompanantes_usuario($_SESSION['user_id']);
+            
+            $origen_query = $origen_ciudad;
+            $destino_query = $destino_ciudad;
+            $fecha_salida_query = $fecha_salida;
+
+            include 'views/layout/header.php';
+            include 'views/flights/resumen_autopilot.php';
+            include 'views/layout/footer.php';
+            break;
+        }
+
         include 'views/layout/header.php';
         include 'views/flights/reserva.php';
         include 'views/layout/footer.php';
@@ -477,6 +509,7 @@ switch ($accion) {
         break;
 
     case 'generarBoleto':
+    case 'descargar_boleto':
         $pnr_descarga = $_GET['pnr'] ?? '';
         if (!empty($pnr_descarga)) {
             generar_boleto_pdf($pnr_descarga);
@@ -662,6 +695,148 @@ switch ($accion) {
             header('Location: index.php?action=admin&error=Seleccione+un+destino+y+un+archivo+de+imagen');
         }
         exit();
+        break;
+
+    // ------------------------------------------------------------------------------------------
+    // ACCIONES DEL MÓDULO AUTO-PILOT & ACOMPAÑANTES
+    // ------------------------------------------------------------------------------------------
+    case 'guardar_config_autopilot':
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: index.php?action=home');
+            exit();
+        }
+        require_once 'models/Usuario.php';
+        $modo = isset($_POST['modo_autopilot']) ? 1 : 0;
+        $doc_tipo = $_POST['tipo_documento_pref'] ?? 'DNI';
+        $doc_num = trim($_POST['numero_documento_pref'] ?? '');
+        $tarjeta = trim($_POST['tarjeta_mascarada_pref'] ?? 'Visa **** 4892');
+        
+        actualizar_config_autopilot($_SESSION['user_id'], $modo, $doc_tipo, $doc_num, $tarjeta);
+        header('Location: index.php?action=panel&config_saved=1');
+        exit();
+        break;
+
+    case 'agregar_acompanante':
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: index.php?action=home');
+            exit();
+        }
+        require_once 'models/Usuario.php';
+        $nombre = trim($_POST['nombre'] ?? '');
+        $apellido = trim($_POST['apellido'] ?? '');
+        $tipo_doc = $_POST['tipo_documento'] ?? 'DNI';
+        $num_doc = trim($_POST['numero_documento'] ?? '');
+        
+        if (!empty($nombre) && !empty($apellido)) {
+            agregar_acompanante($_SESSION['user_id'], $nombre, $apellido, $tipo_doc, $num_doc);
+        }
+        header('Location: index.php?action=panel&config_saved=1');
+        exit();
+        break;
+
+    case 'eliminar_acompanante':
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: index.php?action=home');
+            exit();
+        }
+        require_once 'models/Usuario.php';
+        $ac_id = (int)($_POST['acompanante_id'] ?? 0);
+        if ($ac_id > 0) {
+            eliminar_acompanante($ac_id, $_SESSION['user_id']);
+        }
+        header('Location: index.php?action=panel');
+        exit();
+        break;
+
+    case 'procesar_reserva_autopilot':
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: index.php?action=home');
+            exit();
+        }
+        require_once 'models/Usuario.php';
+        require_once 'models/Reserva.php';
+        require_once 'models/Vuelo.php';
+        
+        $usuario_id = $_SESSION['user_id'];
+        $u_info = obtener_usuario_por_id($usuario_id);
+        $oferta_ganadora = $_SESSION['oferta_autopilot_ganadora'] ?? null;
+        
+        $id_vuelo = null;
+        $precio_unitario_ida = 120.00;
+        $precio_unitario_vuelta = 0.00;
+        $vuelo_vuelta_data = null;
+        $tipo_viaje = $_POST['tipo_viaje'] ?? 'solo_ida';
+
+        if ($oferta_ganadora) {
+            // Guardar o sincronizar vuelo con BD local para obtener un ID valido
+            $id_vuelo = guardar_vuelo_duffel($oferta_ganadora);
+            $precio_unitario_ida = (float)($oferta_ganadora['price'] ?? 120.00);
+            if (isset($oferta_ganadora['inbound'])) {
+                $vuelo_vuelta_data = [
+                    'airline' => $oferta_ganadora['inbound']['airline'] ?? ($oferta_ganadora['airline'] ?? 'NovAirlines'),
+                    'flight_number' => $oferta_ganadora['inbound']['flight_number'] ?? 'NV-999',
+                    'departure_airport' => $oferta_ganadora['inbound']['departure_airport'] ?? 'DEST',
+                    'arrival_airport' => $oferta_ganadora['inbound']['arrival_airport'] ?? 'ORIG',
+                    'departure_time' => $oferta_ganadora['inbound']['departure_time'] ?? '12:00',
+                    'arrival_time' => $oferta_ganadora['inbound']['arrival_time'] ?? '14:00',
+                    'duration' => $oferta_ganadora['inbound']['duration'] ?? '2h',
+                    'price' => (float)($oferta_ganadora['inbound_price'] ?? 110.00),
+                ];
+                $precio_unitario_vuelta = (float)($oferta_ganadora['inbound_price'] ?? 110.00);
+            }
+        } else {
+            $vuelo_id_post = (int)($_POST['vuelo_id'] ?? 0);
+            if ($vuelo_id_post > 0) {
+                $vuelo_db = obtener_vuelo_por_id($vuelo_id_post);
+                if ($vuelo_db) {
+                    $id_vuelo = $vuelo_db['id'];
+                    $precio_unitario_ida = (float)$vuelo_db['precio'];
+                }
+            }
+        }
+
+        $precio_unitario = $precio_unitario_ida + $precio_unitario_vuelta;
+        
+        $acompanantes_seleccionados_ids = $_POST['acompanantes_ids'] ?? [];
+        $acompanantes_todos = obtener_acompanantes_usuario($usuario_id);
+        
+        $lista_pasajeros_final = [];
+        $partes_nombre = explode(' ', $_SESSION['user_name'], 2);
+        $lista_pasajeros_final[] = [
+            'nombre' => $partes_nombre[0],
+            'apellido' => $partes_nombre[1] ?? 'Principal',
+            'email' => $_SESSION['user_email'] ?? '',
+            'tipo_doc' => !empty($u_info['tipo_documento_pref']) ? $u_info['tipo_documento_pref'] : 'DNI',
+            'doc' => !empty($u_info['numero_documento_pref']) ? $u_info['numero_documento_pref'] : '71928374'
+        ];
+        
+        foreach ($acompanantes_todos as $ac) {
+            if (in_array((string)$ac['id'], array_map('strval', $acompanantes_seleccionados_ids))) {
+                $lista_pasajeros_final[] = [
+                    'nombre' => $ac['nombre'],
+                    'apellido' => $ac['apellido'],
+                    'email' => null,
+                    'tipo_doc' => $ac['tipo_documento'],
+                    'doc' => $ac['numero_documento']
+                ];
+            }
+        }
+        
+        $pasajeros_count = count($lista_pasajeros_final);
+        $precio_total = $precio_unitario * $pasajeros_count;
+        $pnr = substr(str_shuffle("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"), 0, 6);
+        
+        $reserva_id = crear_reserva($pnr, $usuario_id, $id_vuelo, $pasajeros_count, $precio_total, null, $tipo_viaje, $vuelo_vuelta_data);
+        if ($reserva_id) {
+            foreach ($lista_pasajeros_final as $pax) {
+                agregar_pasajero($reserva_id, $pax['nombre'], $pax['apellido'], $pax['email'], $pax['tipo_doc'], $pax['doc']);
+            }
+            header('Location: index.php?action=confirmacion&pnr=' . $pnr);
+            exit();
+        } else {
+            header('Location: index.php?action=home&error=Error+al+procesar+reserva+Auto-Pilot');
+            exit();
+        }
         break;
 
     // ------------------------------------------------------------------------------------------

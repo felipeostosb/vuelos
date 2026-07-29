@@ -76,4 +76,79 @@ function registrar_usuario($nombre, $email, $password) {
 
     return false;
 }
+
+/**
+ * Obtener perfil completo del usuario por su ID
+ */
+function obtener_usuario_por_id($usuario_id) {
+    $conexion = conectar_db();
+    if (!$conexion) return null;
+    $sql = "SELECT id, nombre, email, rol, modo_autopilot, tipo_documento_pref, numero_documento_pref, tarjeta_mascarada_pref, creado_en FROM usuarios WHERE id = :id";
+    $stmt = $conexion->prepare($sql);
+    $stmt->execute([':id' => $usuario_id]);
+    return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+}
+
+/**
+ * Actualizar preferencias de Modo Auto-Pilot del usuario
+ */
+function actualizar_config_autopilot($usuario_id, $modo, $doc_tipo, $doc_num, $tarjeta) {
+    $conexion = conectar_db();
+    if (!$conexion) return false;
+    $sql = "UPDATE usuarios 
+            SET modo_autopilot = :modo, 
+                tipo_documento_pref = :doc_tipo, 
+                numero_documento_pref = :doc_num, 
+                tarjeta_mascarada_pref = :tarjeta 
+            WHERE id = :id";
+    $stmt = $conexion->prepare($sql);
+    return $stmt->execute([
+        ':modo' => (int)$modo,
+        ':doc_tipo' => $doc_tipo,
+        ':doc_num' => $doc_num,
+        ':tarjeta' => $tarjeta,
+        ':id' => $usuario_id
+    ]);
+}
+
+/**
+ * Obtener lista de acompañantes guardados del usuario
+ */
+function obtener_acompanantes_usuario($usuario_id) {
+    $conexion = conectar_db();
+    if (!$conexion) return [];
+    $sql = "SELECT * FROM usuario_acompanantes WHERE usuario_id = :usuario_id ORDER BY id DESC";
+    $stmt = $conexion->prepare($sql);
+    $stmt->execute([':usuario_id' => $usuario_id]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+/**
+ * Registrar un nuevo acompañante habitual
+ */
+function agregar_acompanante($usuario_id, $nombre, $apellido, $tipo_doc, $num_doc) {
+    $conexion = conectar_db();
+    if (!$conexion) return false;
+    $sql = "INSERT INTO usuario_acompanantes (usuario_id, nombre, apellido, tipo_documento, numero_documento) 
+            VALUES (:usuario_id, :nombre, :apellido, :tipo_doc, :num_doc)";
+    $stmt = $conexion->prepare($sql);
+    return $stmt->execute([
+        ':usuario_id' => $usuario_id,
+        ':nombre' => $nombre,
+        ':apellido' => $apellido,
+        ':tipo_doc' => $tipo_doc,
+        ':num_doc' => $num_doc
+    ]);
+}
+
+/**
+ * Eliminar un acompañante por ID y usuario_id
+ */
+function eliminar_acompanante($id, $usuario_id) {
+    $conexion = conectar_db();
+    if (!$conexion) return false;
+    $sql = "DELETE FROM usuario_acompanantes WHERE id = :id AND usuario_id = :usuario_id";
+    $stmt = $conexion->prepare($sql);
+    return $stmt->execute([':id' => $id, ':usuario_id' => $usuario_id]);
+}
 ?>
