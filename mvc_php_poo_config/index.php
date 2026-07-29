@@ -712,7 +712,7 @@ switch ($accion) {
         $tarjeta = trim($_POST['tarjeta_mascarada_pref'] ?? 'Visa **** 4892');
         
         actualizar_config_autopilot($_SESSION['user_id'], $modo, $doc_tipo, $doc_num, $tarjeta);
-        header('Location: index.php?action=panel&config_saved=1');
+        header('Location: index.php?action=panel&tab=autopilot&config_saved=1');
         exit();
         break;
 
@@ -730,7 +730,7 @@ switch ($accion) {
         if (!empty($nombre) && !empty($apellido)) {
             agregar_acompanante($_SESSION['user_id'], $nombre, $apellido, $tipo_doc, $num_doc);
         }
-        header('Location: index.php?action=panel&config_saved=1');
+        header('Location: index.php?action=panel&tab=autopilot&ac_added=1');
         exit();
         break;
 
@@ -744,7 +744,7 @@ switch ($accion) {
         if ($ac_id > 0) {
             eliminar_acompanante($ac_id, $_SESSION['user_id']);
         }
-        header('Location: index.php?action=panel');
+        header('Location: index.php?action=panel&tab=autopilot&ac_deleted=1');
         exit();
         break;
 

@@ -41,13 +41,6 @@ $modo_autopilot_activo = (int)($usuario_perfil['modo_autopilot'] ?? 0);
             </div>
         <?php endif; ?>
 
-        <?php if (isset($_GET['config_saved'])): ?>
-            <div class="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-light tracking-wide flex items-center space-x-3 shadow-lg">
-                <i class="fa-solid fa-circle-check text-base"></i>
-                <span>Preferencias de Modo Auto-Pilot actualizadas correctamente.</span>
-            </div>
-        <?php endif; ?>
-
         <!-- BARRA DE PESTAÑAS (TABS) BOUTIQUE -->
         <div class="flex border-b border-[#C5A880]/20 space-x-8">
             <button onclick="switchTab('vuelos')" id="tab-btn-vuelos" class="pb-3 text-xs font-light uppercase tracking-widest border-b-2 border-[#C5A880] text-[#C5A880] transition flex items-center gap-2">
@@ -173,6 +166,27 @@ $modo_autopilot_activo = (int)($usuario_perfil['modo_autopilot'] ?? 0);
 
         <!-- PESTAÑA 2: CONFIGURACIÓN MODO AUTO-PILOT & ACOMPAÑANTES -->
         <div id="tab-autopilot" class="hidden space-y-8">
+            
+            <?php if (isset($_GET['ac_deleted'])): ?>
+                <div class="bg-rose-500/15 border border-rose-500/40 text-rose-300 px-4 py-3 rounded-2xl text-xs font-light flex items-center gap-3 animate-fade-in">
+                    <i class="fa-solid fa-circle-check text-base text-rose-400"></i>
+                    <span>Acompañante eliminado de su perfil con éxito.</span>
+                </div>
+            <?php endif; ?>
+
+            <?php if (isset($_GET['ac_added'])): ?>
+                <div class="bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 px-4 py-3 rounded-2xl text-xs font-light flex items-center gap-3 animate-fade-in">
+                    <i class="fa-solid fa-circle-check text-base text-emerald-400"></i>
+                    <span>Nuevo acompañante registrado con éxito.</span>
+                </div>
+            <?php endif; ?>
+
+            <?php if (isset($_GET['config_saved'])): ?>
+                <div class="bg-[#C5A880]/15 border border-[#C5A880]/40 text-[#C5A880] px-4 py-3 rounded-2xl text-xs font-light flex items-center gap-3 animate-fade-in">
+                    <i class="fa-solid fa-circle-check text-base text-[#C5A880]"></i>
+                    <span>Configuración de preferencia Auto-Pilot guardada con éxito.</span>
+                </div>
+            <?php endif; ?>
             
             <!-- PANEL 1: SWITCH MODO AUTO-PILOT -->
             <div class="bg-[#132238]/80 border border-[#C5A880]/30 rounded-3xl p-8 shadow-2xl backdrop-blur-md">
@@ -327,4 +341,11 @@ function switchTab(tab) {
         btnVuelos.classList.add('border-transparent', 'text-slate-400');
     }
 }
+
+document.addEventListener("DOMContentLoaded", function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('tab') === 'autopilot' || urlParams.has('config_saved') || urlParams.has('ac_added') || urlParams.has('ac_deleted')) {
+        switchTab('autopilot');
+    }
+});
 </script>

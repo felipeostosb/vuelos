@@ -282,7 +282,7 @@ $lista_acompanantes = $acompanantes_registrados ?? [];
                     </button>
 
                     <div class="flex justify-between items-center text-xs font-light text-slate-400 pt-2">
-                        <a href="index.php?action=buscar&origen=<?php echo urlencode($vuelo_ida['origen_ciudad']); ?>&destino=<?php echo urlencode($vuelo_ida['destino_ciudad']); ?>" 
+                        <a href="index.php?action=buscar&origen=<?php echo urlencode($vuelo_ida['origen_ciudad']); ?>&destino=<?php echo urlencode($vuelo_ida['destino_ciudad']); ?>&tipo_busqueda=normal" 
                            class="hover:text-[#C5A880] underline transition">
                             <i class="fa-solid fa-list mr-1"></i> Ver todos los vuelos alternativos
                         </a>
