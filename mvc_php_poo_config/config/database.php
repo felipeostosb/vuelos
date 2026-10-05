@@ -37,8 +37,8 @@ function conectar_db() {
         return $conexion;
 
     } catch (PDOException $error) {
-        // En caso de error de conexión, mostramos un mensaje explicativo y retornamos null
-        echo "Error al conectar con la Base de Datos: " . $error->getMessage();
+        // Registramos el error de conexion en los logs internos del servidor sin exponer datos sensibles a la interfaz
+        error_log("Error al conectar con la Base de Datos: " . $error->getMessage());
         return null;
     }
 }

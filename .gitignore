@@ -1,0 +1,18 @@
+# Archivos de entorno y credenciales (Seguridad estricta)
+.env
+.env.*
+*.env
+*.bak
+
+# Sistema operativo y editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.sw?
+
+# Logs y temporales
+*.log
+logs/
+temp/
+tmp/

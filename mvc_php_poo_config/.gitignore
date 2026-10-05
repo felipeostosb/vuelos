@@ -1,5 +1,7 @@
 # Archivos de entorno y configuración secreta
 .env
+.env.*
+*.bak
 
 # Archivos de sistema operativo y editores
 .DS_Store
