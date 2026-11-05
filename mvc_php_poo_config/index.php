@@ -1,12 +1,9 @@
 <?php
 /**
- * ==============================================================================================
  * ENRUTADOR PRINCIPAL DEL PROYECTO NOVAIRLINES (VERSIÓN PROCEDURAL ELEMENTAL)
- * ==============================================================================================
  * Este archivo actúa como el controlador central. Recibe las peticiones del usuario
  * mediante el parámetro 'action' en la URL o formulario, ejecuta la lógica necesaria
  * invocando funciones procedurales sencillas y carga las vistas correspondientes.
- * ==============================================================================================
  */
 
 // Iniciamos o reanudamos la sesión PHP para manejar usuarios e intenciones de búsqueda
@@ -19,6 +16,7 @@ require_once 'models/Reserva.php';
 require_once 'models/GeminiAPI.php';
 require_once 'models/DuffelAPI.php';
 require_once 'models/Admin.php';
+require_once 'models/LugarTuristico.php';
 
 // 2. Leemos la acción solicitada por el usuario (GET o POST)
 if (isset($_GET['action'])) {
@@ -32,9 +30,7 @@ if (isset($_GET['action'])) {
 // 3. Evaluamos la acción mediante una estructura switch limpia y directa
 switch ($accion) {
 
-    // ------------------------------------------------------------------------------------------
     // SECCIÓN 1: VISTAS PÚBLICAS Y NAVEGACIÓN
-    // ------------------------------------------------------------------------------------------
     case 'home':
         include 'views/layout/header.php';
         include 'views/home/home.php';
@@ -45,6 +41,32 @@ switch ($accion) {
         include 'views/layout/header.php';
         include 'views/flights/destinos.php';
         include 'views/layout/footer.php';
+        break;
+
+    case 'lugares':
+        // Buscador de lugares turísticos bien valorados y poco concurridos ("joyas ocultas").
+        $q_lugares = trim($_GET['q'] ?? '');
+        $destino_lugares = trim($_GET['destino'] ?? '');
+        $resultado_lugares = listar_lugares_turisticos($q_lugares, $destino_lugares);
+
+        include 'views/layout/header.php';
+        include 'views/lugares/index.php';
+        include 'views/layout/footer.php';
+        break;
+
+    case 'api_lugares':
+        // Endpoint JSON para futuras integraciones (mapa, app móvil, panel admin).
+        header('Content-Type: application/json; charset=utf-8');
+
+        $q_lugares = trim($_GET['q'] ?? '');
+        $destino_lugares = trim($_GET['destino'] ?? '');
+        $limite_lugares = isset($_GET['limite']) ? max(1, min(120, (int)$_GET['limite'])) : 60;
+
+        $respuesta_lugares = listar_lugares_turisticos($q_lugares, $destino_lugares, $limite_lugares);
+        unset($respuesta_lugares['destinos']); // El catálogo completo no es necesario en la API.
+
+        echo json_encode($respuesta_lugares, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit();
         break;
 
     case 'ofertas':
@@ -71,9 +93,7 @@ switch ($accion) {
         include 'views/layout/footer.php';
         break;
 
-    // ------------------------------------------------------------------------------------------
     // SECCIÓN 2: AUTENTICACIÓN Y REGISTRO DE USUARIOS
-    // ------------------------------------------------------------------------------------------
     case 'procesarRegistro':
         $nombre = $_POST['nombre'] ?? '';
         $email = $_POST['email'] ?? '';
@@ -127,9 +147,7 @@ switch ($accion) {
         exit();
         break;
 
-    // ------------------------------------------------------------------------------------------
     // SECCIÓN 3: BÚSQUEDA Y SELECCIÓN DE VUELOS (CON IA Y FILTROS)
-    // ------------------------------------------------------------------------------------------
     case 'buscar':
         $origen_ciudad = $_GET['origen'] ?? '';
         $destino_ciudad = $_GET['destino'] ?? '';
@@ -345,9 +363,7 @@ switch ($accion) {
         include 'views/layout/footer.php';
         break;
 
-    // ------------------------------------------------------------------------------------------
     // SECCIÓN 4: PROCESO DE CHECKOUT Y CONFIRMACIÓN DE RESERVAS
-    // ------------------------------------------------------------------------------------------
     case 'checkout':
         $offer_id = $_POST['flight_id'] ?? '';
         $pasajeros = max(1, (int)($_POST['pasajeros'] ?? 1));
@@ -519,9 +535,7 @@ switch ($accion) {
         exit();
         break;
 
-    // ------------------------------------------------------------------------------------------
     // SECCIÓN 5: ZONA PRIVADA Y CHECK-IN
-    // ------------------------------------------------------------------------------------------
     case 'panel':
         if (!isset($_SESSION['user_id'])) {
             header('Location: index.php?action=home');
@@ -553,9 +567,7 @@ switch ($accion) {
         exit();
         break;
 
-    // ------------------------------------------------------------------------------------------
     // SECCIÓN 6: PANEL DE ADMINISTRACIÓN Y CONTROL DE GESTIÓN (SOLO ROL ADMIN)
-    // ------------------------------------------------------------------------------------------
     case 'admin':
         // Verificación de seguridad: Solo usuarios autenticados con rol 'admin'
         $rol_actual = $_SESSION['usuario']['rol'] ?? '';
@@ -697,9 +709,7 @@ switch ($accion) {
         exit();
         break;
 
-    // ------------------------------------------------------------------------------------------
     // ACCIONES DEL MÓDULO AUTO-PILOT & ACOMPAÑANTES
-    // ------------------------------------------------------------------------------------------
     case 'guardar_config_autopilot':
         if (!isset($_SESSION['user_id'])) {
             header('Location: index.php?action=home');
@@ -839,9 +849,7 @@ switch ($accion) {
         }
         break;
 
-    // ------------------------------------------------------------------------------------------
     // ACCIÓN POR DEFECTO SI LA RUTA NO EXISTE
-    // ------------------------------------------------------------------------------------------
     default:
         header('Location: index.php?action=home');
         exit();

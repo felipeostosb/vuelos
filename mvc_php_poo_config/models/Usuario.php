@@ -1,11 +1,8 @@
 <?php
 /**
- * ==============================================================================================
  * MÓDULO DE GESTIÓN DE USUARIOS (VERSIÓN PROCEDURAL SIMPLE)
- * ==============================================================================================
  * Este archivo contiene las funciones para el registro e inicio de sesión de usuarios.
  * Utiliza funciones en lugar de clases para mantener la máxima sencillez.
- * ==============================================================================================
  */
 
 require_once __DIR__ . '/../config/database.php';

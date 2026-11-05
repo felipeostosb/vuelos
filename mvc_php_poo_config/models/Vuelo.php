@@ -1,11 +1,8 @@
 <?php
 /**
- * ==============================================================================================
  * MÓDULO DE GESTIÓN DE VUELOS (VERSIÓN PROCEDURAL SIMPLE)
- * ==============================================================================================
  * Este archivo contiene todas las funciones para consultar, buscar y guardar vuelos
  * en la base de datos local del proyecto.
- * ==============================================================================================
  */
 
 require_once __DIR__ . '/../config/database.php';

@@ -1,11 +1,8 @@
 <?php
 /**
- * ==============================================================================================
  * MÓDULO DE GESTIÓN DE RESERVAS (VERSIÓN PROCEDURAL SIMPLE)
- * ==============================================================================================
  * Este archivo contiene todas las funciones para crear, consultar y actualizar reservas
  * y pasajeros en el sistema.
- * ==============================================================================================
  */
 
 require_once __DIR__ . '/../config/database.php';

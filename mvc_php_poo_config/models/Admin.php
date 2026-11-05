@@ -1,11 +1,8 @@
 <?php
 /**
- * ==============================================================================================
  * MÓDULO DE ADMINISTRACIÓN DE NOVAIRLINES (VERSIÓN PROCEDURAL SIMPLE)
- * ==============================================================================================
  * Este archivo contiene las funciones para que los usuarios con rol 'admin' puedan
  * obtener estadísticas, gestionar reservas, modificar estados, listar usuarios y eliminarlos.
- * ==============================================================================================
  */
 
 require_once __DIR__ . '/../config/database.php';

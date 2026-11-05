@@ -1,11 +1,8 @@
 <?php
 /**
- * ==============================================================================================
  * MÓDULO DE INTEGRACIÓN CON DUFFEL API (VERSIÓN PROCEDURAL SIMPLE)
- * ==============================================================================================
  * Este archivo contiene las funciones procedurales para comunicarse con la API de Duffel
  * y buscar ofertas de vuelos en tiempo real.
- * ==============================================================================================
  */
 
 require_once __DIR__ . '/../config/env.php';

@@ -1,26 +1,25 @@
--- ==============================================================================================
 -- BASE DE DATOS MEJORADA: novairlines_db
 -- Sistema de Reserva de Vuelos con Duffel API & Gemini 3.5 Flash
 -- Motor: MySQL 8.0+ / MariaDB 10.4+
--- ==============================================================================================
 
 CREATE DATABASE IF NOT EXISTS novairlines_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE novairlines_db;
 
 -- Desactivar temporalmente la revisión de llaves foráneas para reinicio limpio
 SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS lugares_reportes;
+DROP TABLE IF EXISTS lugares_cache;
 DROP TABLE IF EXISTS pasajeros;
 DROP TABLE IF EXISTS consultas_ia;
 DROP TABLE IF EXISTS reservas;
 DROP TABLE IF EXISTS vuelos;
+DROP TABLE IF EXISTS usuario_acompanantes;
 DROP TABLE IF EXISTS usuarios;
 DROP TABLE IF EXISTS aerolineas;
 DROP TABLE IF EXISTS aeropuertos;
 SET FOREIGN_KEY_CHECKS = 1;
 
--- ----------------------------------------------------------------------------------------------
 -- 1. TABLA DE AEROPUERTOS
--- ----------------------------------------------------------------------------------------------
 CREATE TABLE aeropuertos (
     id INT(11) AUTO_INCREMENT PRIMARY KEY,
     codigo_iata CHAR(3) NOT NULL UNIQUE COMMENT 'Código IATA único de 3 letras (ej: LIM, MAD, CDG)',
@@ -29,9 +28,7 @@ CREATE TABLE aeropuertos (
     pais VARCHAR(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ----------------------------------------------------------------------------------------------
 -- 2. TABLA DE AEROLÍNEAS
--- ----------------------------------------------------------------------------------------------
 CREATE TABLE aerolineas (
     id INT(11) AUTO_INCREMENT PRIMARY KEY,
     codigo_iata VARCHAR(3) NOT NULL,
@@ -39,9 +36,7 @@ CREATE TABLE aerolineas (
     logo_url VARCHAR(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ----------------------------------------------------------------------------------------------
 -- 3. TABLA DE USUARIOS
--- ----------------------------------------------------------------------------------------------
 CREATE TABLE usuarios (
     id INT(11) AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -55,9 +50,7 @@ CREATE TABLE usuarios (
     creado_en DATETIME DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ----------------------------------------------------------------------------------------------
 -- 3.1. TABLA DE ACOMPAÑANTES HABITUALES DE USUARIO
--- ----------------------------------------------------------------------------------------------
 CREATE TABLE usuario_acompanantes (
     id INT(11) AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT(11) NOT NULL,
@@ -69,9 +62,7 @@ CREATE TABLE usuario_acompanantes (
     CONSTRAINT fk_acompanantes_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ----------------------------------------------------------------------------------------------
 -- 4. TABLA DE VUELOS
--- ----------------------------------------------------------------------------------------------
 CREATE TABLE vuelos (
     id INT(11) AUTO_INCREMENT PRIMARY KEY,
     aerolinea_id INT(11) NOT NULL,
@@ -92,9 +83,7 @@ CREATE TABLE vuelos (
     CONSTRAINT fk_vuelos_destino FOREIGN KEY (destino_aeropuerto_id) REFERENCES aeropuertos(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ----------------------------------------------------------------------------------------------
 -- 5. TABLA DE CONSULTAS IA (GEMINI 3.5 FLASH)
--- ----------------------------------------------------------------------------------------------
 CREATE TABLE consultas_ia (
     id INT(11) AUTO_INCREMENT PRIMARY KEY,
     usuario_id INT(11) DEFAULT NULL COMMENT 'NULL para búsquedas de usuarios no autenticados',
@@ -105,9 +94,7 @@ CREATE TABLE consultas_ia (
     CONSTRAINT fk_consultas_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ----------------------------------------------------------------------------------------------
 -- 6. TABLA DE RESERVAS
--- ----------------------------------------------------------------------------------------------
 CREATE TABLE reservas (
     id INT(11) AUTO_INCREMENT PRIMARY KEY,
     pnr CHAR(6) NOT NULL UNIQUE COMMENT 'Código PNR local de 6 caracteres',
@@ -118,14 +105,13 @@ CREATE TABLE reservas (
     estado ENUM('Pendiente', 'Confirmada', 'Checked-in', 'Cancelada') DEFAULT 'Pendiente',
     precio_total DECIMAL(10,2) NOT NULL,
     pasajeros_count INT(11) NOT NULL DEFAULT 1,
+    vuelo_vuelta_data JSON DEFAULT NULL COMMENT 'Datos del vuelo de retorno en reservas ida_vuelta (JSON)',
     fecha_reserva DATETIME DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_reservas_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL,
     CONSTRAINT fk_reservas_vuelo FOREIGN KEY (vuelo_id) REFERENCES vuelos(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ----------------------------------------------------------------------------------------------
 -- 7. TABLA DE PASAJEROS
--- ----------------------------------------------------------------------------------------------
 CREATE TABLE pasajeros (
     id INT(11) AUTO_INCREMENT PRIMARY KEY,
     reserva_id INT(11) NOT NULL,
@@ -140,9 +126,40 @@ CREATE TABLE pasajeros (
     CONSTRAINT fk_pasajeros_reserva FOREIGN KEY (reserva_id) REFERENCES reservas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ==============================================================================================
+-- 8. TABLA DE CACHÉ DEL BUSCADOR DE LUGARES TURÍSTICOS
+--    Google Places permite caché de 30 días como máximo; Geoapify hasta 90 días.
+--    Si la tabla no existe, el buscador sigue funcionando con caché de sesión.
+CREATE TABLE lugares_cache (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    cache_key VARCHAR(190) NOT NULL,
+    proveedor ENUM('google', 'geoapify', 'tomtom', 'ambos', 'ninguno') NOT NULL,
+    place_id VARCHAR(190) NOT NULL,
+    destino_slug VARCHAR(120) NOT NULL,
+    payload LONGTEXT NOT NULL,
+    rating DECIMAL(2,1) NULL,
+    user_rating_count INT NULL,
+    score_final TINYINT NULL,
+    fetched_at DATETIME NOT NULL,
+    expires_at DATETIME NOT NULL,
+    UNIQUE KEY uq_lugares_cache_key (cache_key),
+    KEY idx_lugares_cache_destino (destino_slug),
+    KEY idx_lugares_cache_expira (expires_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 9. TABLA DE REPORTES DE AFLUENCIA DE LA COMUNIDAD (FASE 2)
+CREATE TABLE lugares_reportes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    place_id VARCHAR(190) NOT NULL,
+    usuario_id INT NULL,
+    nivel ENUM('vacio', 'tranquilo', 'normal', 'lleno', 'saturado') NOT NULL,
+    fecha_visita DATE NULL,
+    comentario VARCHAR(500) NULL,
+    creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_lugares_reportes_place (place_id, creado_en),
+    KEY idx_lugares_reportes_usuario (usuario_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- INSERCIÓN DE DATOS INICIALES (MIGRACIÓN Y DATOS SEMILLA)
--- ==============================================================================================
 
 -- 1. Insertar Usuarios VIP (Contraseñas seguras con Hash BCRYPT)
 INSERT INTO usuarios (id, nombre, email, password, rol) VALUES

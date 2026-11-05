@@ -44,6 +44,7 @@
     <link rel="stylesheet" href="assets/css/views/checkout.css">
     <link rel="stylesheet" href="assets/css/views/panel.css">
     <link rel="stylesheet" href="assets/css/views/checkin.css">
+    <link rel="stylesheet" href="assets/css/views/lugares.css">
     
     <!-- Flatpickr Date Picker -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -78,6 +79,7 @@
             <nav class="hidden md:flex items-center space-x-8 font-light text-xs uppercase tracking-[0.2em] text-slate-300">
                 <a href="?action=home" class="nav-link hover:text-[#C5A880] transition-colors py-1 border-b-2 border-transparent">Inicio</a>
                 <a href="?action=destinos" class="nav-link hover:text-[#C5A880] transition-colors py-1 border-b-2 border-transparent">Destinos</a>
+                <a href="?action=lugares" class="nav-link hover:text-[#C5A880] transition-colors py-1 border-b-2 border-transparent">Lugares</a>
                 <a href="?action=ofertas" class="nav-link hover:text-[#C5A880] transition-colors py-1 border-b-2 border-transparent">Ofertas</a>
                 <a href="?action=checkin" class="nav-link hover:text-[#C5A880] transition-colors py-1 border-b-2 border-transparent">Check-in</a>
                 <a href="?action=ayuda" class="nav-link hover:text-[#C5A880] transition-colors py-1 border-b-2 border-transparent">Ayuda</a>
