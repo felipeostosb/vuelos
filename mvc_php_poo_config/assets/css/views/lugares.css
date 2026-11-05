@@ -1,0 +1,48 @@
+/* ==========================================================================
+   VISTA: LUGARES TURÍSTICOS Y JOYAS OCULTAS
+   Ajustes finos sobre Tailwind para mantener la estética boutique.
+   ========================================================================== */
+
+.lugar-card {
+    animation: lugarAparecer 0.45s ease both;
+}
+
+@keyframes lugarAparecer {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.lugar-card:hover {
+    transform: translateY(-2px);
+}
+
+/* El selector de puntaje debe mantener el fondo oscuro en todos los navegadores */
+#filtroRating option {
+    background-color: #0A1628;
+    color: #ffffff;
+}
+
+/* Compatibilidad por si el CDN de Tailwind no trae line-clamp */
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .lugar-card {
+        animation: none;
+        transition: none;
+    }
+
+    .lugar-card:hover {
+        transform: none;
+    }
+}

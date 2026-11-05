@@ -35,6 +35,7 @@
                 <ul class="space-y-2.5 text-xs text-slate-300 font-light tracking-wide">
                     <li><a href="?action=home" class="hover:text-[#C5A880] hover:translate-x-1 inline-block transition-all duration-200">Inicio y Buscador IA</a></li>
                     <li><a href="?action=destinos" class="hover:text-[#C5A880] hover:translate-x-1 inline-block transition-all duration-200">Destinos Exclusivos</a></li>
+                    <li><a href="?action=lugares" class="hover:text-[#C5A880] hover:translate-x-1 inline-block transition-all duration-200">Joyas Ocultas &amp; Lugares</a></li>
                     <li><a href="?action=ofertas" class="hover:text-[#C5A880] hover:translate-x-1 inline-block transition-all duration-200">Ofertas de Temporada</a></li>
                     <li><a href="?action=home" class="hover:text-[#C5A880] hover:translate-x-1 inline-block transition-all duration-200">Sobre la Experiencia IA</a></li>
                 </ul>
@@ -93,9 +94,7 @@
     </div>
 </footer>
 
-<!-- ========================================== -->
 <!-- MODAL DE INICIO DE SESIÓN -->
-<!-- ========================================== -->
 <div id="login-modal" class="fixed inset-0 bg-[#0A1628]/90 backdrop-blur-md z-[100] flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
     
     <!-- Contenedor del Modal -->

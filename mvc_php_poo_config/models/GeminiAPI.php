@@ -1,11 +1,8 @@
 <?php
 /**
- * ==============================================================================================
  * MÓDULO DE INTELIGENCIA ARTIFICIAL GEMINI (VERSIÓN PROCEDURAL SIMPLE)
- * ==============================================================================================
  * Este archivo contiene las funciones para procesar peticiones en lenguaje natural del usuario
  * mediante el modelo Google Gemini AI.
- * ==============================================================================================
  */
 
 require_once __DIR__ . '/../config/database.php';

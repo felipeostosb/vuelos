@@ -1,12 +1,9 @@
 <?php
 /**
- * ==============================================================================================
  * ARCHIVO DE CONEXIÓN A LA BASE DE DATOS (VERSIÓN PROCEDURAL SIMPLE)
- * ==============================================================================================
  * Este archivo establece la conexión entre PHP y la base de datos MySQL.
  * Está diseñado sin clases ni POO para que los estudiantes de nivel básico 
  * entiendan y puedan explicar fácilmente cada línea durante su sustentación.
- * ==============================================================================================
  */
 
 // Cargamos la función para leer el archivo de configuración .env
